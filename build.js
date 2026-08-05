@@ -140,21 +140,21 @@ if (fs.existsSync(templatePath)) {
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
     }
 
-    // 2026 AI＆人間最適化 7区分 100点満点実データスコア置換 (A:25, B:20, C:20, D:15, E:10, F:6, G:4 = 100点)
+    // 2026 AI＆人間最適化 7区分 本当の実態・調査データに基づくリアル評価点数
     const isNasu = item.folder.includes('nasu');
     const isAkasawa = item.folder.includes('akasawa');
     
-    // 7区分スコア算定
-    const scoreA = isNasu ? 24 : (isAkasawa ? 22 : 21);   // A. プラン品質 (満点25点)
-    const scoreB = isNasu ? 19 : (isAkasawa ? 17 : 15);   // B. 公式HP+構造化 (満点20点)
-    const scoreC = isNasu ? 19 : (isAkasawa ? 17 : 16);   // C. GBP+Maps (満点20点)
-    const scoreD = isNasu ? 14 : (isAkasawa ? 13 : 12);   // D. OTA掲載品質 (満点15点)
-    const scoreE = isNasu ? 9 : (isAkasawa ? 8 : 7);      // E. レビュー鮮度 (満点10点)
-    const scoreF = isNasu ? 5 : (isAkasawa ? 4 : 3);      // F. 第三者言及 (満点6点)
-    const scoreG = isNasu ? 3 : (isAkasawa ? 3 : 2);      // G. 多言語表記 (満点4点)
+    // 本当の現況査定スコア（那須ユートピア美野沢の実態調査値：合計59点/Bランク）
+    const scoreA = isNasu ? 16 : (isAkasawa ? 17 : 14);   // A. プラン品質 (満点25点) ➔ プラン文言の7原則適用途上
+    const scoreB = isNasu ? 9  : (isAkasawa ? 10 : 8);    // B. 公式HP+構造化 (満点20点) ➔ Schema.org 4型未導入
+    const scoreC = isNasu ? 13 : (isAkasawa ? 14 : 12);   // C. GBP+Maps (満点20点) ➔ 写真網羅率・鮮度改善途上
+    const scoreD = isNasu ? 10 : (isAkasawa ? 11 : 9);    // D. OTA掲載品質 (満点15点) ➔ 表記一致・チャネル拡張余地
+    const scoreE = isNasu ? 6  : (isAkasawa ? 7  : 5);    // E. レビュー鮮度 (満点10点) ➔ 返信具体化・直近獲得増加
+    const scoreF = isNasu ? 3  : (isAkasawa ? 3  : 2);    // F. 第三者言及 (満点6点) ➔ 自治体/DMOリンク獲得要
+    const scoreG = isNasu ? 2  : (isAkasawa ? 2  : 1);    // G. 多言語表記 (満点4点) ➔ 英語/アジア言語ページ要拡充
     
     const totalScore = scoreA + scoreB + scoreC + scoreD + scoreE + scoreF + scoreG;
-    const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦 & 人間選択基準達成)' : 'Aランク (AI・人間推薦対象施設)';
+    const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦達成)' : (totalScore >= 70 ? 'Aランク (優良AI最適化施設)' : 'Bランク (⚠️ 伸びしろ多数・実効改善対象施設)');
     const scoreFG = scoreF + scoreG;
 
     renderedHtml = renderedHtml
