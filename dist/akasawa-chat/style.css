@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+:root {
+  --bg-deep: #08111e;
+  --bg-gradient: radial-gradient(circle at 50% -20%, #162c46 0%, #091728 50%, #030812 100%);
+  --card-bg: rgba(15, 30, 50, 0.65);
+  --card-hover-bg: rgba(22, 44, 72, 0.85);
+  --glass-border: rgba(212, 175, 55, 0.25);
+  --glass-border-active: rgba(212, 175, 55, 0.6);
+  --gold-accent: #e6c86e;
+  --gold-gradient: linear-gradient(135deg, #f3e5ad 0%, #d4af37 50%, #aa820a 100%);
+  --text-main: #f8f6f0;
+  --text-sub: #a1b0c5;
+  --user-msg-bg: linear-gradient(135deg, #d4af37 0%, #b8921e 100%);
+  --bot-msg-bg: rgba(255, 255, 255, 0.07);
+  --shadow-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-deep);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: 'Outfit', 'Shippori Mincho', sans-serif;
+  min-height: 100vh;
+  line-height: 1.65;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.container, .app-container {
+  width: 100%;
+  max-width: 580px;
+  min-height: 100vh;
+  padding: 1.5rem 1.2rem 3rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo h1 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo .sub {
+  font-size: 0.75rem;
+  color: var(--gold-accent);
+  letter-spacing: 0.12em;
+}
+
+.hero-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.8rem 1.5rem;
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+}
+
+.hero-card h2 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.45rem;
+  color: var(--text-main);
+  margin-bottom: 0.6rem;
+}
+
+.chat-section {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.4rem;
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chat-box {
+  min-height: 200px;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.chat-message {
+  max-width: 85%;
+  padding: 0.85rem 1.1rem;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.chat-message.bot {
+  align-self: flex-start;
+  background: var(--bot-msg-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e8ece9;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  background: var(--user-msg-bg);
+  color: #0b1a13;
+  font-weight: 600;
+}
+
+.chat-input-form {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.chat-input-form input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  outline: none;
+}
+
+.chat-input-form button {
+  background: var(--gold-gradient);
+  border: none;
+  color: #081711;
+  font-weight: 700;
+  padding: 0 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: auto;
+}

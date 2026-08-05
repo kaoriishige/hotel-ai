@@ -1,0 +1,484 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+:root {
+  --bg-deep: #050d0a;
+  --bg-gradient: radial-gradient(circle at 50% -20%, #1a4332 0%, #081711 50%, #030806 100%);
+  --card-bg: rgba(12, 28, 21, 0.65);
+  --card-hover-bg: rgba(18, 42, 32, 0.85);
+  --glass-border: rgba(212, 175, 55, 0.25);
+  --glass-border-active: rgba(212, 175, 55, 0.6);
+  --gold-accent: #e6c86e;
+  --gold-gradient: linear-gradient(135deg, #f3e5ad 0%, #d4af37 50%, #aa820a 100%);
+  --text-main: #f8f6f0;
+  --text-sub: #a1b5ac;
+  --user-msg-bg: linear-gradient(135deg, #d4af37 0%, #b8921e 100%);
+  --bot-msg-bg: rgba(255, 255, 255, 0.07);
+  --shadow-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg-deep);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: 'Outfit', 'Shippori Mincho', -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  min-height: 100vh;
+  line-height: 1.65;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0;
+}
+
+/* モバイルフレンドリーコンテナ */
+.container, .app-container {
+  width: 100%;
+  max-width: 580px;
+  min-height: 100vh;
+  padding: 1.5rem 1.2rem 3rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* ヘッダー */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo .sub {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--gold-accent);
+  text-transform: uppercase;
+}
+
+.logo h1 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.05em;
+}
+
+.back-link {
+  color: var(--gold-accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.back-link:hover {
+  opacity: 0.8;
+}
+
+.lang-selector select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.lang-selector select:hover {
+  border-color: var(--gold-accent);
+}
+
+/* ヒーローカード (コンセプト) */
+.hero-card, .detail-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.8rem 1.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--gold-accent);
+  color: var(--gold-accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 3px 10px;
+  border-radius: 50px;
+  margin-bottom: 0.8rem;
+  animation: pulseBadge 3s infinite alternate;
+}
+
+@keyframes pulseBadge {
+  0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.2); }
+  100% { box-shadow: 0 0 18px rgba(212, 175, 55, 0.6); }
+}
+
+.hero-card h2, .detail-card h2 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 1.45rem;
+  color: var(--text-main);
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+
+.hero-card p, .detail-card p {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+/* ナビゲーションカード・グリッド */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+}
+
+.cat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.2rem 1rem;
+  text-decoration: none;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  backdrop-filter: blur(12px);
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.cat-card:hover {
+  background: var(--card-hover-bg);
+  border-color: var(--glass-border-active);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.2);
+}
+
+.cat-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+.cat-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.cat-sub {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+/* AI チャットセクション */
+.chat-section {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 1.4rem;
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chat-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.6rem;
+}
+
+.chat-header h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gold-accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-header p {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  margin-top: 0.2rem;
+}
+
+/* チャットボックス */
+.chat-box {
+  min-height: 200px;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-right: 4px;
+}
+
+.chat-box::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-box::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+}
+
+.chat-message {
+  max-width: 85%;
+  padding: 0.85rem 1.1rem;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  animation: fadeInMsg 0.3s ease-out forwards;
+}
+
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message.bot {
+  align-self: flex-start;
+  background: var(--bot-msg-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e8ece9;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  background: var(--user-msg-bg);
+  color: #0b1a13;
+  font-weight: 600;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.chat-message.loading {
+  font-style: italic;
+  opacity: 0.8;
+  animation: pulseLoading 1.5s infinite alternate;
+}
+
+@keyframes pulseLoading {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+/* クイック質問チップス */
+.quick-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-questions button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.quick-questions button:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-accent);
+  color: var(--gold-accent);
+  transform: translateY(-2px);
+}
+
+/* 入力フォーム */
+.chat-input-form {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.chat-input-form input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.chat-input-form input:focus {
+  border-color: var(--gold-accent);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.chat-input-form button {
+  background: var(--gold-gradient);
+  border: none;
+  color: #081711;
+  font-weight: 700;
+  padding: 0 1.2rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.chat-input-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+}
+
+/* インフォメーションカード */
+.info-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.3rem;
+  backdrop-filter: blur(12px);
+}
+
+.info-card h4 {
+  font-size: 0.95rem;
+  color: var(--gold-accent);
+  margin-bottom: 0.8rem;
+  border-left: 3px solid var(--gold-accent);
+  padding-left: 8px;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.4rem;
+}
+
+.info-item .label {
+  color: var(--text-sub);
+}
+
+.info-item .value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* スポット・詳細表示用 */
+.spot-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.spot-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.spot-item h3 {
+  font-size: 1rem;
+  color: var(--gold-accent);
+  margin-bottom: 0.4rem;
+}
+
+.spot-item p {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.info-box {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.info-box h4 {
+  color: var(--gold-accent);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-box ul {
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.info-box li {
+  margin-bottom: 0.3rem;
+}
+
+/* フッター */
+.footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+/* スマホ表示最適化 */
+@media (max-width: 480px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+  .container {
+    padding: 1rem 0.8rem;
+  }
+}

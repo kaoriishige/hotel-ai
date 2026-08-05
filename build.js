@@ -140,6 +140,22 @@ if (fs.existsSync(templatePath)) {
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
     }
 
+    // 全10施設へ RAG管理エージェント (apps/akasawa-rag/public) を個別カスタマイズ配備
+    const ragTargetDir = path.join(targetDir, 'rag');
+    const ragSrcDir = path.join(__dirname, 'apps', 'akasawa-rag', 'public');
+    if (fs.existsSync(ragSrcDir)) {
+      copyFolderSync(ragSrcDir, ragTargetDir);
+      const ragHtmlPath = path.join(ragTargetDir, 'index.html');
+      if (fs.existsSync(ragHtmlPath)) {
+        let ragHtml = fs.readFileSync(ragHtmlPath, 'utf8')
+          .replace(/赤沢温泉旅館/g, item.name);
+        if (item.folder.includes('nasu')) {
+          ragHtml = ragHtml.replace(/赤沢温泉旅館/g, '那須ユートピア美野沢');
+        }
+        fs.writeFileSync(ragHtmlPath, ragHtml, 'utf8');
+      }
+    }
+
     fs.writeFileSync(path.join(targetDir, 'index.html'), renderedHtml, 'utf8');
   });
 }
