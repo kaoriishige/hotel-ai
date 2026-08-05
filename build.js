@@ -85,6 +85,20 @@ if (!fs.existsSync(dpPath)) {
 const adminPath = path.join(dpPath, 'apps', 'admin');
 const adminDistPath = path.join(adminPath, 'dist');
 
+// Netlify上ではdistが存在しないためReactをビルドする
+if (!fs.existsSync(adminDistPath) || !fs.existsSync(path.join(adminDistPath, 'index.html'))) {
+  console.log('  → akasawa-dp: dist not found, running npm install + vite build...');
+  try {
+    execSync('npm install', { cwd: adminPath, stdio: 'inherit' });
+    execSync('npm run build', { cwd: adminPath, stdio: 'inherit' });
+    console.log('  → akasawa-dp: build complete.');
+  } catch (e) {
+    console.error('  ✗ akasawa-dp build failed:', e.message);
+  }
+} else {
+  console.log('  → akasawa-dp: dist already exists, skipping build.');
+}
+
 // 6. 全10施設への「9システム統合AIダッシュボードポータル」のデプロイ
 console.log('Building and deploying 9-system AI Dashboards for all 10 facilities...');
 const facilityMap = [
