@@ -156,7 +156,8 @@ const appReplacements = [
   { subpath: 'ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
   { subpath: 'plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
   { subpath: 'video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
-  { subpath: 'dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') }
+  { subpath: 'dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') },
+  { subpath: 'rag', src: path.join(__dirname, 'apps', 'akasawa-rag', 'public') }
 ];
 
 appReplacements.forEach(app => {
