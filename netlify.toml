@@ -10,61 +10,84 @@
   node_bundler = "esbuild"
   external_node_modules = ["firebase-admin", "googleapis"]
 
-# 赤沢温泉旅館 ポータルダッシュボード
+# 那須ユートピア美野沢 ダイナミックプライシング (React SPA ルーティング)
+[[redirects]]
+  from = "/nasu-utopia/dp"
+  to = "/nasu-utopia/dp/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia/dp/*"
+  to = "/nasu-utopia/dp/index.html"
+  status = 200
+
+# 赤沢温泉旅館 ダイナミックプライシング (React SPA ルーティング)
+[[redirects]]
+  from = "/akasawa/dp"
+  to = "/akasawa/dp/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/akasawa/dp/*"
+  to = "/akasawa/dp/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/akasawa-dp"
+  to = "/akasawa-dp/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/akasawa-dp/*"
+  to = "/akasawa-dp/index.html"
+  status = 200
+
+# 各施設 ポータルダッシュボード ルーティング
 [[redirects]]
   from = "/akasawa"
   to = "/akasawa/index.html"
   status = 200
 
-# 那須ユートピア美野沢 ポータルダッシュボード
 [[redirects]]
   from = "/nasu-utopia"
   to = "/nasu-utopia/index.html"
   status = 200
 
-# 箱根強羅 AIヴィラ
 [[redirects]]
   from = "/hakone-villa"
   to = "/hakone-villa/index.html"
   status = 200
 
-# 熱海オーシャンビューリゾート
 [[redirects]]
   from = "/atami-resort"
   to = "/atami-resort/index.html"
   status = 200
 
-# 軽井沢フォレストロッジ
 [[redirects]]
   from = "/karuizawa-lodge"
   to = "/karuizawa-lodge/index.html"
   status = 200
 
-# 京都祇園 伝統庵AI
 [[redirects]]
   from = "/kyoto-gion"
   to = "/kyoto-gion/index.html"
   status = 200
 
-# 富良野スノーリゾート
 [[redirects]]
   from = "/furano-snow"
   to = "/furano-snow/index.html"
   status = 200
 
-# 伊勢志摩ベイサイドヴィラ
 [[redirects]]
   from = "/iseshima-villa"
   to = "/iseshima-villa/index.html"
   status = 200
 
-# 由布院 温泉離れAI
 [[redirects]]
   from = "/yufuin-hanare"
   to = "/yufuin-hanare/index.html"
   status = 200
 
-# 宮古島 プレミアムスイート
 [[redirects]]
   from = "/miyakojima-suite"
   to = "/miyakojima-suite/index.html"
