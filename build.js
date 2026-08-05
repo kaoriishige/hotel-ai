@@ -131,7 +131,7 @@ if (fs.existsSync(templatePath)) {
 }
 
 // 6.5. 那須ユートピア美野沢 専用 9アプリアプリの自動複製・完全テキスト＆RAG置換
-console.log('Generating Nasu Utopia dedicated AI sub-apps...');
+console.log('Generating Nasu Utopia dedicated AI sub-apps with deep fine-grained text replacements...');
 
 const appReplacements = [
   { prefix: 'nasu-utopia-chat', src: path.join(__dirname, 'apps', 'akasawa-chat') },
@@ -141,27 +141,65 @@ const appReplacements = [
   { prefix: 'nasu-utopia-blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
   { prefix: 'nasu-utopia-ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
   { prefix: 'nasu-utopia-plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
-  { prefix: 'nasu-utopia-video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') }
+  { prefix: 'nasu-utopia-video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
+  { prefix: 'nasu-utopia-dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') }
 ];
 
 appReplacements.forEach(app => {
   const destDir = path.join(distDir, app.prefix);
-  copyFolderSync(app.src, destDir);
+  if (fs.existsSync(app.src)) {
+    copyFolderSync(app.src, destDir);
+  }
 
-  // コピーされたテキストファイル・HTML・JSの「赤沢温泉旅館」を「那須ユートピア美野沢」へ置換
+  // 細部まで100%全置換する辞書マップ（徹底完全補強）
+  const replacementRules = [
+    [/赤沢温泉旅館/g, '那須ユートピア美野沢'],
+    [/赤沢温泉/g, '那須ユートピア美野沢'],
+    [/赤沢風/g, '那須ユートピア風'],
+    [/赤沢/g, '那須ユートピア'],
+    [/塩原/g, '那須町'],
+    [/箒川/g, '那須連山'],
+    [/Akasawa Onsen Ryokan/g, 'Nasu Utopia Minosawa'],
+    [/Akasawa Onsen/g, 'Nasu Utopia'],
+    [/Akasawa/g, 'Nasu Utopia'],
+    [/akazawa-onsen/g, 'nasu-utopia'],
+    [/akazawa/g, 'nasu-utopia'],
+    [/猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿/g, 'アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート'],
+    [/猫とぬる湯と渓流にほどける/g, '「ととのう」の、その先へ。アート×サウナ×大自然'],
+    [/静養型ウェルネスの小宿/g, '廃校アートリノベーションリゾート'],
+    [/サウナ・水風呂旅館/g, 'サウナ＆ヴィラリゾート'],
+    [/ぬる湯/g, '本格フィンランドサウナ（CUBERU / Rekka）と那須連山の水風呂'],
+    [/渓流のせせらぎ/g, '那須連山の豊かな大自然'],
+    [/渓流/g, '那須の大自然'],
+    [/金目鯛の姿煮/g, '那須特製 手ぶら本格BBQ'],
+    [/金目鯛/g, '手ぶら本格BBQ'],
+    [/当館自慢の創作料理/g, '当館自慢の手ぶらBBQ＆サウナ飯'],
+    [/創作料理/g, '手ぶら本格BBQ'],
+    [/創作コース/g, '手ぶら本格BBQコース'],
+    [/創作和食/g, '地元の新鮮食材BBQ'],
+    [/伊豆/g, '那須高原'],
+    [/遠藤正俊/g, '那須ユートピア支配人'],
+    [/遠藤氏/g, '支配人'],
+    [/看板猫/g, '現代アート作品'],
+    [/看板ネコ/g, '現代アート作品'],
+    [/猫/g, 'アート'],
+    [/露天風呂/g, 'プライベートサウナ＆外気浴'],
+    [/大浴場/g, 'コンクリートサウナCUBERU＆薪サウナRekka'],
+    [/自家源泉100%/g, '那須連山の極流水風呂'],
+    [/温泉/g, 'サウナ・水風呂']
+  ];
+
   const replaceInDir = (dir) => {
     if (!fs.existsSync(dir)) return;
     fs.readdirSync(dir).forEach(file => {
       const fullPath = path.join(dir, file);
       if (fs.lstatSync(fullPath).isDirectory()) {
         if (file !== 'node_modules' && file !== '.git') replaceInDir(fullPath);
-      } else if (file.endsWith('.html') || file.endsWith('.js') || file.endsWith('.json') || file.endsWith('.css')) {
+      } else if (/\.(html|js|json|md|css|txt|ts|tsx)$/.test(file)) {
         let content = fs.readFileSync(fullPath, 'utf8');
-        content = content.replace(/赤沢温泉旅館/g, '那須ユートピア美野沢');
-        content = content.replace(/Akasawa Onsen Ryokan/g, 'Nasu Utopia Minosawa');
-        content = content.replace(/Akasawa/g, 'Nasu Utopia');
-        content = content.replace(/akazawa-onsen/g, 'nasu-utopia');
-        content = content.replace(/猫とぬる湯と渓流にほどける/g, '「ととのう」の、その先へ。アート×サウナ×大自然');
+        replacementRules.forEach(([rule, value]) => {
+          content = content.replace(rule, value);
+        });
         fs.writeFileSync(fullPath, content, 'utf8');
       }
     });
