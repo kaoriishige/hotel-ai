@@ -3,7 +3,7 @@
   { "id": "nasu-sauna-villa", "name": "那須高原サウナヴィラ", "type": "direct", "plan": "【サウナ付】プライベートヴィラプラン", "price": "¥18,000〜" },
   { "id": "nasu-glamping", "name": "那須グランピングリゾート RAUS", "type": "direct", "plan": "【グランピング】手ぶらBBQ付きプラン", "price": "¥22,000〜" },
   { "id": "nasu-forest", "name": "那須フォレストヴィラ", "type": "direct", "plan": "【貸切】森のヴィラ1棟貸しプラン", "price": "¥20,000〜" },
-  { "id": "nasu-onsen-inn", "name": "三斗小屋温泉 大黒屋", "type": "market", "plan": "【相場参考】那須岳秘湯プラン", "price": "¥16,000〜" },
+  { "id": "epinard-nasu", "name": "ホテルエピナール那須", "type": "market", "plan": "【相場参考】那須高原リゾートステイプラン", "price": "¥16,000〜" },
   { "id": "nasu-kogen-hotel", "name": "那須高原ホテル", "type": "market", "plan": "【相場参考】高原リゾート満喫プラン", "price": "¥19,000〜" },
   { "id": "nasu-sanctuary", "name": "那須サンクチュアリ", "type": "market", "plan": "【相場参考】大自然に包まれるステイ", "price": "¥25,000〜" },
   { "id": "nasu-pension-sauna", "name": "ペンション那須 with SAUNA", "type": "market", "plan": "【相場参考】フィンランドサウナ付き貸切プラン", "price": "¥20,000〜" },

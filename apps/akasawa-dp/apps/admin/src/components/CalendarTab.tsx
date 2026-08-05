@@ -57,7 +57,7 @@ export default function CalendarTab({
             { id: "nasu-sauna-villa", name: "那須高原サウナヴィラ", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/2345/" },
             { id: "nasu-glamping", name: "那須グランピングリゾート RAUS", rating: 4.6, url: "https://travel.rakuten.co.jp/HOTEL/3456/" },
             { id: "nasu-forest", name: "那須フォレストヴィラ", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/4567/" },
-            { id: "nasu-onsen-inn", name: "三斗小屋温泉 大黒屋", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/5678/" },
+            { id: "epinard-nasu", name: "ホテルエピナール那須", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/5678/" },
             { id: "nasu-kogen-hotel", name: "那須高原ホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/6789/" },
             { id: "nasu-sanctuary", name: "那須サンクチュアリ", rating: 4.7, url: "https://travel.rakuten.co.jp/HOTEL/7890/" },
             { id: "nasu-pension-sauna", name: "ペンション那須 with SAUNA", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/8901/" },
