@@ -5,48 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>那須ユートピア美野沢 - AI客室デジタルコンシェルジュ</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- ヘッダー -->
-    <header class="header">
-        <div class="logo">
-            <span class="sub">アート×サウナ×大自然</span>
-            <h1>那須ユートピア美野沢</h1>
-        </div>
-        <div class="lang-selector">
-            <select id="langSelect" onchange="changeLanguage(this.value)">
-                <option value="ja" selected>日本語</option>
-                <option value="en">English</option>
-                <option value="zh">中文</option>
-                <option value="ko">한국語</option>
-            </select>
-        </div>
-    </header>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="logo">
+                <span class="sub">ART × SAUNA × NATURE</span>
+                <h1>那須ユートピア美野沢</h1>
+            </div>
+            <div class="lang-selector">
+                <select id="langSelect" onchange="changeLanguage(this.value)">
+                    <option value="ja" selected>🌐 日本語</option>
+                    <option value="en">🌐 English</option>
+                    <option value="zh">🌐 中文</option>
+                    <option value="ko">🌐 한국語</option>
+                </select>
+            </div>
+        </header>
 
-    <!-- メインコンテンツ -->
-    <main class="container">
         <!-- ヒーロービジュアル / コンセプト -->
         <section class="hero-card">
-            <div class="hero-badge">BEYOND TOTONOU FEELING</div>
+            <div class="hero-badge">✨ BEYOND TOTONOU FEELING</div>
             <h2 data-i18n="heroTitle">「ととのう」の、その先へ。</h2>
             <p data-i18n="heroDesc">
                 旧美野沢小学校をリノベーションしたアート＆サウナリゾート。<br>
-                コンクリートサウナCUBERU、薪サウナRekka、那須連山の水風呂、手ぶらBBQなど、極上の体験をご案内いたします。
+                コンクリートサウナCUBERU、薪サウナRekka、那須連山の天然水風呂、手ぶら本格BBQなど、極上の五感体験をご案内いたします。
             </p>
         </section>
 
-        <!-- カテゴリナビゲーション -->
+        <!-- カテゴリナビゲーション (2x2 グリッド) -->
         <nav class="category-grid">
             <a href="onsen.html" class="cat-card">
                 <div class="cat-icon">🔥</div>
                 <div class="cat-title" data-i18n="navOnsen">サウナ＆水風呂</div>
-                <div class="cat-sub">CUBERU / Rekka / 水風呂</div>
+                <div class="cat-sub">CUBERU / Rekka / 那須水風呂</div>
             </a>
             <a href="dining.html" class="cat-card">
                 <div class="cat-icon">🍖</div>
                 <div class="cat-title" data-i18n="navDining">手ぶらBBQ・お食事</div>
-                <div class="cat-sub">特選那須牛 / 朝食案内</div>
+                <div class="cat-sub">特選那須牛 / 朝食BOX</div>
             </a>
             <a href="facilities.html" class="cat-card">
                 <div class="cat-icon">🏕️</div>
@@ -63,38 +62,38 @@
         <!-- AIチャットコンシェルジュ -->
         <section class="chat-section">
             <div class="chat-header">
-                <h3>💬 AIコンシェルジュに質問する</h3>
-                <p>チェックアウト時間、サウナ利用、周辺のおすすめなど24時間お答えします</p>
+                <h3>💬 AIコンシェルジュ <span style="font-size:0.75rem; color:#52c41a; font-weight:normal; margin-left:6px;">● 24時間オンライン受付中</span></h3>
+                <p>サウナ利用時間、BBQメニュー、館内アメニティ、周辺観光など何でも質問してください</p>
             </div>
 
             <div class="chat-box" id="chatBox">
                 <div class="chat-message bot">
-                    こんにちは！那須ユートピア美野沢のAIデジタルコンシェルジュです。サウナのご利用時間、BBQのご案内、館内施設、周観光など、何でもお気軽にお尋ねください。
+                    いらっしゃいませ！那須ユートピア美野沢のAIデジタルコンシェルジュです。サウナのご利用時間、BBQ、Wi-Fiパスワード、チェックアウトなど、お気軽にお尋ねください。
                 </div>
             </div>
 
-            <!-- クイック質問ボタン -->
+            <!-- クイック質問チップス -->
             <div class="quick-questions">
-                <button onclick="sendQuickQuestion('サウナの利用時間を教えてください')">🔥 サウナの利用時間</button>
-                <button onclick="sendQuickQuestion('手ぶらBBQのメニューは何がありますか？')">🍖 BBQメニュー</button>
-                <button onclick="sendQuickQuestion('Wi-Fiのパスワードを教えてください')">📶 Wi-Fi案内</button>
+                <button onclick="sendQuickQuestion('サウナの利用時間を教えてください')">🔥 サウナ時間</button>
+                <button onclick="sendQuickQuestion('手ぶらBBQのメニューを教えてください')">🍖 BBQメニュー</button>
+                <button onclick="sendQuickQuestion('Wi-Fiのパスワードは何ですか？')">📶 Wi-Fi案内</button>
                 <button onclick="sendQuickQuestion('チェックアウト時間を教えてください')">⏰ チェックアウト</button>
             </div>
 
             <!-- 入力フォーム -->
             <form id="chatForm" class="chat-input-form" onsubmit="handleChatSubmit(event)">
-                <input type="text" id="userInput" placeholder="ご質問を入力してください..." required>
-                <button type="submit" id="sendBtn">送信</button>
+                <input type="text" id="userInput" placeholder="AIコンシェルジュにご質問を入力..." required>
+                <button type="submit" id="sendBtn">送信 ➔</button>
             </form>
         </section>
 
         <!-- 基本情報・Wi-Fi -->
         <section class="info-card">
-            <h4>館内インフォメーション</h4>
+            <h4>館内クイックインフォメーション</h4>
             <div class="info-grid">
                 <div class="info-item">
-                    <span class="label">📶 館内Wi-Fi:</span>
-                    <span class="value">NasuUtopia_Guest (Pass: utopia2024)</span>
+                    <span class="label">📶 客室Wi-Fi:</span>
+                    <span class="value">NasuUtopia_Guest (utopia2024)</span>
                 </div>
                 <div class="info-item">
                     <span class="label">⏰ チェックアウト:</span>
@@ -106,15 +105,15 @@
                 </div>
                 <div class="info-item">
                     <span class="label">📍 所在地:</span>
-                    <span class="value">〒329-3436 栃木県那須郡那須町簑沢563-4</span>
+                    <span class="value">栃木県那須郡那須町簑沢563-4</span>
                 </div>
             </div>
         </section>
-    </main>
 
-    <footer class="footer">
-        <p>&copy; 那須ユートピア美野沢 - AI Guest Concierge System</p>
-    </footer>
+        <footer class="footer">
+            <p>&copy; 那須ユートピア美野沢 - AI Guest Concierge System</p>
+        </footer>
+    </div>
 
     <script src="translations.js"></script>
     <script src="chat.js"></script>
