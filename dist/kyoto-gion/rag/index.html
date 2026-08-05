@@ -13,17 +13,42 @@
 
   <div class="container">
     
-    <!-- シンプルヘッダー -->
+    <!-- ヘッダー -->
     <header class="header">
       <div class="badge">現場スタッフ用・簡単登録</div>
       <h1>📝 現場のおすすめ・最新プラン登録</h1>
-      <p class="desc">
-        ここに新しいプランや今週のおすすめを入力して「保存」を押すだけで、<br>
-        <strong>AIが自動で「SNS投稿・ブログ記事・OTAプラン文章・客室案内」を最新情報に書き換えます。</strong>
-      </p>
     </header>
 
-    <!-- 入力フォーム（極限までシンプル化） -->
+    <!-- 全システム共有の説明図 -->
+    <section class="flow-box">
+      <div class="flow-title">💡 この画面の仕組み</div>
+      <div class="flow-diagram">
+        <div class="flow-step input-step">
+          <div class="flow-icon">✏️</div>
+          <div class="flow-label">ここに入力して<br>「保存」を押す</div>
+        </div>
+        <div class="flow-arrow">▶</div>
+        <div class="flow-step sync-step">
+          <div class="flow-icon">🔄</div>
+          <div class="flow-label">全AIシステムに<br>最新情報を一括共有</div>
+        </div>
+        <div class="flow-arrow">▶</div>
+        <div class="flow-targets">
+          <span class="target-tag">🤖 コンシェルジュ</span>
+          <span class="target-tag">📷 SNS作成</span>
+          <span class="target-tag">📖 ブログ作成</span>
+          <span class="target-tag">🏨 プラン作成</span>
+          <span class="target-tag">💬 クチコミ返信</span>
+          <span class="target-tag">✉️ メール配信</span>
+          <span class="target-tag">📊 OTA最適化</span>
+          <span class="target-tag">📹 動画SNS</span>
+          <span class="target-tag">🔍 競合分析</span>
+        </div>
+      </div>
+      <p class="flow-note">ここに入力した情報は、上記の<strong>全9つのAIシステムが自動で読み込み</strong>、SNS投稿・ブログ記事・プラン文面・接客案内などに反映されます。</p>
+    </section>
+
+    <!-- 入力フォーム -->
     <main class="form-container">
       
       <!-- 入力1: 新プラン・イチオシ情報 -->
@@ -43,7 +68,6 @@
           お客様に伝えたい「今週のお知らせ」や「見どころ」
         </label>
         <p class="help-text">例: 今週末は道が混雑するため旧道ルートがおすすめ / サウナの夜の最終枠を拡大中 / 理科室アート展示が人気です</p>
-
         <textarea id="noticeText" class="textarea" rows="3" placeholder="今週のお知らせや見どころを入力してください"></textarea>
       </div>
 
@@ -57,6 +81,17 @@
         <input type="text" id="appealText" class="input-text" placeholder="宿の自慢のアピールポイントを入力してください">
       </div>
 
+      <!-- 入力4: 削除したい情報 -->
+      <div class="form-card delete-card">
+        <label class="label">
+          <span class="step-num del">✕</span>
+          AIに使わせたくない情報・終了したプランの削除依頼
+        </label>
+        <p class="help-text">終了したプランや古くなった情報をここに書いてください。AIが案内や文章作成で使わなくなります。</p>
+        <p class="help-text">例: 「夏限定かき氷プラン」は9月で終了 / 近隣の〇〇レストランは閉店済み / 旧料金15,000円は誤り</p>
+        <textarea id="deleteText" class="textarea delete-textarea" rows="3" placeholder="終了したプランや古い情報、AIに使わせたくない内容を入力してください"></textarea>
+      </div>
+
       <!-- 保存ボタン -->
       <div class="action-area">
         <button id="saveBtn" class="save-button">
@@ -66,17 +101,6 @@
       </div>
 
     </main>
-
-    <!-- なにが起きるかの案内 -->
-    <section class="info-box">
-      <h3>💡 保存ボタンを押すと、どうなる？</h3>
-      <ul>
-        <li><strong>📷 SNS・GBP自動作成:</strong> 入力した最新プランをテーマにした映える投稿文が作れます。</li>
-        <li><strong>📖 公式ブログ自動生成:</strong> 入力した最新おすすめ情報を元に、SEOに強いブログ記事が作れます。</li>
-        <li><strong>🏨 宿泊プラン作成エージェント:</strong> 楽天トラベル等に載せる「売れるプランタイトルと詳細」が作れます。</li>
-        <li><strong>🤖 デジタルコンシェルジュ:</strong> 客室のAIが、最新のおすすめ情報をお客さまへ案内できるようになります。</li>
-      </ul>
-    </section>
 
   </div>
 

@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusMsg = document.getElementById('statusMessage');
   const KEY = 'HOTEL_AI_RAG_KNOWLEDGE';
 
-  // 保存データの復元
   function load() {
     const saved = localStorage.getItem(KEY);
     if (!saved) return;
@@ -12,20 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (d.latestNews) document.getElementById('latestNewsText').value = d.latestNews;
       if (d.notice) document.getElementById('noticeText').value = d.notice;
       if (d.appeal) document.getElementById('appealText').value = d.appeal;
+      if (d.deleteInfo) document.getElementById('deleteText').value = d.deleteInfo;
     } catch (e) { /* ignore */ }
   }
 
-  // 保存
   function save() {
     const data = {
       updatedAt: new Date().toISOString(),
       latestNews: document.getElementById('latestNewsText').value,
       notice: document.getElementById('noticeText').value,
-      appeal: document.getElementById('appealText').value
+      appeal: document.getElementById('appealText').value,
+      deleteInfo: document.getElementById('deleteText').value
     };
     localStorage.setItem(KEY, JSON.stringify(data));
 
-    statusMsg.textContent = '✨ 保存完了！全AIに反映されました';
+    statusMsg.textContent = '✨ 保存完了！全9つのAIシステムに反映されました';
     statusMsg.style.background = 'rgba(52,211,153,0.2)';
     statusMsg.style.color = '#34d399';
     setTimeout(() => {

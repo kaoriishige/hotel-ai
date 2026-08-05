@@ -6,6 +6,7 @@
   --text-sub: #94a3b8;
   --gold: #d4af37;
   --green: #34d399;
+  --red: #f87171;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,7 +28,7 @@ body {
 /* ── ヘッダー ── */
 .header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .badge {
@@ -46,15 +47,98 @@ body {
 .header h1 {
   font-family: 'Shippori Mincho', serif;
   font-size: 1.6rem;
-  margin-bottom: 0.6rem;
 }
 
-.desc {
-  font-size: 0.88rem;
-  color: var(--text-sub);
-  line-height: 1.7;
+/* ── 全システム共有フロー図 ── */
+.flow-box {
+  background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(30,41,59,0.8) 100%);
+  border: 1px solid rgba(212,175,55,0.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
 }
-.desc strong {
+
+.flow-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  min-width: 120px;
+}
+
+.input-step {
+  background: rgba(212,175,55,0.15);
+  border: 1px solid rgba(212,175,55,0.4);
+}
+
+.sync-step {
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.3);
+}
+
+.flow-icon {
+  font-size: 1.5rem;
+}
+
+.flow-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.flow-arrow {
+  font-size: 1.2rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.flow-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 280px;
+}
+
+.target-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.flow-note {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.6;
+}
+.flow-note strong {
   color: var(--gold);
 }
 
@@ -63,7 +147,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
 }
 
 .form-card {
@@ -77,6 +160,11 @@ body {
 .form-card.highlight {
   border-color: rgba(212,175,55,0.5);
   background: linear-gradient(135deg, rgba(212,175,55,0.06) 0%, var(--card-bg) 100%);
+}
+
+.form-card.delete-card {
+  border-color: rgba(248,113,113,0.4);
+  background: linear-gradient(135deg, rgba(248,113,113,0.05) 0%, var(--card-bg) 100%);
 }
 
 .label {
@@ -101,6 +189,12 @@ body {
   font-size: 0.8rem;
   font-weight: 800;
   flex-shrink: 0;
+}
+
+.step-num.del {
+  background: var(--red);
+  color: #fff;
+  font-size: 0.9rem;
 }
 
 .help-text {
@@ -131,12 +225,21 @@ body {
   box-shadow: 0 0 12px rgba(212,175,55,0.2);
 }
 
+.delete-textarea {
+  border-color: rgba(248,113,113,0.3);
+}
+.delete-textarea:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(248,113,113,0.15);
+}
+
 /* ── 保存ボタン ── */
 .action-area {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
 .save-button {
@@ -167,39 +270,11 @@ body {
   border: 1px solid rgba(52,211,153,0.2);
 }
 
-/* ── 案内ボックス ── */
-.info-box {
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.5rem;
-}
-
-.info-box h3 {
-  font-size: 0.95rem;
-  margin-bottom: 0.8rem;
-  color: var(--gold);
-}
-
-.info-box ul {
-  list-style: none;
-  padding: 0;
-}
-
-.info-box li {
-  font-size: 0.85rem;
-  color: var(--text-sub);
-  padding: 0.35rem 0;
-  line-height: 1.5;
-}
-
-.info-box li strong {
-  color: #e2e8f0;
-}
-
 @media (max-width: 600px) {
   .container { padding: 1.5rem 1rem 3rem; }
   .header h1 { font-size: 1.3rem; }
+  .flow-diagram { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
   .action-area { flex-direction: column; align-items: stretch; }
   .save-button { width: 100%; }
 }
