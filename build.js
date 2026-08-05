@@ -134,7 +134,7 @@ if (fs.existsSync(templatePath)) {
 console.log('Generating Nasu Utopia dedicated AI sub-apps with deep fine-grained text replacements...');
 
 const appReplacements = [
-  { prefix: 'nasu-utopia-chat', src: path.join(__dirname, 'apps', 'akasawa-chat') },
+  { prefix: 'nasu-utopia-chat', src: path.join(__dirname, 'apps', 'nasu-utopia-chat') },
   { prefix: 'nasu-utopia-ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
   { prefix: 'nasu-utopia-sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
   { prefix: 'nasu-utopia-review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
