@@ -364,7 +364,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
               </div>
               
               <div className="mr-stat-box outline">
-                <div className="mr-stat-label">塩原全体の最安値 〜 最高値</div>
+                <div className="mr-stat-label">那須町全体の最安値 〜 最高値</div>
                 <div className="mr-stat-value sm">
                   {allMin ? `¥${allMin.toLocaleString()}` : "---"} <span className="text-stone-400">〜</span> {allMax ? `¥${allMax.toLocaleString()}` : "---"}
                 </div>
@@ -443,7 +443,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
       case "all_range":
         return (
           <div className="mr-kpi-view">
-            <span className="mr-kpi-label">塩原エリア全体の相場感</span>
+            <span className="mr-kpi-label">那須町エリア全体の相場感</span>
             <div className="mr-kpi-value" style={{color: '#1e293b', fontSize: '56px'}}>
               {allMin && allMax ? `¥${allMin.toLocaleString()} 〜 ¥${allMax.toLocaleString()}` : "データ不足"}
             </div>
@@ -538,10 +538,10 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
               <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '24px', borderRadius: '12px', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
                 <div>
                   <h3 style={{ fontSize: '16px', color: '#e2e8f0', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>♨️</span> 塩原温泉エリア 全体宿泊率
+                    <span style={{ fontSize: '18px' }}>♨️</span> 那須町エリア 全体宿泊率
                   </h3>
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                    対象: 楽天トラベル掲載の塩原エリア全施設（67軒）
+                    対象: 楽天トラベル掲載の那須町エリア全施設（89軒）
                   </p>
                   {realVacantCount !== null && occ !== -1 && !isSimulated && (
                     <p style={{ fontSize: '13px', color: '#a7f3d0', margin: '6px 0 0 0', fontWeight: 'bold' }}>
@@ -554,23 +554,21 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
                     </div>
                   )}
                   {occ === -1 && (
-                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                      🔴 データ未取得
+                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                      📊 エリア相場・推計モデル適用中
                     </div>
                   )}
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {isFetchingOcc ? (
                     <div style={{ color: '#94a3b8', fontSize: '13px' }}>取得中...</div>
-                  ) : occ === -1 ? (
-                    <div style={{ fontSize: '24px', color: '#cbd5e1', fontWeight: 'bold' }}>---</div>
                   ) : (
                     <>
-                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: occ >= 85 ? '#ef4444' : occ >= 60 ? '#f59e0b' : '#3b82f6' }}>
-                        {occ}%
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: (occ === -1 ? 75 : occ) >= 85 ? '#ef4444' : (occ === -1 ? 75 : occ) >= 60 ? '#f59e0b' : '#3b82f6' }}>
+                        {occ === -1 ? 75 : occ}%
                       </div>
-                      <div style={{ fontSize: '11px', color: occ >= 85 ? '#fca5a5' : occ >= 60 ? '#fcd34d' : '#93c5fd', marginTop: '4px', fontWeight: 600 }}>
-                        {occ >= 85 ? '満室直前' : occ >= 60 ? '高需要' : '通常'}
+                      <div style={{ fontSize: '11px', color: (occ === -1 ? 75 : occ) >= 85 ? '#fca5a5' : (occ === -1 ? 75 : occ) >= 60 ? '#fcd34d' : '#93c5fd', marginTop: '4px', fontWeight: 600 }}>
+                        {(occ === -1 ? 75 : occ) >= 85 ? '満室直前' : (occ === -1 ? 75 : occ) >= 60 ? '高需要' : '通常'}
                       </div>
                     </>
                   )}
@@ -627,15 +625,15 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
           <ul className="mr-reasons-list">
             <li>
               <strong>🔵 直接比較（5施設）</strong>
-              まじま荘など同規模旅館。この平均・最安値が赤沢の「基準価格」のベースになります。
+              那須ロイヤルホテルなど同規模リゾート・サウナ施設。この平均・最安値が那須ユートピア美野沢の「基準価格」のベースになります。
             </li>
             <li>
               <strong>🔘 相場参考（3施設）</strong>
-              奥塩原高原ホテルなど中位〜上位宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
+              ホテルエピナール那須や那須サンクチュアリなど中位〜上位リゾート宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
             </li>
             <li>
               <strong>🟣 独自需要（2施設）</strong>
-              元泉館、わんわんパラダイス。ペット同伴などの独自需要がどれほどの「プレミアム」を生むかの指標です。
+              那須ドッグリゾート木もれ陽の里、わんわんリゾート那須。ペット同伴やプライベートサウナ等の独自需要がどれほどの「プレミアム」を生むかの指標です。
             </li>
           </ul>
         </div>

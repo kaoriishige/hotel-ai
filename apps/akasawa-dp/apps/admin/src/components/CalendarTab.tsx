@@ -355,15 +355,15 @@ export default function CalendarTab({
                   <div>
                     <div style={{ fontSize: "24px", marginBottom: "4px" }}>♨️</div>
                     <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", margin: "0 0 4px 0" }}>
-                      塩原温泉エリア 全体宿泊率
+                      那須町エリア 全体宿泊率
                     </h3>
                     <div style={{ fontSize: "12px", color: "#15803d", marginBottom: "16px" }}>
-                      対象: 楽天トラベル掲載の塩原エリア全施設（67軒）
+                      対象: 楽天トラベル掲載の那須町エリア全施設（89軒）
                     </div>
                     
                     <div style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", marginBottom: "12px" }}>
                       空室: <span style={{ fontSize: "18px", color: "#15803d" }}>{areaVacantCount}</span> 軒 / 
-                      満室: <span style={{ fontSize: "18px", color: "#b91c1c" }}>{Math.max(0, 67 - areaVacantCount)}</span> 軒
+                      満室: <span style={{ fontSize: "18px", color: "#b91c1c" }}>{Math.max(0, 89 - areaVacantCount)}</span> 軒
                     </div>
                     
                     <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -529,15 +529,15 @@ export default function CalendarTab({
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div>
                   <strong style={{ color: "#1e3a8a" }}>🔵 直接比較（5施設）</strong><br />
-                  まじま荘など同規模旅館。この平均・最安値が赤沢の「基準価格」のベースになります。
+                  那須ロイヤルホテルなど同規模リゾート・サウナ施設。この平均・最安値が那須ユートピア美野沢の「基準価格」のベースになります。
                 </div>
                 <div>
                   <strong style={{ color: "#4b5563" }}>🔘 相場参考（3施設）</strong><br />
-                  奥塩原高原ホテルなど中位〜上位宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
+                  ホテルエピナール那須や那須サンクチュアリなど中位〜上位リゾート宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
                 </div>
                 <div>
-                  <strong style={{ color: "#6d28d9" }}>🟣 独自状態（2施設）</strong><br />
-                  元泉館、わんわんパラダイス。ペット同伴などの独自需要がどれほどの「プレミアム」を生むかの指標です。
+                  <strong style={{ color: "#6d28d9" }}>🟣 独自需要（2施設）</strong><br />
+                  那須ドッグリゾート木もれ陽の里、わんわんリゾート那須。ペット同伴やプライベートサウナ等の独自需要がどれほどの「プレミアム」を生むかの指標です。
                 </div>
               </div>
             </div>
