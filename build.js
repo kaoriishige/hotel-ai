@@ -182,11 +182,21 @@ if (fs.existsSync(endoFuncsSrc)) {
 console.log('Copying akasawa-review...');
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(distDir, 'akasawa-review'));
 
-// 7.6. apps/nasumid-p (那須ユートピア美野沢) のコピー
-console.log('Copying nasu-utopia...');
+// 7.6. 全10施設の専用AIダッシュボードフォルダのコピーとエイリアス作成
+console.log('Copying 10 facility dashboards...');
 copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasu-utopia'));
 copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasu-utopia-ai'));
 copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasumid-p'));
+
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(distDir, 'hakone-villa'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ml', 'public'), path.join(distDir, 'atami-resort'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-sns', 'public'), path.join(distDir, 'karuizawa-lodge'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-chat'), path.join(distDir, 'kyoto-gion'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ota', 'public'), path.join(distDir, 'furano-snow'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-plan', 'public'), path.join(distDir, 'iseshima-villa'));
+copyFolderSync(path.join(__dirname, 'apps', 'endo-sns', 'public'), path.join(distDir, 'yufuin-hanare'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-chat'), path.join(distDir, 'miyakojima-suite'));
+
 
 // akasawa-review functions
 const reviewFuncsSrc = path.join(__dirname, 'apps', 'akasawa-review', 'netlify', 'functions');
