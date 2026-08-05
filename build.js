@@ -134,19 +134,19 @@ if (fs.existsSync(templatePath)) {
 console.log('Generating Nasu Utopia dedicated AI sub-apps with deep fine-grained text replacements...');
 
 const appReplacements = [
-  { prefix: 'nasu-utopia-chat', src: path.join(__dirname, 'apps', 'nasu-utopia-chat') },
-  { prefix: 'nasu-utopia-ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
-  { prefix: 'nasu-utopia-sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
-  { prefix: 'nasu-utopia-review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
-  { prefix: 'nasu-utopia-blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
-  { prefix: 'nasu-utopia-ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
-  { prefix: 'nasu-utopia-plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
-  { prefix: 'nasu-utopia-video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
-  { prefix: 'nasu-utopia-dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') }
+  { subpath: 'chat', src: path.join(__dirname, 'apps', 'nasu-utopia-chat') },
+  { subpath: 'ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
+  { subpath: 'sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
+  { subpath: 'review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
+  { subpath: 'blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
+  { subpath: 'ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
+  { subpath: 'plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
+  { subpath: 'video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
+  { subpath: 'dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') }
 ];
 
 appReplacements.forEach(app => {
-  const destDir = path.join(distDir, app.prefix);
+  const destDir = path.join(distDir, 'nasu-utopia', app.subpath);
   if (fs.existsSync(app.src)) {
     copyFolderSync(app.src, destDir);
   }
@@ -274,18 +274,12 @@ copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.jo
 
 // 7.6. 全10施設の専用AIダッシュボードフォルダのコピーとエイリアス作成
 console.log('Copying 10 facility dashboards...');
-copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasu-utopia'));
-copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasu-utopia-ai'));
-copyFolderSync(path.join(__dirname, 'apps', 'nasumid-p'), path.join(distDir, 'nasumid-p'));
-
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(distDir, 'hakone-villa'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ml', 'public'), path.join(distDir, 'atami-resort'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-sns', 'public'), path.join(distDir, 'karuizawa-lodge'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-chat'), path.join(distDir, 'kyoto-gion'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ota', 'public'), path.join(distDir, 'furano-snow'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-plan', 'public'), path.join(distDir, 'iseshima-villa'));
 copyFolderSync(path.join(__dirname, 'apps', 'endo-sns', 'public'), path.join(distDir, 'yufuin-hanare'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-chat'), path.join(distDir, 'miyakojima-suite'));
 
 
 // akasawa-review functions

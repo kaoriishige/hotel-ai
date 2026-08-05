@@ -1,56 +1,49 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>客室案内 | 赤沢温泉旅館</title>
-  <meta name="description" content="赤沢温泉旅館の客室デジタルコンシェルジュ。静養型ウェルネスの小宿。お食事、館内施設、温泉のご案内をスマートフォンでご覧いただけます。">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赤沢温泉旅館 - AI客室デジタルコンシェルジュ</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-container fade-in">
-    <div class="washi-overlay"></div>
-
-    <header class="main-header">
-      <div class="logo-area">
-        <h1 class="logo-text gold-text-gradient">赤沢温泉旅館</h1>
-        <span class="logo-sub">デジタルコンシェルジュ</span>
-      </div>
-      <div class="en-title">AKASAWA ONSEN RYOKAN</div>
+    <header class="header">
+        <div class="logo">
+            <span class="sub">自家源泉100% ぬる湯と渓流の宿</span>
+            <h1>赤沢温泉旅館</h1>
+        </div>
     </header>
 
-    <main class="content-body">
-      <section class="concept-card glass-panel">
-        <h2 class="concept-title gold-text-gradient">猫とぬる湯と渓流にほどける静養の宿</h2>
-        <p class="concept-desc">
-          自家源泉100%のかけ流しぬる湯と渓流のせせらぎ、手作り創作料理。なにもしない贅沢な静養の時間をどうぞ。
-        </p>
-      </section>
+    <main class="container">
+        <section class="hero-card">
+            <h2>猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿</h2>
+            <p>赤沢温泉旅館のAI客室デジタルコンシェルジュへようこそ。温泉、お食事、館内案内をご案内いたします。</p>
+        </section>
 
-      <nav class="category-grid">
-        <a href="dining.html" class="category-card glass-panel">
-          <div class="category-icon">🍱</div>
-          <div class="category-info">
-            <h3>お食事のご案内</h3>
-            <p>手作りにこだわった滋味豊かな創作料理</p>
-          </div>
-          <span class="arrow-icon">›</span>
-        </a>
+        <section class="chat-section">
+            <div class="chat-header">
+                <h3>💬 AIコンシェルジュに質問する</h3>
+            </div>
 
-        <a href="onsen.html" class="category-card glass-panel">
-          <div class="category-icon">♨️</div>
-          <div class="category-info">
-            <h3>源泉かけ流し ぬる湯のご案内</h3>
-            <p>無循環・自家源泉100%の湯と渓流の癒やし</p>
-          </div>
-          <span class="arrow-icon">›</span>
-        </a>
-      </nav>
+            <div class="chat-box" id="chatBox">
+                <div class="chat-message bot">
+                    こんにちは！赤沢温泉旅館のAIデジタルコンシェルジュです。温泉の入浴時間、お食事、館内施設など、何でもお気軽にお尋ねください。
+                </div>
+            </div>
+
+            <form id="chatForm" class="chat-input-form" onsubmit="handleChatSubmit(event)">
+                <input type="text" id="userInput" placeholder="ご質問を入力してください..." required>
+                <button type="submit" id="sendBtn">送信</button>
+            </form>
+        </section>
     </main>
 
-    <footer class="main-footer">
-      <p>&copy; 2026 赤沢温泉旅館. All rights reserved.</p>
+    <footer class="footer">
+        <p>&copy; 赤沢温泉旅館 - AI Guest Concierge System</p>
     </footer>
-  </div>
+
+    <script src="chat.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
