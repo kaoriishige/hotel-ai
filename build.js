@@ -85,48 +85,37 @@ if (!fs.existsSync(dpPath)) {
 const adminPath = path.join(dpPath, 'apps', 'admin');
 const adminDistPath = path.join(adminPath, 'dist');
 
-try {
-  if (fs.existsSync(dpPath)) {
-    // すでにdistが存在する場合は不要なnpm install/vite buildの二重実行をスキップして高速ビルド
-    const allFacilityFolders = [
-      'akasawa', 'akasawa-dp', 'nasu-utopia', 'nasu-utopia-ai',
-      'hakone-villa', 'atami-resort', 'karuizawa-lodge', 'kyoto-gion',
-      'furano-snow', 'iseshima-villa', 'yufuin-hanare', 'miyakojima-suite'
-    ];
+// 6. 全10施設への「9システム統合AIダッシュボードポータル」のデプロイ
+console.log('Building and deploying 9-system AI Dashboards for all 10 facilities...');
+const facilityMap = [
+  { folder: 'akasawa', name: '赤沢温泉旅館' },
+  { folder: 'akasawa-dp', name: '赤沢温泉旅館' },
+  { folder: 'nasu-utopia', name: '那須ユートピア美野沢' },
+  { folder: 'nasu-utopia-ai', name: '那須ユートピア美野沢' },
+  { folder: 'nasumid-p', name: '那須ユートピア美野沢' },
+  { folder: 'hakone-villa', name: '箱根強羅 AIヴィラ' },
+  { folder: 'atami-resort', name: '熱海オーシャンビューリゾート' },
+  { folder: 'karuizawa-lodge', name: '軽井沢フォレストロッジ' },
+  { folder: 'kyoto-gion', name: '京都祇園 伝統庵AI' },
+  { folder: 'furano-snow', name: '富良野スノーリゾート' },
+  { folder: 'iseshima-villa', name: '伊勢志摩ベイサイドヴィラ' },
+  { folder: 'yufuin-hanare', name: '由布院 温泉離れAI' },
+  { folder: 'miyakojima-suite', name: '宮古島 プレミアムスイート' }
+];
 
-    if (fs.existsSync(adminDistPath)) {
-      console.log('Deploying React Dashboard to all 10 facilities...');
-      allFacilityFolders.forEach(folder => {
-        copyFolderSync(adminDistPath, path.join(distDir, folder));
-      });
-    } else {
-      console.log('Building akasawa-dp via vite...');
-      try {
-        execSync('npx vite build', { cwd: adminPath, stdio: 'ignore', shell: true });
-      } catch (e) {
-        console.warn('Warning when running vite build for akasawa-dp:', e.message);
-      }
-      if (fs.existsSync(adminDistPath)) {
-        allFacilityFolders.forEach(folder => {
-          copyFolderSync(adminDistPath, path.join(distDir, folder));
-        });
-      }
-    }
+const templatePath = path.join(__dirname, 'facility-dashboard-template.html');
+if (fs.existsSync(templatePath)) {
+  const templateHtml = fs.readFileSync(templatePath, 'utf8');
 
-    // 全10施設のアセットパス絶対値補正
-    allFacilityFolders.forEach(folder => {
-      const htmlFile = path.join(distDir, folder, 'index.html');
-      if (fs.existsSync(htmlFile)) {
-        let content = fs.readFileSync(htmlFile, 'utf8');
-        content = content.replace(/src="\.\/assets\//g, `src="/${folder}/assets/`);
-        content = content.replace(/href="\.\/assets\//g, `href="/${folder}/assets/`);
-        fs.writeFileSync(htmlFile, content, 'utf8');
-      }
-    });
-  }
-} catch (err) {
-  console.warn('Warning when processing akasawa-dp (continuing build):', err.message);
+  facilityMap.forEach(item => {
+    const targetDir = path.join(distDir, item.folder);
+    fs.mkdirSync(targetDir, { recursive: true });
+    
+    let renderedHtml = templateHtml.replace(/\{\{FACILITY_NAME\}\}/g, item.name);
+    fs.writeFileSync(path.join(targetDir, 'index.html'), renderedHtml, 'utf8');
+  });
 }
+
 
 // 7. Netlify Functions のマージ
 console.log('Merging Netlify Functions...');
