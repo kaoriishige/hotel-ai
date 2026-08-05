@@ -132,7 +132,7 @@ if (fs.existsSync(templatePath)) {
     // 那須ユートピア美野沢専用のRAG・9システム文言の完全カスタマイズ
     if (item.folder.includes('nasu')) {
       renderedHtml = renderedHtml
-        .replace(/「ととのう」の、その先へ/g, '「ととのう」の、その先へ (BEYOND TOTONOU FEELING)')
+        .replace(/「ととのう」の、その先へ(?!\s*\(BEYOND)/g, '「ととのう」の、その先へ (BEYOND TOTONOU FEELING)')
         .replace(/猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿/g, 'アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート')
         .replace(/お食事、館内施設、温泉のご案内/g, 'サウナ（CUBERU/Rekka）、グランピングヴィラ、手ぶらBBQのご案内')
         .replace(/オーナー遠藤正俊氏のトーン＆マナー/g, '那須ユートピアの温かみと『ととのい体験』に寄り添うトーン＆マナー')
