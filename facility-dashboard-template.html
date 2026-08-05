@@ -104,7 +104,7 @@
       gap: 2.5rem;
     }
 
-    /* KPI 公式表示エリア */
+    /* 売上 = 顧客数 × 客単価 × リピート回数 式バナー */
     .formula-banner {
       background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(18, 43, 29, 0.5) 100%);
       border: 1.5px solid var(--border-color);
@@ -114,36 +114,51 @@
     }
 
     .formula-title {
-      font-size: 1.4rem;
+      font-size: 1.45rem;
       font-weight: bold;
       color: var(--accent-color);
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .formula-sub {
+      font-size: 1.15rem;
+      color: var(--text-main);
+      margin-bottom: 1.2rem;
+      font-weight: 600;
     }
 
     .formula-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.2rem;
-      margin-top: 1.2rem;
     }
 
     .formula-kpi {
       background: rgba(0,0,0,0.4);
-      padding: 1rem;
+      padding: 1.2rem;
       border-radius: 10px;
       border: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+    }
+
+    .formula-kpi-num {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      margin-bottom: 0.3rem;
     }
 
     .formula-kpi-label {
-      font-size: 0.85rem;
-      color: var(--text-sub);
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
     }
 
-    .formula-kpi-val {
-      font-size: 1.6rem;
-      font-weight: bold;
-      color: #fff;
-      margin-top: 0.3rem;
+    .formula-kpi-desc {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      line-height: 1.5;
     }
 
     /* 9システムグリッド */
@@ -201,21 +216,24 @@
       justify-content: center;
       font-size: 1.5rem;
       color: var(--accent-color);
+      flex-shrink: 0;
     }
 
     .system-num {
       font-family: 'Cinzel', serif;
       font-size: 0.8rem;
-      color: var(--text-sub);
+      color: var(--accent-color);
+      letter-spacing: 0.05em;
     }
 
     .system-title {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
+      color: var(--text-main);
     }
 
     .system-desc {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--text-sub);
       line-height: 1.6;
       margin-bottom: 1.5rem;
@@ -232,11 +250,12 @@
       text-decoration: none;
       display: block;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
     }
 
     .btn-launch-system:hover {
       transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45);
     }
 
     footer {
@@ -253,10 +272,10 @@
   <header>
     <div class="nav-bar">
       <a href="https://hotel-ai.netlify.app/" class="back-btn">
-        <i class="fa-solid fa-chevron-left"></i> 全施設 統括ダッシュボードへ戻る
+        <i class="fa-solid fa-chevron-left"></i> 統括ダッシュボードへ戻る
       </a>
       <div class="facility-title-area">
-        <span class="facility-badge">9システムフル搭載 AI専用ポータル</span>
+        <span class="facility-badge">9システムフル統合 AI管理ダッシュボード</span>
         <h1 class="facility-main-title">{{FACILITY_NAME}}</h1>
       </div>
       <div style="width: 180px;"></div>
@@ -265,37 +284,43 @@
 
   <div class="container">
 
-    <!-- KPI売上倍増目標 banner -->
+    <!-- 売上 = 宿泊客数 × 客単価 × リピート回数 -->
     <section class="formula-banner">
-      <div class="formula-title">売上2.197倍 ＝ 宿泊客数1.3倍 × 客単価1.3倍 × リピート1.3倍</div>
-      <p style="font-size: 0.95rem; color: var(--text-sub);">
-        {{FACILITY_NAME}} 専用の9つのAIエンジンが連動し、集客・単価・リピート率を一括最大化します。
+      <div class="formula-title">売上 = 宿泊客数 × 客単価（ADR） × リピート回数</div>
+      <div class="formula-sub">売上 2.197倍 ＝ 宿泊客数 1.3倍 × 客単価 1.3倍 × リピート 1.3倍</div>
+      <p style="font-size: 0.9rem; color: var(--text-sub); max-width: 900px; margin: 0 auto 1.2rem;">
+        {{FACILITY_NAME}} 専用に最適化された以下の9つのAIシステムが連携し、顧客獲得から単価向上、リピート育成まで全プロセスを自動支援します。
       </p>
+
       <div class="formula-grid">
         <div class="formula-kpi">
-          <div class="formula-kpi-label">① 新規顧客数 (集客AI)</div>
-          <div class="formula-kpi-val" style="color: #6ad2ff;">+30.0%</div>
+          <div class="formula-kpi-num">① 集客（顧客数）</div>
+          <div class="formula-kpi-label" style="color: #6ad2ff;">新規客を増やす (1.3倍)</div>
+          <div class="formula-kpi-desc">SEO、LLMO、OTA最適化、Google広告、SNS投稿、ブログ生成、口コミ改善</div>
         </div>
         <div class="formula-kpi">
-          <div class="formula-kpi-label">② 平均客単価 (プライシングAI)</div>
-          <div class="formula-kpi-val" style="color: #d4af37;">+30.0%</div>
+          <div class="formula-kpi-num">② 単価（客単価）</div>
+          <div class="formula-kpi-label" style="color: #d4af37;">1人売上を最大化 (1.3倍)</div>
+          <div class="formula-kpi-desc">ダイナミックプライシング、アップセル、宿泊プラン自律設計</div>
         </div>
         <div class="formula-kpi">
-          <div class="formula-kpi-label">③ リピート率 (CRM・LINE AI)</div>
-          <div class="formula-kpi-val" style="color: #52c41a;">+30.0%</div>
+          <div class="formula-kpi-num">③ ファン化（リピート）</div>
+          <div class="formula-kpi-label" style="color: #52c41a;">また泊まりたい宿へ (1.3倍)</div>
+          <div class="formula-kpi-desc">LINE・メールCRM、会員化、クチコミ自動返信、個別アフターフォロー</div>
         </div>
         <div class="formula-kpi">
-          <div class="formula-kpi-label">④ 総合売上拡大予測</div>
-          <div class="formula-kpi-val" style="color: #ff9d42;">2.197倍</div>
+          <div class="formula-kpi-num">④ 利益率向上</div>
+          <div class="formula-kpi-label" style="color: #ff9d42;">業務効率化・コスト削減</div>
+          <div class="formula-kpi-desc">AIコンシェルジュ自動応答、OTA依存率低下、省人化オペレーション</div>
         </div>
       </div>
     </section>
 
-    <!-- 9つのAIシステム一覧 -->
+    <!-- 9つの本物AIシステム一覧 -->
     <section>
       <div class="section-head">
-        <span>⚡ 稼働中の 9つのAIシステム</span>
-        <span style="font-size: 0.9rem; color: #52c41a; font-weight: normal;"><i class="fa-solid fa-circle-check"></i> 全9システム正常稼働中</span>
+        <span>⚙️ {{FACILITY_NAME}} 専用 9つのAI管理システム</span>
+        <span style="font-size: 0.9rem; color: #52c41a; font-weight: normal;"><i class="fa-solid fa-circle-check"></i> 全9システム連動・稼働中</span>
       </div>
 
       <div class="systems-grid">
@@ -306,88 +331,88 @@
             <div class="system-icon-header">
               <div class="system-icon-box"><i class="fa-solid fa-chart-line"></i></div>
               <div>
-                <div class="system-num">SYSTEM #01</div>
-                <div class="system-title">ダイナミックプライシング AI</div>
+                <div class="system-num">SYSTEM 01</div>
+                <div class="system-title">ダイナミックプライシング ダッシュボード</div>
               </div>
             </div>
-            <p class="system-desc">需要予測と連動し、客室単価（ADR）と稼働率（OCC）を自動最適化。売り止めや適正価格の設定をリアルタイムに自動調整します。</p>
+            <p class="system-desc">需要予測アルゴリズムと連動し、客室単価（ADR）と稼働率（OCC）をリアルタイム自動調整。売り止めや料金カレンダーを統合管理します。</p>
           </div>
-          <a href="/akasawa-dp/" class="btn-launch-system">プライシングAIシステムを起動 ➔</a>
+          <a href="/akasawa-dp/" class="btn-launch-system" target="_blank">ダイナミックプライシング画面を開く ➔</a>
         </div>
 
-        <!-- 2. AIデジタルコンシェルジュ・自動音声/テキスト接客 -->
+        <!-- 2. AIデジタルコンシェルジュ (接客・予約案内) -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
-              <div class="system-icon-box"><i class="fa-solid fa-comments"></i></div>
+              <div class="system-icon-box"><i class="fa-solid fa-robot"></i></div>
               <div>
-                <div class="system-num">SYSTEM #02</div>
-                <div class="system-title">AIデジタルコンシェルジュ</div>
+                <div class="system-num">SYSTEM 02</div>
+                <div class="system-title">AIデジタルコンシェルジュ (接客・予約)</div>
               </div>
             </div>
-            <p class="system-desc">客室案内・宿泊予約・館内施設のご案内を24時間自動対応。日本語・英語・中国語・韓国語の多言語接客を完全自動化。</p>
+            <p class="system-desc">客室案内・館内施設・温泉・周辺観光や予約の質問に24時間自動対応。日本語・英語・中国語・韓国語の多言語AI接客を提供します。</p>
           </div>
-          <a href="/akasawa-chat/" class="btn-launch-system">AIコンシェルジュシステムを起動 ➔</a>
+          <a href="/akasawa-chat/" class="btn-launch-system" target="_blank">AIコンシェルジュ画面を開く ➔</a>
         </div>
 
-        <!-- 3. 口コミ自動返信・評判分析エージェント -->
+        <!-- 3. クチコミ返信エージェント -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
               <div class="system-icon-box"><i class="fa-solid fa-star"></i></div>
               <div>
-                <div class="system-num">SYSTEM #03</div>
-                <div class="system-title">クチコミ自動返信・評判分析 AI</div>
+                <div class="system-num">SYSTEM 03</div>
+                <div class="system-title">口コミ自動返信・評判分析エージェント</div>
               </div>
             </div>
-            <p class="system-desc">楽天・じゃらん・Google等のクチコミに人間味あふれる感謝の返信を自動生成。不満箇所のAI感情分析と改善提案を出力。</p>
+            <p class="system-desc">過去の返信履歴（RAG）とオーナーの思想を基に、楽天・じゃらん・Google等の口コミに最適な感謝返信案を3パターン自動生成します。</p>
           </div>
-          <a href="/akasawa-review/" class="btn-launch-system">クチコミAIシステムを起動 ➔</a>
+          <a href="/akasawa-review/" class="btn-launch-system" target="_blank">口コミ返信AI画面を開く ➔</a>
         </div>
 
         <!-- 4. メール・LINE自動連携 CRM -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
-              <div class="system-icon-box"><i class="fa-solid fa-paper-plane"></i></div>
+              <div class="system-icon-box"><i class="fa-solid fa-envelope-open-text"></i></div>
               <div>
-                <div class="system-num">SYSTEM #04</div>
-                <div class="system-title">メール・LINE自動連携 CRM</div>
+                <div class="system-num">SYSTEM 04</div>
+                <div class="system-title">メール・LINE追跡マーケティング CRM</div>
               </div>
             </div>
-            <p class="system-desc">宿泊後の自動フォローアップメールやLINE個別アプローチによりリピート客化。自動配信経由の追跡売上をリアルタイム計測。</p>
+            <p class="system-desc">宿泊後の自動フォローアップ配信やLINE個別CRMによりリピーター化。一括配信とリアルタイム追跡売上計測を管理します。</p>
           </div>
-          <a href="/akasawa-ml/" class="btn-launch-system">LINE/メールCRMシステムを起動 ➔</a>
+          <a href="/akasawa-ml/" class="btn-launch-system" target="_blank">メール・LINE CRM画面を開く ➔</a>
         </div>
 
-        <!-- 5. SNS投稿・プロモーション自動生成 -->
+        <!-- 5. オーナー投稿管理・SNS自動投稿 -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
               <div class="system-icon-box"><i class="fa-solid fa-share-nodes"></i></div>
               <div>
-                <div class="system-num">SYSTEM #05</div>
-                <div class="system-title">SNSプロモーション自動生成 AI</div>
+                <div class="system-num">SYSTEM 05</div>
+                <div class="system-title">オーナー投稿管理・SNS自動投稿 AI</div>
               </div>
             </div>
-            <p class="system-desc">Instagram, X, Facebook, GBPへの公式投稿文やハッシュタグをAIが自動作成。投稿スケジューリングと自動配信を管理。</p>
+            <p class="system-desc">宿のこだわりや日常の魅力をAIが自動言語化。Instagram, X, Facebook, Googleビジネスプロフィールへの予約配信と承認フローを統括します。</p>
           </div>
-          <a href="/akasawa-sns/" class="btn-launch-system">SNSプロモーションAIを起動 ➔</a>
+          <a href="/akasawa-sns/" class="btn-launch-system" target="_blank">SNS投稿管理画面を開く ➔</a>
         </div>
 
-        <!-- 6. 公式ブログ自動生成システム -->
+        <!-- 6. 公式ブログ生成システム -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
-              <div class="system-icon-box"><i class="fa-solid fa-pen-nib"></i></div>
+              <div class="system-icon-box"><i class="fa-solid fa-blog"></i></div>
               <div>
-                <div class="system-num">SYSTEM #06</div>
-                <div class="system-title">公式SEOブログ自動執筆 AI</div>
+                <div class="system-num">SYSTEM 06</div>
+                <div class="system-title">公式SEOブログ自律生成システム</div>
               </div>
             </div>
-            <p class="system-desc">周辺観光・季節イベント・料理紹介などのSEO・LLMO検索に強い記事を自律執筆。検索上位表示で新規客を獲得。</p>
+            <p class="system-desc">季節の観光体験・おすすめ料理・館内の過ごし方をテーマに、SEO・LLMO（生成AI検索）で上位表示を狙う高品質な公式ブログ記事を全自動生成します。</p>
           </div>
-          <a href="/akasawa-blog/" class="btn-launch-system">ブログ生成AIシステムを起動 ➔</a>
+          <a href="/akasawa-blog/" class="btn-launch-system" target="_blank">ブログ自動生成画面を開く ➔</a>
         </div>
 
         <!-- 7. AI OTA最適化エンジン -->
@@ -396,43 +421,43 @@
             <div class="system-icon-header">
               <div class="system-icon-box"><i class="fa-solid fa-hotel"></i></div>
               <div>
-                <div class="system-num">SYSTEM #07</div>
+                <div class="system-num">SYSTEM 07</div>
                 <div class="system-title">AI OTA最適化エンジン</div>
               </div>
             </div>
-            <p class="system-desc">楽天トラベル・じゃらん・一休等のOTA掲載情報をAIが常時監視。スコア・写真・キャッチコピーを最適化して予約率向上。</p>
+            <p class="system-desc">楽天トラベル・じゃらん等のOTAページを常時分析。スコア・写真・キャッチコピー・競合比較をAIが診断し、予約率（CVR）を極大化します。</p>
           </div>
-          <a href="/akasawa-ota/" class="btn-launch-system">OTA最適化AIシステムを起動 ➔</a>
+          <a href="/akasawa-ota/" class="btn-launch-system" target="_blank">OTA最適化画面を開く ➔</a>
         </div>
 
         <!-- 8. 宿泊プラン作成エージェント -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
-              <div class="system-icon-box"><i class="fa-solid fa-gift"></i></div>
+              <div class="system-icon-box"><i class="fa-solid fa-box-archive"></i></div>
               <div>
-                <div class="system-num">SYSTEM #08</div>
+                <div class="system-num">SYSTEM 08</div>
                 <div class="system-title">宿泊プラン自律設計 AI</div>
               </div>
             </div>
-            <p class="system-desc">季節のイベントやターゲット層（カップル・ファミリー・女子旅）に応じた高単価・高満足度宿泊プランを自動作成。</p>
+            <p class="system-desc">ターゲット層（カップル・女子旅・シニア・ファミリー）に刺さる高単価・高付加価値プランのタイトル、特典内容、説明文章を自律設計します。</p>
           </div>
-          <a href="/akasawa-plan/" class="btn-launch-system">宿泊プラン作成AIを起動 ➔</a>
+          <a href="/akasawa-plan/" class="btn-launch-system" target="_blank">宿泊プラン設計画面を開く ➔</a>
         </div>
 
         <!-- 9. SNSプロモーション動画自動レンダリング -->
         <div class="system-card">
           <div>
             <div class="system-icon-header">
-              <div class="system-icon-box"><i class="fa-solid fa-video"></i></div>
+              <div class="system-icon-box"><i class="fa-solid fa-film"></i></div>
               <div>
-                <div class="system-num">SYSTEM #09</div>
-                <div class="system-title">SNSプロモーション動画生成 AI</div>
+                <div class="system-num">SYSTEM 09</div>
+                <div class="system-title">SNSプロモーション動画レンダリング AI</div>
               </div>
             </div>
-            <p class="system-desc">TikTok・Instagramリール用の縦型ショート動画を自動生成・レンダリング。音楽・ナレーション・字幕付きで集客力を爆増。</p>
+            <p class="system-desc">InstagramリールやTikTok用の縦型プロモーションショート動画をクラウド上で自動編集・レンダリング。音楽・ナレーション付きで集客力を強化します。</p>
           </div>
-          <a href="/endo-sns/" class="btn-launch-system">動画生成AIシステムを起動 ➔</a>
+          <a href="/endo-sns/" class="btn-launch-system" target="_blank">動画レンダリング画面を開く ➔</a>
         </div>
 
       </div>
@@ -441,7 +466,7 @@
   </div>
 
   <footer>
-    <p>{{FACILITY_NAME}} Dedicated Operations Portal &copy; 2026 | 9-System Integrated AI Platform</p>
+    <p>{{FACILITY_NAME}} 統合AI管理システム &copy; 2026 | 全9システム完全連動プラットフォーム</p>
   </footer>
 
 </body>
