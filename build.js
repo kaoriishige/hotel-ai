@@ -90,6 +90,7 @@ try {
     // すでにdistが存在する場合は不要なnpm install/vite buildの二重実行をスキップして高速ビルド
     if (fs.existsSync(adminDistPath)) {
       console.log('Using existing akasawa-dp build dist...');
+      copyFolderSync(adminDistPath, path.join(distDir, 'akasawa'));
       copyFolderSync(adminDistPath, path.join(distDir, 'akasawa-dp'));
     } else {
       console.log('Building akasawa-dp via vite...');
@@ -99,6 +100,7 @@ try {
         console.warn('Warning when running vite build for akasawa-dp:', e.message);
       }
       if (fs.existsSync(adminDistPath)) {
+        copyFolderSync(adminDistPath, path.join(distDir, 'akasawa'));
         copyFolderSync(adminDistPath, path.join(distDir, 'akasawa-dp'));
       }
     }
