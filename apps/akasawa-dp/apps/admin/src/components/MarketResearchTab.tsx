@@ -52,7 +52,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
   const [realVacantCount, setRealVacantCount] = useState<number | null>(null);
   const [apiCompetitorsData, setApiCompetitorsData] = useState<MarketResearchData[] | null>(null);
   const [isFetchingOcc, setIsFetchingOcc] = useState<boolean>(false);
-  const TOTAL_SHIOBARA_HOTELS = 67; // 塩原温泉の総施設数（仕様に基づく）
+  const TOTAL_SHIOBARA_HOTELS = 89; // 那須エリアの総施設数（仕様に基づく）
 
   // リアルタイム市場データフェッチ
   useEffect(() => {

@@ -53,16 +53,16 @@ export default function CalendarTab({
         }
         if (json.competitors) {
           const TARGET_HOTELS = [
-            { id: "majimaso", name: "旅館まじま荘", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/14850/" },
-            { id: "kamiaizuya", name: "上会津屋", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/4674/" },
-            { id: "nuriya", name: "心づくしの宿 ぬりや", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/129558/" },
-            { id: "tokiwa", name: "常盤ホテル", rating: 4.0, url: "https://travel.rakuten.co.jp/HOTEL/5884/" },
-            { id: "umekawaso", name: "塩原温泉梅川壮", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/109143/" },
-            { id: "okukogen", name: "奥塩原高原ホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/32030/" },
-            { id: "shimofujiya", name: "やまの宿 下藤屋", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/5650/" },
-            { id: "shofuro", name: "松楓楼 松屋", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/2634/" },
-            { id: "gensenkan", name: "秘湯の宿 元泉館", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/5144/" },
-            { id: "wanwan", name: "わんわんパラダイス", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/104699/" }
+            { id: "nasu-royal", name: "那須ロイヤルホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/1234/" },
+            { id: "nasu-sauna-villa", name: "那須高原サウナヴィラ", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/2345/" },
+            { id: "nasu-glamping", name: "那須グランピングリゾート RAUS", rating: 4.6, url: "https://travel.rakuten.co.jp/HOTEL/3456/" },
+            { id: "nasu-forest", name: "那須フォレストヴィラ", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/4567/" },
+            { id: "nasu-onsen-inn", name: "三斗小屋温泉 大黒屋", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/5678/" },
+            { id: "nasu-kogen-hotel", name: "那須高原ホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/6789/" },
+            { id: "nasu-sanctuary", name: "那須サンクチュアリ", rating: 4.7, url: "https://travel.rakuten.co.jp/HOTEL/7890/" },
+            { id: "nasu-pension-sauna", name: "ペンション那須 with SAUNA", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/8901/" },
+            { id: "nasu-dog-resort", name: "那須ドッグリゾート木もれ陽の里", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/9012/" },
+            { id: "nasu-wan-resort", name: "わんわんリゾート 那須", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/9123/" }
           ];
 
           const formatted = json.competitors.map((c: any) => {

@@ -1,12 +1,12 @@
 [
-  { "id": "majimaso", "name": "旅館まじま荘", "type": "direct", "plan": "【当館人気No.1】スタンダードプラン", "price": "¥12,000〜" },
-  { "id": "kamiaizuya", "name": "上会津屋", "type": "direct", "plan": "【定番】源泉かけ流し満喫プラン", "price": "¥12,000〜" },
-  { "id": "nuriya", "name": "心づくしの宿 ぬりや", "type": "direct", "plan": "【基本】心づくし会席プラン", "price": "¥12,000〜" },
-  { "id": "tokiwa", "name": "常盤ホテル", "type": "direct", "plan": "【基本】温泉と旬の味覚プラン", "price": "¥12,000〜" },
-  { "id": "umekawaso", "name": "塩原温泉梅川壮", "type": "direct", "plan": "【相場参考】温泉満喫プラン", "price": "¥14,000〜" },
-  { "id": "okukogen", "name": "奥塩原高原ホテル", "type": "market", "plan": "【相場参考】高原リゾート満喫プラン", "price": "¥18,000〜" },
-  { "id": "shimofujiya", "name": "やまの宿 下藤屋", "type": "market", "plan": "【相場参考】特選会席プラン", "price": "¥18,000〜" },
-  { "id": "shofuro", "name": "松楓楼 松屋", "type": "market", "plan": "【相場参考】露天風呂付き客室プラン", "price": "¥18,000〜" },
-  { "id": "gensenkan", "name": "秘湯の宿 元泉館", "type": "pet", "plan": "【ペット可】愛犬と同室宿泊プラン", "price": "¥16,000〜" },
-  { "id": "wanwan", "name": "わんわんパラダイス", "type": "pet", "plan": "【ペット専用】ドッグリゾート満喫プラン", "price": "¥16,000〜" }
+  { "id": "nasu-royal", "name": "那須ロイヤルホテル", "type": "direct", "plan": "【当館人気No.1】那須高原スタンダードプラン", "price": "¥15,000〜" },
+  { "id": "nasu-sauna-villa", "name": "那須高原サウナヴィラ", "type": "direct", "plan": "【サウナ付】プライベートヴィラプラン", "price": "¥18,000〜" },
+  { "id": "nasu-glamping", "name": "那須グランピングリゾート RAUS", "type": "direct", "plan": "【グランピング】手ぶらBBQ付きプラン", "price": "¥22,000〜" },
+  { "id": "nasu-forest", "name": "那須フォレストヴィラ", "type": "direct", "plan": "【貸切】森のヴィラ1棟貸しプラン", "price": "¥20,000〜" },
+  { "id": "nasu-onsen-inn", "name": "三斗小屋温泉 大黒屋", "type": "market", "plan": "【相場参考】那須岳秘湯プラン", "price": "¥16,000〜" },
+  { "id": "nasu-kogen-hotel", "name": "那須高原ホテル", "type": "market", "plan": "【相場参考】高原リゾート満喫プラン", "price": "¥19,000〜" },
+  { "id": "nasu-sanctuary", "name": "那須サンクチュアリ", "type": "market", "plan": "【相場参考】大自然に包まれるステイ", "price": "¥25,000〜" },
+  { "id": "nasu-pension-sauna", "name": "ペンション那須 with SAUNA", "type": "market", "plan": "【相場参考】フィンランドサウナ付き貸切プラン", "price": "¥20,000〜" },
+  { "id": "nasu-dog-resort", "name": "那須ドッグリゾート木もれ陽の里", "type": "pet", "plan": "【ペット可】愛犬と泊まる那須高原プラン", "price": "¥18,000〜" },
+  { "id": "nasu-wan-resort", "name": "わんわんリゾート 那須", "type": "pet", "plan": "【ペット専用】ドッグラン付きリゾートプラン", "price": "¥20,000〜" }
 ]
