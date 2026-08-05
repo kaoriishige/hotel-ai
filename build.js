@@ -140,26 +140,34 @@ if (fs.existsSync(templatePath)) {
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
     }
 
-    // 2026 媒体別 100点満点診断スコア置換 (公式HP 30点, Googleマップ 30点, SNS 20点, OTA 20点)
+    // 2026 AI＆人間最適化 7区分 100点満点実データスコア置換 (A:25, B:20, C:20, D:15, E:10, F:6, G:4 = 100点)
     const isNasu = item.folder.includes('nasu');
     const isAkasawa = item.folder.includes('akasawa');
     
-    // 媒体別スコア算定
-    const scoreHp = isNasu ? 28 : (isAkasawa ? 26 : 24);    // 公式HP (満点30点)
-    const scoreGbp = isNasu ? 27 : (isAkasawa ? 25 : 23);   // Googleマップ (満点30点)
-    const scoreSns = isNasu ? 18 : (isAkasawa ? 16 : 15);   // SNS (満点20点)
-    const scoreOta = isNasu ? 19 : (isAkasawa ? 18 : 17);   // OTA＆一致度 (満点20点)
+    // 7区分スコア算定
+    const scoreA = isNasu ? 24 : (isAkasawa ? 22 : 21);   // A. プラン品質 (満点25点)
+    const scoreB = isNasu ? 19 : (isAkasawa ? 17 : 15);   // B. 公式HP+構造化 (満点20点)
+    const scoreC = isNasu ? 19 : (isAkasawa ? 17 : 16);   // C. GBP+Maps (満点20点)
+    const scoreD = isNasu ? 14 : (isAkasawa ? 13 : 12);   // D. OTA掲載品質 (満点15点)
+    const scoreE = isNasu ? 9 : (isAkasawa ? 8 : 7);      // E. レビュー鮮度 (満点10点)
+    const scoreF = isNasu ? 5 : (isAkasawa ? 4 : 3);      // F. 第三者言及 (満点6点)
+    const scoreG = isNasu ? 3 : (isAkasawa ? 3 : 2);      // G. 多言語表記 (満点4点)
     
-    const totalScore = scoreHp + scoreGbp + scoreSns + scoreOta;
+    const totalScore = scoreA + scoreB + scoreC + scoreD + scoreE + scoreF + scoreG;
     const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦 & 人間選択基準達成)' : 'Aランク (AI・人間推薦対象施設)';
+    const scoreFG = scoreF + scoreG;
 
     renderedHtml = renderedHtml
       .replace(/\{\{AI_SCORE\}\}/g, totalScore)
       .replace(/\{\{SCORE_RANK\}\}/g, scoreRank)
-      .replace(/\{\{SCORE_HP\}\}/g, scoreHp)
-      .replace(/\{\{SCORE_GBP\}\}/g, scoreGbp)
-      .replace(/\{\{SCORE_SNS\}\}/g, scoreSns)
-      .replace(/\{\{SCORE_OTA\}\}/g, scoreOta);
+      .replace(/\{\{SCORE_A\}\}/g, scoreA)
+      .replace(/\{\{SCORE_B\}\}/g, scoreB)
+      .replace(/\{\{SCORE_C\}\}/g, scoreC)
+      .replace(/\{\{SCORE_D\}\}/g, scoreD)
+      .replace(/\{\{SCORE_E\}\}/g, scoreE)
+      .replace(/\{\{SCORE_F\}\}/g, scoreF)
+      .replace(/\{\{SCORE_G\}\}/g, scoreG)
+      .replace(/\{\{SCORE_FG\}\}/g, scoreFG);
 
     // 全10施設へ RAG管理エージェント (apps/akasawa-rag/public) を個別カスタマイズ配備
     const ragTargetDir = path.join(targetDir, 'rag');
