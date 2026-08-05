@@ -59,21 +59,21 @@ function optimizeForMainInbox(str) {
 
 const templates = {
   summer_recommend: {
-    emailSubject: '【赤沢温泉旅館】お盆前のおすすめプランと涼やかな温泉のご案内',
+    emailSubject: '【那須ユートピア美野沢】お盆前のおすすめプランと涼やかなサウナ・水風呂のご案内',
     message: ({ greeting }) =>
 `${greeting}
 
 毎日、本当に暑い日が続いていますね。こんな暑さが続くと、「どこかでゆっくりしたいな」と思うことはありませんか？
 
-赤沢温泉の湯は、源泉100％かけ流しの「ぬる湯」、川のせせらぎを聞きながら、時間を忘れてゆっくり温泉を楽しめます、のんびり長湯をしながら、リセットしませんか？
+那須ユートピア美野沢の湯は、源泉100％かけ流しの「本格フィンランドサウナ（CUBERU / Rekka）と那須連山の水風呂」、川のせせらぎを聞きながら、時間を忘れてゆっくりサウナ・水風呂を楽しめます、のんびり長湯をしながら、リセットしませんか？
 
 お盆前でしたら、まだご案内できるお日にちがございます。　混み合う時期の前に、少しだけ日常を離れて、のんびりしに来ませんか?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ おすすめのプラン
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-【1泊2食付】旅を楽しむ温泉宿♪
-四季を彩る創作料理と疲れを癒す赤沢源泉
+【1泊2食付】旅を楽しむサウナ・水風呂宿♪
+四季を彩る手ぶら本格BBQと疲れを癒す那須ユートピア源泉
 
 今の季節は、国産牛を使ったジューシーなローストビーフ、自家製赤ワインソース付をご提供、当館一番人気のプランです。（公式　通常）https://x.gd/tnpmh　（公式　直前割）　https://x.gd/WmKVp
 
@@ -85,29 +85,29 @@ const templates = {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ HP予約がお得、ささやかなプレゼント🎁
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-上記のリンクのように公式ホームページからご予約いただき、チェックインの際に声をかけてくださった方、【那須塩原産ジュースあるいは同等品】をお一人様につき1本プレゼントいたします！　akasawaonsen.com
+上記のリンクのように公式ホームページからご予約いただき、チェックインの際に声をかけてくださった方、【那須那須町産ジュースあるいは同等品】をお一人様につき1本プレゼントいたします！　akasawaonsen.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ ネコカフェも週末中心にオープン中
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-赤沢温泉旅館から歩いて10分、あかさわネコカフェ＆ダイニングの保護ネコ5匹と子猫5匹が皆様をお待ちしております。現在金曜～日曜のお昼前後に定期営業中、其の他の時間はご予約制です。可愛いよ！https://maps.app.goo.gl/ZPh5vgDMHsLEXhBC7
+那須ユートピア美野沢から歩いて10分、あかさわネコカフェ＆ダイニングの保護ネコ5匹と子アート5匹が皆様をお待ちしております。現在金曜～日曜のお昼前後に定期営業中、其の他の時間はご予約制です。可愛いよ！https://maps.app.goo.gl/ZPh5vgDMHsLEXhBC7
 
 皆様にお会いできる日を、スタッフ一同心より楽しみにしております。`
   },
   seasonal: {
-    emailSubject: '【赤沢温泉旅館】季節のお便り',
+    emailSubject: '【那須ユートピア美野沢】季節のお便り',
     message: ({ greeting }) =>
-      `${greeting}\n\n平素より赤沢温泉旅館をご愛顧いただき、誠にありがとうございます。\n\n季節の変わり目となりましたが、いかがお過ごしでしょうか。\n当館の看板猫たちも、ぽかぽかとした日差しの中、のんびりと日向ぼっこを楽しんでおります。\n\n豊かな自然と、じんわり温まる「ぬる湯」をご用意してお待ちしております。\nぜひまた、日常の喧騒を離れて静かな時間をお過ごしにいらしてください。\n\nご予約・お問い合わせは下記より承ります。\nhttps://akasawaonsen.com/`
+      `${greeting}\n\n平素より那須ユートピア美野沢をご愛顧いただき、誠にありがとうございます。\n\n季節の変わり目となりましたが、いかがお過ごしでしょうか。\n当館の現代アート作品たちも、ぽかぽかとした日差しの中、のんびりと日向ぼっこを楽しんでおります。\n\n豊かな自然と、じんわり温まる「本格フィンランドサウナ（CUBERU / Rekka）と那須連山の水風呂」をご用意してお待ちしております。\nぜひまた、日常の喧騒を離れて静かな時間をお過ごしにいらしてください。\n\nご予約・お問い合わせは下記より承ります。\nhttps://akasawaonsen.com/`
   },
   special_plan: {
-    emailSubject: '【赤沢温泉旅館】LINE・メルマガ会員様限定 特別プランのご案内',
+    emailSubject: '【那須ユートピア美野沢】LINE・メルマガ会員様限定 特別プランのご案内',
     message: ({ greeting }) =>
-      `${greeting}\n\nいつも赤沢温泉旅館をごご利用いただきありがとうございます。\n\n本日は、過去にご宿泊いただいたお客様限定の「特別プラン」のご案内です。\n\n【会員様限定特典】\n・アーリーチェックイン（14:00〜）無料\n・夕食時のドリンク1杯サービス\n\nご希望の日程が埋まってしまう前に、ぜひ下記より詳細をご確認くださいませ。\nご来館を心よりお待ち申し上げております。\n\nhttps://akasawaonsen.com/`
+      `${greeting}\n\nいつも那須ユートピア美野沢をごご利用いただきありがとうございます。\n\n本日は、過去にご宿泊いただいたお客様限定の「特別プラン」のご案内です。\n\n【会員様限定特典】\n・アーリーチェックイン（14:00〜）無料\n・夕食時のドリンク1杯サービス\n\nご希望の日程が埋まってしまう前に、ぜひ下記より詳細をご確認くださいませ。\nご来館を心よりお待ち申し上げております。\n\nhttps://akasawaonsen.com/`
   },
   re_engagement: {
-    emailSubject: '【赤沢温泉旅館】ご無沙汰しております。いかがお過ごしでしょうか',
+    emailSubject: '【那須ユートピア美野沢】ご無沙汰しております。いかがお過ごしでしょうか',
     message: ({ greeting }) =>
-      `${greeting}\n\n赤沢温泉旅館でございます。\n前回のご宿泊からしばらく経ちましたが、その後いかがお過ごしでしょうか。\n\n当館の「ぬる湯」は、長湯することで心身の疲れをじんわりと癒やす効果がございます。\n日々のお疲れが溜まっているようでしたら、ぜひまた当館の温泉と猫たちに癒やされにお越しください。\n\nまたお目にかかれる日を, スタッフ・猫一同、楽しみにお待ち申し上げております。\n\nhttps://akasawaonsen.com/`
+      `${greeting}\n\n那須ユートピア美野沢でございます。\n前回のご宿泊からしばらく経ちましたが、その後いかがお過ごしでしょうか。\n\n当館の「本格フィンランドサウナ（CUBERU / Rekka）と那須連山の水風呂」は、長湯することで心身の疲れをじんわりと癒やす効果がございます。\n日々のお疲れが溜まっているようでしたら、ぜひまた当館のサウナ・水風呂とアートたちに癒やされにお越しください。\n\nまたお目にかかれる日を, スタッフ・アート一同、楽しみにお待ち申し上げております。\n\nhttps://akasawaonsen.com/`
   },
   custom: {
     emailSubject: '',
@@ -118,8 +118,8 @@ const templates = {
 const isSubdir = window.location.pathname.includes('/akasawa-ml');
 const SIGNATURE = `
 ------------------------------
-赤沢温泉株式会社/赤沢温泉旅館 遠藤正俊
-〒329-2921 栃木県那須塩原市塩原1149
+那須ユートピア美野沢株式会社/那須ユートピア美野沢 那須ユートピア支配人
+〒329-2921 栃木県那須那須町市那須町1149
 TEL: 0287-46-5700　FAX：0287-46-5699
 公式サイト：https://akasawaonsen.com/
 ------------------------------
@@ -435,7 +435,7 @@ function preview() {
     spamWarning = '\n\n------------------------------\n💡 【メイントレイ到達のコツ】\n件名や本文に過度な記号（！！！、★★★）や強いセールスワードが含まれているため、Gmailの「プロモーション」タブに入りやすくなる可能性があります。';
   }
 
-  el.previewBox.textContent = `差出人: 赤沢温泉旅館\n件名: ${message.subject}\n\n${message.body}${spamWarning}`;
+  el.previewBox.textContent = `差出人: 那須ユートピア美野沢\n件名: ${message.subject}\n\n${message.body}${spamWarning}`;
 }
 
 async function dispatchMessages() {
@@ -787,7 +787,7 @@ function getTargets() {
   }
 }
 
-// 赤沢温泉プランURLへの追跡パラメータ自動埋め込みエンジン
+// 那須ユートピア美野沢プランURLへの追跡パラメータ自動埋め込みエンジン
 function attachTrackingParams(text, customer, channelOverride) {
   if (!text) return '';
   const channel = channelOverride || (el.channelSelect ? el.channelSelect.value : 'email');
@@ -809,7 +809,7 @@ function attachTrackingParams(text, customer, channelOverride) {
     // すでにutmパラメータが付与されている場合はそのまま返す
     if (cleanUrl.includes('utm_source=')) return cleanUrl + suffix;
 
-    // 赤沢温泉旅館の対象プラン・公式URLかをチェック
+    // 那須ユートピア美野沢の対象プラン・公式URLかをチェック
     let matchedPlanKey = '';
     for (const [key, plan] of Object.entries(PLANS)) {
       if (cleanUrl.includes(plan.url) || plan.url.includes(cleanUrl)) {
@@ -818,7 +818,7 @@ function attachTrackingParams(text, customer, channelOverride) {
       }
     }
 
-    // すべてのhttp/https URL、または赤沢関連URLに追跡パラメータを自動合成
+    // すべてのhttp/https URL、または那須ユートピア関連URLに追跡パラメータを自動合成
     const sep = cleanUrl.includes('?') ? '&' : '?';
     const planContentParam = matchedPlanKey ? `&utm_content=${matchedPlanKey}` : '';
     const trackingParams = `utm_source=${encodeURIComponent(channel)}&utm_medium=crm&utm_campaign=${encodeURIComponent(scenario)}${planContentParam}&cid=${encodeURIComponent(cid)}`;
@@ -833,7 +833,7 @@ function buildMessage(customer, channelOverride) {
   const customerWithFullName = {
     ...customer,
     name,
-    greeting: name === '赤沢温泉旅館ご利用者様' ? '赤沢温泉旅館ご利用者様' : `${name} 様`
+    greeting: name === '那須ユートピア美野沢ご利用者様' ? '那須ユートピア美野沢ご利用者様' : `${name} 様`
   };
   let tplMsg = tpl.message ? tpl.message(customerWithFullName) : '';
   let customMsg = el.customMessage.value;
@@ -844,7 +844,7 @@ function buildMessage(customer, channelOverride) {
   let trackedContent = attachTrackingParams(fullContent, customer, channelOverride);
 
   const body = trackedContent + '\n' + SIGNATURE;
-  const subject = el.customSubject.value.trim() || tpl.emailSubject || '【赤沢温泉旅館】ご案内';
+  const subject = el.customSubject.value.trim() || tpl.emailSubject || '【那須ユートピア美野沢】ご案内';
   return { subject, body };
 }
 
@@ -1005,7 +1005,7 @@ function seedCustomers() {
   const today = new Date();
   const addDays = n => new Date(today.getTime() + n * 86400000).toISOString().slice(0, 10);
   const seeds = [
-    normalizeCustomer({ source: 'staysee', lastName: '山田', firstName: '花', email: 'hana@example.com', lineUserId: 'U-demo-hana', language: 'ja', tags: '猫好き,女性ひとり旅', checkInDate: addDays(3), checkOutDate: addDays(4), reservationId: 'ST-1001', stayCount: 2, importFileName: 'sample_staysee.csv', bookedPlanName: '【1泊2食付】直前割プラン', bookedAmount: 15000, bookedAt: new Date().toISOString() }),
+    normalizeCustomer({ source: 'staysee', lastName: '山田', firstName: '花', email: 'hana@example.com', lineUserId: 'U-demo-hana', language: 'ja', tags: 'アート好き,女性ひとり旅', checkInDate: addDays(3), checkOutDate: addDays(4), reservationId: 'ST-1001', stayCount: 2, importFileName: 'sample_staysee.csv', bookedPlanName: '【1泊2食付】直前割プラン', bookedAmount: 15000, bookedAt: new Date().toISOString() }),
     normalizeCustomer({ source: 'neppan', lastName: '佐藤', firstName: '健', email: 'ken@example.com', lineUserId: 'U-demo-ken', language: 'ja', tags: '長湯好き,静かな部屋希望', checkInDate: addDays(7), checkOutDate: addDays(8), reservationId: 'NP-2001', stayCount: 1, importFileName: 'sample_neppan.csv' }),
     normalizeCustomer({ source: 'staysee', lastName: '鈴木', firstName: '一郎', email: 'ichiro@example.com', lineUserId: 'U-demo-ichiro', language: 'ja', tags: 'リピーター', checkInDate: addDays(1), checkOutDate: addDays(2), reservationId: 'ST-0999', stayCount: 5, unsubscribed: true, importFileName: 'sample_staysee.csv' })
   ];
@@ -1025,7 +1025,7 @@ function clearAll() {
 function downloadSampleCsv() {
   const csv = [
     'source,lastName,firstName,email,lineUserId,phone,language,tags,checkInDate,checkOutDate,reservationId,stayCount,unsubscribed',
-    'staysee,山田,花,hana@example.com,U-demo-hana,09000000001,ja,"猫好き,女性ひとり旅",2026-07-10,2026-07-11,ST-1001,2,',
+    'staysee,山田,花,hana@example.com,U-demo-hana,09000000001,ja,"アート好き,女性ひとり旅",2026-07-10,2026-07-11,ST-1001,2,',
     'neppan,佐藤,健,ken@example.com,U-demo-ken,09000000002,ja,"長湯好き,静かな部屋希望",2026-07-15,2026-07-16,NP-2001,1,',
     'staysee,鈴木,一郎,ichiro@example.com,U-demo-ichiro,09000000003,ja,"リピーター",2026-07-18,2026-07-19,ST-0999,5,配信停止'
   ].join('\n');
@@ -1149,7 +1149,7 @@ function load(key, fallback) {
   }
 }
 
-function fullName(customer) { return `${customer.lastName || ''} ${customer.firstName || ''}`.trim() || '赤沢温泉旅館ご利用者様'; }
+function fullName(customer) { return `${customer.lastName || ''} ${customer.firstName || ''}`.trim() || '那須ユートピア美野沢ご利用者様'; }
 function fmtDate(value) { return value ? new Date(value).toLocaleDateString('ja-JP') : '-'; }
 function labelScenario(key) {
   return ({ seasonal: '季節のお便り', special_plan: '特別プラン', re_engagement: 'ご無沙汰', custom: '自由入力' })[key] || key;
