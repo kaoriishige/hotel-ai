@@ -88,10 +88,17 @@ const adminDistPath = path.join(adminPath, 'dist');
 try {
   if (fs.existsSync(dpPath)) {
     // すでにdistが存在する場合は不要なnpm install/vite buildの二重実行をスキップして高速ビルド
+    const allFacilityFolders = [
+      'akasawa', 'akasawa-dp', 'nasu-utopia', 'nasu-utopia-ai',
+      'hakone-villa', 'atami-resort', 'karuizawa-lodge', 'kyoto-gion',
+      'furano-snow', 'iseshima-villa', 'yufuin-hanare', 'miyakojima-suite'
+    ];
+
     if (fs.existsSync(adminDistPath)) {
-      console.log('Using existing akasawa-dp build dist...');
-      copyFolderSync(adminDistPath, path.join(distDir, 'akasawa'));
-      copyFolderSync(adminDistPath, path.join(distDir, 'akasawa-dp'));
+      console.log('Deploying React Dashboard to all 10 facilities...');
+      allFacilityFolders.forEach(folder => {
+        copyFolderSync(adminDistPath, path.join(distDir, folder));
+      });
     } else {
       console.log('Building akasawa-dp via vite...');
       try {
@@ -100,13 +107,14 @@ try {
         console.warn('Warning when running vite build for akasawa-dp:', e.message);
       }
       if (fs.existsSync(adminDistPath)) {
-        copyFolderSync(adminDistPath, path.join(distDir, 'akasawa'));
-        copyFolderSync(adminDistPath, path.join(distDir, 'akasawa-dp'));
+        allFacilityFolders.forEach(folder => {
+          copyFolderSync(adminDistPath, path.join(distDir, folder));
+        });
       }
     }
 
-    // akasawa アセットパス調整
-    ['akasawa', 'akasawa-dp'].forEach(folder => {
+    // 全10施設のアセットパス絶対値補正
+    allFacilityFolders.forEach(folder => {
       const htmlFile = path.join(distDir, folder, 'index.html');
       if (fs.existsSync(htmlFile)) {
         let content = fs.readFileSync(htmlFile, 'utf8');
