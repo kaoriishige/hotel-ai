@@ -10,6 +10,53 @@
   node_bundler = "esbuild"
   external_node_modules = ["firebase-admin", "googleapis"]
 
+# 那須ユートピア美野沢 サブアプリ群 (200 OK パスフォワード)
+[[redirects]]
+  from = "/nasu-utopia-chat/*"
+  to = "/nasu-utopia-chat/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-ml/*"
+  to = "/nasu-utopia-ml/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-sns/*"
+  to = "/nasu-utopia-sns/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-review/*"
+  to = "/nasu-utopia-review/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-blog/*"
+  to = "/nasu-utopia-blog/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-ota/*"
+  to = "/nasu-utopia-ota/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-plan/*"
+  to = "/nasu-utopia-plan/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-video/*"
+  to = "/nasu-utopia-video/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia-dp/*"
+  to = "/nasu-utopia-dp/:splat"
+  status = 200
+
+# 各施設 ポータルダッシュボード ルーティング
 [[redirects]]
   from = "/akasawa"
   to = "/akasawa/index.html"
@@ -109,10 +156,3 @@
   from = "/miyakojima-suite/*"
   to = "/miyakojima-suite/index.html"
   status = 200
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-
