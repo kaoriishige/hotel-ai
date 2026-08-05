@@ -11,6 +11,27 @@
   external_node_modules = ["firebase-admin", "googleapis"]
 
 [[redirects]]
+  from = "/akasawa"
+  to = "/akasawa/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/akasawa/*"
+  to = "/akasawa/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia"
+  to = "/nasu-utopia/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/nasu-utopia/*"
+  to = "/nasu-utopia/index.html"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+

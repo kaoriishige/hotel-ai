@@ -104,6 +104,17 @@ try {
         copyFolderSync(adminDistPath, path.join(distDir, 'akasawa-dp'));
       }
     }
+
+    // akasawa アセットパス調整
+    ['akasawa', 'akasawa-dp'].forEach(folder => {
+      const htmlFile = path.join(distDir, folder, 'index.html');
+      if (fs.existsSync(htmlFile)) {
+        let content = fs.readFileSync(htmlFile, 'utf8');
+        content = content.replace(/src="\.\/assets\//g, `src="/${folder}/assets/`);
+        content = content.replace(/href="\.\/assets\//g, `href="/${folder}/assets/`);
+        fs.writeFileSync(htmlFile, content, 'utf8');
+      }
+    });
   }
 } catch (err) {
   console.warn('Warning when processing akasawa-dp (continuing build):', err.message);
