@@ -140,27 +140,26 @@ if (fs.existsSync(templatePath)) {
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
     }
 
-    // 2026 AI＆人間最適化 100点満点診断スコア置換 (施設ごとの現状実績値)
+    // 2026 媒体別 100点満点診断スコア置換 (公式HP 30点, Googleマップ 30点, SNS 20点, OTA 20点)
     const isNasu = item.folder.includes('nasu');
     const isAkasawa = item.folder.includes('akasawa');
     
-    // 5項目スコア算定（比較属性19, NAP整合20, AI構造化18, 口コミ返信19, 写真証拠19など）
-    const scoreAttr = isNasu ? 19 : (isAkasawa ? 18 : 17);
-    const scoreNap = isNasu ? 20 : 18;
-    const scoreAi = isNasu ? 18 : 16;
-    const scoreReview = isNasu ? 19 : 17;
-    const scorePhoto = isNasu ? 19 : 17;
-    const totalScore = scoreAttr + scoreNap + scoreAi + scoreReview + scorePhoto;
-    const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦基準達成)' : 'Aランク (AI推奨対象施設)';
+    // 媒体別スコア算定
+    const scoreHp = isNasu ? 28 : (isAkasawa ? 26 : 24);    // 公式HP (満点30点)
+    const scoreGbp = isNasu ? 27 : (isAkasawa ? 25 : 23);   // Googleマップ (満点30点)
+    const scoreSns = isNasu ? 18 : (isAkasawa ? 16 : 15);   // SNS (満点20点)
+    const scoreOta = isNasu ? 19 : (isAkasawa ? 18 : 17);   // OTA＆一致度 (満点20点)
+    
+    const totalScore = scoreHp + scoreGbp + scoreSns + scoreOta;
+    const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦 & 人間選択基準達成)' : 'Aランク (AI・人間推薦対象施設)';
 
     renderedHtml = renderedHtml
       .replace(/\{\{AI_SCORE\}\}/g, totalScore)
       .replace(/\{\{SCORE_RANK\}\}/g, scoreRank)
-      .replace(/\{\{SCORE_ATTR\}\}/g, scoreAttr)
-      .replace(/\{\{SCORE_NAP\}\}/g, scoreNap)
-      .replace(/\{\{SCORE_AI\}\}/g, scoreAi)
-      .replace(/\{\{SCORE_REVIEW\}\}/g, scoreReview)
-      .replace(/\{\{SCORE_PHOTO\}\}/g, scorePhoto);
+      .replace(/\{\{SCORE_HP\}\}/g, scoreHp)
+      .replace(/\{\{SCORE_GBP\}\}/g, scoreGbp)
+      .replace(/\{\{SCORE_SNS\}\}/g, scoreSns)
+      .replace(/\{\{SCORE_OTA\}\}/g, scoreOta);
 
     // 全10施設へ RAG管理エージェント (apps/akasawa-rag/public) を個別カスタマイズ配備
     const ragTargetDir = path.join(targetDir, 'rag');
