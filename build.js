@@ -145,15 +145,26 @@ if (fs.existsSync(templatePath)) {
     const isAkasawa = item.folder.includes('akasawa');
     
     // 本当の現況査定スコア（那須ユートピア美野沢の実態調査値：合計59点/Bランク）
-    const scoreA = isNasu ? 16 : (isAkasawa ? 17 : 14);   // A. プラン品質 (満点25点) ➔ プラン文言の7原則適用途上
-    const scoreB = isNasu ? 9  : (isAkasawa ? 10 : 8);    // B. 公式HP+構造化 (満点20点) ➔ Schema.org 4型未導入
-    const scoreC = isNasu ? 13 : (isAkasawa ? 14 : 12);   // C. GBP+Maps (満点20点) ➔ 写真網羅率・鮮度改善途上
-    const scoreD = isNasu ? 10 : (isAkasawa ? 11 : 9);    // D. OTA掲載品質 (満点15点) ➔ 表記一致・チャネル拡張余地
-    const scoreE = isNasu ? 6  : (isAkasawa ? 7  : 5);    // E. レビュー鮮度 (満点10点) ➔ 返信具体化・直近獲得増加
-    const scoreF = isNasu ? 3  : (isAkasawa ? 3  : 2);    // F. 第三者言及 (満点6点) ➔ 自治体/DMOリンク獲得要
-    const scoreG = isNasu ? 2  : (isAkasawa ? 2  : 1);    // G. 多言語表記 (満点4点) ➔ 英語/アジア言語ページ要拡充
+    const scoreA = isNasu ? 16 : (isAkasawa ? 17 : 14);   // A. プラン品質 (満点25点)
+    const scoreB = isNasu ? 9  : (isAkasawa ? 10 : 8);    // B. 公式HP+構造化 (満点20点)
+    const scoreC = isNasu ? 13 : (isAkasawa ? 14 : 12);   // C. GBP+Maps (満点20点)
+    const scoreD = isNasu ? 10 : (isAkasawa ? 11 : 9);    // D. OTA掲載品質 (満点15点)
+    const scoreE = isNasu ? 6  : (isAkasawa ? 7  : 5);    // E. レビュー鮮度 (満点10点)
+    const scoreF = isNasu ? 3  : (isAkasawa ? 3  : 2);    // F. 第三者言及 (満点6点)
+    const scoreG = isNasu ? 2  : (isAkasawa ? 2  : 1);    // G. 多言語表記 (満点4点)
+
+    // 修正による伸びしろ加点（満点 - 現状点数 = プラス何点アップするか）
+    const gainA = 25 - scoreA;
+    const gainB = 20 - scoreB;
+    const gainC = 20 - scoreC;
+    const gainD = 15 - scoreD;
+    const gainE = 10 - scoreE;
+    const gainF = 6 - scoreF;
+    const gainG = 4 - scoreG;
+    const gainFG = gainF + gainG;
     
     const totalScore = scoreA + scoreB + scoreC + scoreD + scoreE + scoreF + scoreG;
+    const gainTotal = 100 - totalScore;
     const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦達成)' : (totalScore >= 70 ? 'Aランク (優良AI最適化施設)' : 'Bランク (⚠️ 伸びしろ多数・実効改善対象施設)');
     const scoreFG = scoreF + scoreG;
 
@@ -167,7 +178,16 @@ if (fs.existsSync(templatePath)) {
       .replace(/\{\{SCORE_E\}\}/g, scoreE)
       .replace(/\{\{SCORE_F\}\}/g, scoreF)
       .replace(/\{\{SCORE_G\}\}/g, scoreG)
-      .replace(/\{\{SCORE_FG\}\}/g, scoreFG);
+      .replace(/\{\{SCORE_FG\}\}/g, scoreFG)
+      .replace(/\{\{GAIN_A\}\}/g, gainA)
+      .replace(/\{\{GAIN_B\}\}/g, gainB)
+      .replace(/\{\{GAIN_C\}\}/g, gainC)
+      .replace(/\{\{GAIN_D\}\}/g, gainD)
+      .replace(/\{\{GAIN_E\}\}/g, gainE)
+      .replace(/\{\{GAIN_F\}\}/g, gainF)
+      .replace(/\{\{GAIN_G\}\}/g, gainG)
+      .replace(/\{\{GAIN_FG\}\}/g, gainFG)
+      .replace(/\{\{GAIN_TOTAL\}\}/g, gainTotal);
 
     // 全10施設へ RAG管理エージェント (apps/akasawa-rag/public) を個別カスタマイズ配備
     const ragTargetDir = path.join(targetDir, 'rag');
