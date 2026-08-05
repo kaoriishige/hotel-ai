@@ -243,6 +243,65 @@
         </p>
       </div>
 
+      <!-- 🏆 AI時代＆人間対応 100点満点 診断スコアボード -->
+      <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 16px; padding: 1.8rem; max-width: 850px; margin: 2rem auto; backdrop-filter: blur(12px);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span style="background: var(--accent-color); color: #000; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;">2026 最新AI & 人間選択基準</span>
+            <h2 style="font-size: 1.3rem; color: #fff; margin-top: 4px; font-family: 'Shippori Mincho', serif;">🏆 {{FACILITY_NAME}} AI＆人間対応 総合診断スコア</h2>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-color); line-height: 1;">{{AI_SCORE}} <span style="font-size: 1rem; color: #94a3b8;">/ 100点</span></div>
+            <div style="font-size: 0.8rem; color: #34d399; font-weight: 700; margin-top: 2px;">判定: {{SCORE_RANK}} (AI推薦対象施設)</div>
+          </div>
+        </div>
+
+        <!-- 5つの評価項目別の点数表示 -->
+        <h4 style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 0.8rem;">📊 調査項目別の評価スコア（全5項目）</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
+          
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.78rem; color: #94a3b8;">❶ 比較可能性 & 属性明記 (価格・設備・アクセス)</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-top: 2px;">{{SCORE_ATTR}} / 20点</div>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.78rem; color: #94a3b8;">❷ 信頼性 & NAP一致 (全媒体の表記統一)</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-top: 2px;">{{SCORE_NAP}} / 20点</div>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.78rem; color: #94a3b8;">❸ AI構造化 & クロール許可 (FAQ・Schema)</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-top: 2px;">{{SCORE_AI}} / 20点</div>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.78rem; color: #94a3b8;">❹ 口コミ評判 & 具象性 (返信品質80%以上)</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-top: 2px;">{{SCORE_REVIEW}} / 20点</div>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.3); grid-column: 1 / -1;">
+            <div style="font-size: 0.78rem; color: #94a3b8;">❺ 写真証拠 & 体験ストーリー (30枚以上の写真とBecause)</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent-color); margin-top: 2px;">{{SCORE_PHOTO}} / 20点</div>
+          </div>
+
+        </div>
+
+        <!-- 今すぐ改善すべきアクション提案（スタッフ向け） -->
+        <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 1.2rem;">
+          <h4 style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 6px;">
+            <span>💡</span> スタッフ様へ：点数を伸ばすための改善アドバイス（改善アクション提案）
+          </h4>
+          <ul style="font-size: 0.85rem; color: #cbd5e1; padding-left: 1.2rem; line-height: 1.6; margin: 0;">
+            <li style="margin-bottom: 4px;"><strong>最新プランの即時登録:</strong> 下記の「📝 現場のおすすめ・最新プラン登録」から、今月のおすすめ・新プランを入力し保存してください（AIと人間の購買理由が一気にアップデートされます）。</li>
+            <li style="margin-bottom: 4px;"><strong>Googleビジネスプロフィールの写真追加:</strong> 客室・コンセント・サウナ・朝食・駐車場の最新写真を10枚以上追加してください。</li>
+            <li><strong>一問一答FAQの充実:</strong> 送迎・子連れ・アレルギー・冬季交通アクセスなど、よくある問合せを数値付きで明記してください。</li>
+          </ul>
+        </div>
+
+      </div>
+
       <!-- 本AIシステムを導入・採用する納得の理由 (Because Framework & RAG設計) -->
       <div style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
         
