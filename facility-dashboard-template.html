@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{FACILITY_NAME}} 統合AIシステムポータル</title>
-  <!-- Google Fonts: Cinzel & Noto Serif JP -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+JP:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #05120c; /* Deep modern wa-modern dark green */
-      --card-bg: rgba(13, 31, 23, 0.7);
+      --bg-dark: #0a1118;
+      --card-bg: rgba(16, 26, 38, 0.7);
+      --card-hover-bg: rgba(24, 38, 56, 0.85);
+      --accent-color: #d4af37;
+      --accent-gradient: linear-gradient(135deg, #f3e5ad 0%, #d4af37 50%, #aa820a 100%);
+      --text-main: #f5f7fa;
+      --text-sub: #94a3b8;
       --border-color: rgba(212, 175, 55, 0.25);
-      --accent-color: #d4af37; /* Gold */
-      --text-main: #f5f2eb;
-      --text-sub: #a4b3ab;
-      --success: #52c41a;
+      --border-hover: rgba(212, 175, 55, 0.6);
+      --shadow-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
 
     * {
@@ -26,183 +26,190 @@
     }
 
     body {
-      background-color: var(--bg-color);
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% -20%, #172a3a 0%, var(--bg-dark) 80%);
+      background-attachment: fixed;
       color: var(--text-main);
-      font-family: 'Noto Serif JP', serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow-x: hidden;
-      background-image: radial-gradient(circle at 50% -20%, #173625 0%, var(--bg-color) 75%);
+      line-height: 1.6;
+      padding-bottom: 4rem;
     }
 
     header {
+      padding: 2.5rem 1.5rem 1.5rem;
       text-align: center;
-      padding: 3.5rem 1rem 2rem;
       position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .back-nav {
       position: absolute;
       top: 1.5rem;
-      left: 2rem;
+      left: 1.5rem;
     }
 
     .back-link {
       color: var(--accent-color);
       text-decoration: none;
-      font-size: 0.9rem;
-      border: 1px solid var(--border-color);
-      padding: 6px 14px;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s;
     }
 
     .back-link:hover {
-      background: var(--accent-color);
-      color: #05120c;
+      opacity: 0.8;
     }
 
     .brand-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
-      letter-spacing: 0.35em;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
       color: var(--accent-color);
-      margin-bottom: 0.8rem;
       text-transform: uppercase;
+      margin-bottom: 0.4rem;
     }
 
     .main-title {
-      font-size: 2.4rem;
+      font-family: 'Shippori Mincho', serif;
+      font-size: 2.2rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      margin-bottom: 1.2rem;
-      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.05em;
     }
 
     .subtitle {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       color: var(--text-sub);
-      max-width: 800px;
+      max-width: 700px;
       margin: 0 auto;
-      line-height: 1.9;
-      font-weight: 300;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 2rem;
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 3.5rem;
+      padding: 0 1.5rem;
     }
 
-    /* Integration Benefits Section */
+    /* 方程式セクション */
     .benefit-section {
-      background: rgba(13, 31, 23, 0.4);
+      background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 2.5rem;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
       backdrop-filter: blur(12px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-glow);
     }
 
     .section-title {
-      font-size: 1.6rem;
-      font-weight: 600;
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.4rem;
       color: var(--accent-color);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.8rem;
-      border-bottom: 1px solid var(--border-color);
-      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .portal-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 2rem;
-      margin-top: 1rem;
+      gap: 1.5rem;
     }
 
     .card {
       background: var(--card-bg);
-      border: 1.5px solid var(--border-color);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 2rem;
-      text-decoration: none;
-      color: var(--text-main);
-      transition: all 0.35s ease;
+      padding: 1.8rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      text-decoration: none;
+      color: var(--text-main);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(10px);
     }
 
     .card:hover {
-      transform: translateY(-6px);
-      border-color: var(--accent-color);
-      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25);
+      background: var(--card-hover-bg);
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.15);
     }
 
     .card-icon {
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
     }
 
     .card-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin-bottom: 0.8rem;
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
       color: var(--text-main);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .card-desc {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--text-sub);
-      line-height: 1.7;
+      line-height: 1.6;
       margin-bottom: 1.2rem;
     }
 
     .card-benefit {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 1rem;
+      font-size: 0.82rem;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.2);
       border-radius: 8px;
-      border-left: 3px solid var(--accent-color);
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
+      padding: 0.7rem 0.9rem;
+      color: #e2e8f0;
+      margin-bottom: 1.2rem;
     }
 
     .card-action {
-      background: linear-gradient(135deg, #d4af37 0%, #aa8513 100%);
-      color: #05120c;
-      font-weight: bold;
-      text-align: center;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: auto;
+      transition: gap 0.2s;
     }
 
-    .card-action:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    .card:hover .card-action {
+      gap: 10px;
     }
 
     footer {
       text-align: center;
-      padding: 3rem 1rem;
+      padding: 3rem 1.5rem 1rem;
       color: var(--text-sub);
+      font-size: 0.8rem;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 0.85rem;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 1.7rem;
+      }
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -223,18 +230,18 @@
   <div class="container">
     <!-- 売上方程式 & ベネフィット -->
     <section class="benefit-section">
-      <h2 class="section-title" style="font-size: 1.7rem; text-align: center;">売上 = 宿泊客数 × 客単価（ADR） × リピート回数</h2>
+      <h2 class="section-title" style="font-size: 1.7rem; text-align: center;">売上向上モデル ＝ 宿泊客数 × 客単価（ADR） × リピート回数</h2>
       
       <div style="text-align: center; margin: 1.5rem 0 2rem;">
-        <p style="font-size: 1.25rem; font-weight: bold; color: var(--accent-color); margin-bottom: 0.8rem;">
-          売上2.197倍 ＝ 宿泊客数1.3倍 × 客単価1.3倍 × リピート1.3倍
+        <p style="font-size: 1.15rem; font-weight: bold; color: var(--accent-color); margin-bottom: 0.5rem;">
+          【売上向上モデル例】 宿泊客数 1.3倍 × 客単価 1.3倍 × リピート 1.3倍
         </p>
-        <p style="font-size: 1rem; color: var(--text-main); font-weight: 600;">
-          利益 = 顧客数 × 客単価 × リピート回数 × 利益率
+        <p style="font-size: 0.8rem; color: var(--text-sub);">
+          ※特定条件下の試算シミュレーションモデルです
         </p>
       </div>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; max-width: 850px; margin: 0 auto 2.5rem;">
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; max-width: 850px; margin: 0 auto 1rem;">
         <h3 style="color: var(--accent-color); margin-bottom: 1rem; text-align: center; font-size: 1.15rem;">{{FACILITY_NAME}} AIシステムによる改善方針</h3>
         <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; line-height: 1.6;">
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
@@ -276,10 +283,10 @@
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              フロント問合せ業務を自動化し、多言語（日・英・中・韓）対応で外国語ゲストの満足度も同時に向上させます。
+              フロント問合せ業務を自動化し、多言語（日・英・中・韓）対応で外国語ゲストの満足度向上を支援します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">デモを見る ➔</div>
         </a>
 
         <!-- 2. メール・LINE自動連携配信 -->
@@ -288,21 +295,21 @@
             <div class="card-icon">✉️</div>
             <h2 class="card-title">メール・LINE自動連携配信</h2>
             <p class="card-desc">
-              宿泊予約システムやCSVデータと連動し、宿泊前後のフォローシナリオ配信および、リピーター獲得や直近の空室を埋めるメッセージ配信を自動で行うシステム。
+              宿泊予約システムやCSVデータと連動し、宿泊前後のフォローシナリオ配信および、リピーター獲得メッセージ配信を自動で行うシステム。
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              宿泊客をファン化してリピート率を高めつつ、カレンダーと同期して平日の突発的な空室へターゲット限定クーポン等を自律的に届けて即座に埋めます。
+              宿泊客をファン化してリピート率を高めつつ、平日の突発的な空室に対して対象顧客へクーポン等を自動配信し、空室販売の初動を早めます。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">配信画面を見る ➔</div>
         </a>
 
-        <!-- 3. ① 支配人投稿管理（台本登録 ＆ 動画確認ダッシュボード） -->
+        <!-- 3. 支配人ショート動画投稿管理 -->
         <a href="/{{FACILITY_PATH}}/video/index.html" class="card" style="border-color: rgba(212, 175, 55, 0.55);">
           <div>
             <div class="card-icon">📲</div>
-            <h2 class="card-title">① 支配人投稿管理（台本登録・動画確認）</h2>
+            <h2 class="card-title">支配人ショート動画投稿管理</h2>
             <p class="card-desc">
               台本（メモ）の入力から、音声合成、Remotionによる縦型ショート動画の自動レンダリング、SNS（Instagram / X）への個別の日程予約・即時投稿までを一画面で完結。
             </p>
@@ -311,24 +318,24 @@
               台本を登録すると、画面下部へ即座に完成動画（MP4）が自動生成され、プレビュー確認、ダウンロード、チャネル別公開スケジュール設定が可能です。
             </div>
           </div>
-          <div class="card-action">統合ダッシュボードを開く ➔</div>
+          <div class="card-action">動画作成画面を見る ➔</div>
         </a>
 
-        <!-- 4. ② SNS投稿登録 -->
+        <!-- 4. SNS・GBP投稿自動作成 -->
         <a href="/{{FACILITY_PATH}}/sns/index.html" class="card">
           <div>
             <div class="card-icon">📷</div>
-            <h2 class="card-title">② {{FACILITY_NAME}} SNS投稿登録</h2>
+            <h2 class="card-title">SNS・GBP投稿自動作成</h2>
             <p class="card-desc">
               {{FACILITY_NAME}} の全データを搭載した公式SNS・GBP投稿システム。<br>
               写真や動画をアップロードするだけで、宿の魅力を引き出す最適な下書き投稿を自動生成します。
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              集客の露出不足をAIが自律的に検知・カバーし、宿の魅力を絶え間なくネット上に広め続けます。
+              宿の魅力を継続的に自動発信し、SNSやGoogleビジネスプロフィールでの露出機会の拡大を支援します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">投稿作成画面を見る ➔</div>
         </a>
 
         <!-- 5. ダイナミックプライシング統合監視ダッシュボード -->
@@ -341,10 +348,10 @@
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              客室平均単価（ADR）と客室稼働率（OCC）の掛け合わせである RevPAR を最大化するため、需要予測に基づく最適な販売価格と販促プランの意思決定をAIが支援します。
+              客室平均単価（ADR）と客室稼働率（OCC）の掛け合わせである RevPAR を向上させるため、需要予測に基づく最適な販売価格と販促プランの意思決定をAIが支援します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">監視ダッシュボードを開く ➔</div>
         </a>
 
         <!-- 6. クチコミ返信エージェント -->
@@ -360,7 +367,7 @@
               宿泊客への感謝やフィードバックに対して、誠実かつパーソナライズされた返答を作成し、宿のファン化とGBPの評価向上を促進します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">返信作成画面を見る ➔</div>
         </a>
 
         <!-- 7. 公式ブログ自動生成システム -->
@@ -373,10 +380,10 @@
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              リアルな宿泊体験と宿の哲学を融合した独自コンテンツを自律生産し、Google検索やChatGPT等のAI検索エンジンでの宿の露出とインデックスを最大化します。
+              リアルな宿泊体験と宿の哲学を融合した独自コンテンツを自律生産し、Google検索やChatGPT等のAI検索エンジンでの宿の露出とインデックス向上を支援します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">ブログ生成画面を見る ➔</div>
         </a>
 
         <!-- 8. AI OTA最適化エンジン -->
@@ -389,10 +396,10 @@
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              媒体ごとの主要客層やキャンペーン特性に合わせた露出（SEO）と、無駄のないクーポン割引設計により、宿の利益率を守りながら販売（CVR）を最大化します。
+              媒体ごとの主要客層やキャンペーン特性に合わせた露出（SEO）と、無駄のないクーポン割引設計により、宿の利益率を守りながら販売転換（CVR）の向上を目指します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">分析画面を見る ➔</div>
         </a>
 
         <!-- 9. 宿泊プラン作成エージェント -->
@@ -405,19 +412,19 @@
             </p>
             <div class="card-benefit">
               <strong>ベネフィット:</strong><br>
-              AIがスキャンしやすい仕込みタグを網羅したタイトルと、人間の心を揺さぶるストーリー仕立ての詳細文を生成し、露出と予約転換率（CVR）の双方を劇的に高めます。
+              AIがスキャンしやすい仕込みタグを網羅したタイトルと、人間の心を揺さぶるストーリー仕立ての詳細文を生成し、AI検索の露出と予約転換率（CVR）の双方の向上を支援します。
             </div>
           </div>
-          <div class="card-action">システムを起動する ➔</div>
+          <div class="card-action">プランを作成する ➔</div>
         </a>
 
       </div>
     </main>
 
+    <footer>
+      <p>&copy; Integrated Hotel AI System Portal. All Rights Reserved.</p>
+    </footer>
   </div>
 
-  <footer>
-    <p>&copy; 2026 {{FACILITY_NAME}} 統合AIシステムポータル. All rights reserved.</p>
-  </footer>
 </body>
 </html>
