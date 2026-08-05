@@ -111,7 +111,9 @@ if (fs.existsSync(templatePath)) {
     const targetDir = path.join(distDir, item.folder);
     fs.mkdirSync(targetDir, { recursive: true });
     
-    let renderedHtml = templateHtml.replace(/\{\{FACILITY_NAME\}\}/g, item.name);
+    let renderedHtml = templateHtml
+      .replace(/\{\{FACILITY_NAME\}\}/g, item.name)
+      .replace(/\{\{FACILITY_PATH\}\}/g, item.folder);
 
     // 那須ユートピア美野沢専用のRAG・9システム文言の完全カスタマイズ
     if (item.folder.includes('nasu')) {
@@ -127,6 +129,47 @@ if (fs.existsSync(templatePath)) {
     fs.writeFileSync(path.join(targetDir, 'index.html'), renderedHtml, 'utf8');
   });
 }
+
+// 6.5. 那須ユートピア美野沢 専用 9アプリアプリの自動複製・完全テキスト＆RAG置換
+console.log('Generating Nasu Utopia dedicated AI sub-apps...');
+
+const appReplacements = [
+  { prefix: 'nasu-utopia-chat', src: path.join(__dirname, 'apps', 'akasawa-chat') },
+  { prefix: 'nasu-utopia-ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
+  { prefix: 'nasu-utopia-sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
+  { prefix: 'nasu-utopia-review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
+  { prefix: 'nasu-utopia-blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
+  { prefix: 'nasu-utopia-ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
+  { prefix: 'nasu-utopia-plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
+  { prefix: 'nasu-utopia-video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') }
+];
+
+appReplacements.forEach(app => {
+  const destDir = path.join(distDir, app.prefix);
+  copyFolderSync(app.src, destDir);
+
+  // コピーされたテキストファイル・HTML・JSの「赤沢温泉旅館」を「那須ユートピア美野沢」へ置換
+  const replaceInDir = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    fs.readdirSync(dir).forEach(file => {
+      const fullPath = path.join(dir, file);
+      if (fs.lstatSync(fullPath).isDirectory()) {
+        if (file !== 'node_modules' && file !== '.git') replaceInDir(fullPath);
+      } else if (file.endsWith('.html') || file.endsWith('.js') || file.endsWith('.json') || file.endsWith('.css')) {
+        let content = fs.readFileSync(fullPath, 'utf8');
+        content = content.replace(/赤沢温泉旅館/g, '那須ユートピア美野沢');
+        content = content.replace(/Akasawa Onsen Ryokan/g, 'Nasu Utopia Minosawa');
+        content = content.replace(/Akasawa/g, 'Nasu Utopia');
+        content = content.replace(/akazawa-onsen/g, 'nasu-utopia');
+        content = content.replace(/猫とぬる湯と渓流にほどける/g, '「ととのう」の、その先へ。アート×サウナ×大自然');
+        fs.writeFileSync(fullPath, content, 'utf8');
+      }
+    });
+  };
+
+  replaceInDir(destDir);
+});
+
 
 
 // 7. Netlify Functions のマージ
