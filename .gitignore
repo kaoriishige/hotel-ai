@@ -6,6 +6,9 @@ key.txt
 .DS_Store
 dist/
 !apps/akasawa-dp/apps/admin/dist/
+!apps/akasawa-dp/apps/admin/dist/**
+!dist/nasu-utopia/dp/
+!dist/nasu-utopia/dp/**
 build/
 powershell.cmd
 powershell.bat
