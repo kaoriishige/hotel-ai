@@ -579,6 +579,55 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
   });
 }
 
+// 6.4. 赤沢温泉旅館 Dedicated AI sub-apps (ml, video, sns, review, blog, ota, plan, dp, rag, chat) の完全デプロイ
+console.log('Deploying Akasawa Ryokan dedicated AI sub-apps to dist/akasawa...');
+
+const akasawaAppReplacements = [
+  { subpath: 'chat', src: path.join(__dirname, 'apps', 'akasawa-chat') },
+  { subpath: 'ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
+  { subpath: 'sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
+  { subpath: 'review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
+  { subpath: 'blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
+  { subpath: 'ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
+  { subpath: 'plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
+  { subpath: 'video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
+  { subpath: 'dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') },
+  { subpath: 'rag', src: path.join(__dirname, 'apps', 'akasawa-rag', 'public') }
+];
+
+akasawaAppReplacements.forEach(app => {
+  const destDir = path.join(distDir, 'akasawa', app.subpath);
+  if (fs.existsSync(app.src)) {
+    copyFolderSync(app.src, destDir);
+  }
+
+  // 赤沢温泉旅館用にテキストを完全補正
+  const replaceInAkasawaDir = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    fs.readdirSync(dir).forEach(file => {
+      const fullPath = path.join(dir, file);
+      if (fs.lstatSync(fullPath).isDirectory()) {
+        if (file !== 'node_modules' && file !== '.git') replaceInAkasawaDir(fullPath);
+      } else if (/\.(html|js|json|md|css|txt|ts|tsx)$/.test(file)) {
+        let content = fs.readFileSync(fullPath, 'utf8');
+        content = content
+          .replace(/那須ユートピア美野沢 支配人 個人SNS自動配信システム/g, '塩原温泉 赤沢温泉旅館 館主遠藤 動画＆SNS自動配信システム')
+          .replace(/那須ユートピア美野沢 支配人/g, '塩原温泉 赤沢温泉旅館 館主遠藤')
+          .replace(/那須ユートピア美野沢/g, '塩原温泉 赤沢温泉旅館')
+          .replace(/那須ユートピア/g, '塩原温泉 赤沢温泉旅館')
+          .replace(/「ととのう」の、その先へ (CUBERUサウナ \/ 薪サウナRekka \/ 那須水風呂)/g, '温泉とぬる湯と渓流にほどける (加温加水なし38〜40℃天然ぬる湯)')
+          .replace(/廃校をアートとサウナで再生した理由 (旧美野沢小学校リノベーション)/g, '看板猫と箒川のせせらぎに癒やされる理由 (塩原一軒宿)')
+          .replace(/那須特選牛と星空の手ぶらBBQ (手ぶら本格BBQ \/ 焚き火)/g, '名物 赤沢風 鹿×豚ジンギスカン鍋 (地物山菜・川魚)')
+          .replace(/愛犬と過ごすドッグランヴィラ (プライベート天然芝ドッグラン)/g, '箒川を望む静養和室 (天然ぬる湯長湯)')
+          .replace(/「ととのう」の、その先へ。廃校アートリノベーション＆サウナリゾート SNS・ショート動画配信/g, '加温加水なし38〜40℃天然ぬる湯＆看板猫の静養宿 SNS・ショート動画配信')
+          .replace(/廃校アートリノベーション＆サウナリゾート/g, '自家源泉かけ流し天然ぬる湯＆看板猫の静養宿');
+        fs.writeFileSync(fullPath, content, 'utf8');
+      }
+    });
+  };
+  replaceInAkasawaDir(destDir);
+});
+
 // 6.5. 那須ユートピア美野沢 専用 9アプリアプリの自動複製・完全テキスト＆RAG置換
 console.log('Generating Nasu Utopia dedicated AI sub-apps with deep fine-grained text replacements...');
 
