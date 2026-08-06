@@ -400,121 +400,35 @@
       "floorSize": { "@type": "QuantitativeValue", "value": 85, "unitCode": "MTK" }
     },
     {
-      "@type": "Offer",
-      "@id": "https://nasu-utopia.jp/#offer-sauna-party",
-      "name": "【新登場】サウナパーティプラン(7時間完全貸切・飲み放題付き)",
-      "priceCurrency": "JPY",
-      "price": "88000",
-      "priceSpecification": { "@type": "PriceSpecification", "priceCurrency": "JPY", "price": "88000", "valueAddedTaxIncluded": true },
-      "availability": "https://schema.org/InStock"
-    },
-    {
-      "@type": "FAQPage",
-      "@id": "https://nasu-utopia.jp/#faq",
-      "mainEntity": [
-        { "@type": "Question", "name": "貸切バレルサウナ CUBERU の利用時間は?", "acceptedAnswer": { "@type": "Answer", "text": "90分完全貸切制。15:00〜22:00 / 7:00〜10:00。" } },
-        { "@type": "Question", "name": "水風呂 REKKA の水温と水質は?", "acceptedAnswer": { "@type": "Answer", "text": "那須連山伏流水かけ流し、15℃(±1℃)。" } },
-        { "@type": "Question", "name": "ペット同伴の条件は?", "acceptedAnswer": { "@type": "Answer", "text": "小型〜中型犬(25kg未満)最大4頭。ワクチン証明書必須。150㎡専用ドッグラン付きヴィラA。" } },
-        { "@type": "Question", "name": "駐車場はありますか?", "acceptedAnswer": { "@type": "Answer", "text": "無料駐車場30台完備、高さ制限2.1m、予約不要。EV充電200V 2口あり。" } },
-        { "@type": "Question", "name": "キャンセル規定は?", "acceptedAnswer": { "@type": "Answer", "text": "7日前無料、3〜6日前30%、前日50%、当日100%。" } },
-        { "@type": "Question", "name": "最寄り駅・ICからのアクセスは?", "acceptedAnswer": { "@type": "Answer", "text": "那須ICより車35分、那須塩原駅より車30分、黒磯駅より車25分。" } },
-        { "@type": "Question", "name": "乳幼児の受け入れは?", "acceptedAnswer": { "@type": "Answer", "text": "ベビーベッド2台・ベビーチェア無料貸出。" } },
-        { "@type": "Question", "name": "BBQ食材は持ち込みできますか?", "acceptedAnswer": { "@type": "Answer", "text": "持ち込み無料。那須牛BBQセットのオプションあり。" } },
-        { "@type": "Question", "name": "タトゥーOK?", "acceptedAnswer": { "@type": "Answer", "text": "完全貸切のため制限なし。" } },
-        { "@type": "Question", "name": "Wi-Fi・電源は?", "acceptedAnswer": { "@type": "Answer", "text": "館内無料Wi-Fi(最大200Mbps)。客室USB-C×2/コンセント×6。" } }
-      ]
-    }
-  ]
-}
-&lt;/script&gt;</pre>
-
-                  <strong style="color:#34d399; margin-top:8px; display:block;">【サーバールートに配置する `/robots.txt` (AIクローラー完全許可版)】:</strong>
-                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;">User-agent: *
-Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-Sitemap: https://nasu-utopia.jp/sitemap.xml</pre>
-
-                  <strong style="color:#34d399; margin-top:8px; display:block;">【サーバールートに配置する `/llms.txt` (AIナレッジ完全要約版)】:</strong>
-                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;"># NASU UTOPIA MINOSAWA
-> 旧美野沢小学校を再生したアートリノベーション・プライベートヴィラ。
-
-## 客室
-- ヴィラ A(50㎡ / 定員 6): 専用ドッグラン 150㎡、専用露天風呂
-- ヴィラ B(85㎡ / 定員 8): CUBERU バレルサウナ、REKKA 水風呂 15℃
-
-## 主要設備
-- CUBERU(90分貸切サウナ) / REKKA(15℃水風呂) / 無料駐車場 30台 / Wi-Fi 200Mbps
-
-## キャンセル規定
-- 7日前無料、3〜6日前 30%、前日 50%、当日 100%</pre>
+                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb担当が実行すべき【{{FACILITY_NAME}} 公式HP ＆ 構造化データ仕様書】を開く</summary>
+                <div id="spec-content-b" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  {{SPEC_B}}
                 </div>
               </details>
             </div>
 
-            <!-- 3. GBP写真修正 & ログイン連携 (全12原則・アコーディオン仕様書) -->
+            <!-- 3. GBP写真修正 & ログイン連携 -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #60a5fa;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                 <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800;">修正場所: 📍 「Googleビジネスプロフィール」管理画面</div>
                 <button onclick="connectGbpAccount()" style="background:rgba(96,165,250,0.2); border:1px solid #60a5fa; color:#60a5fa; font-size:0.7rem; padding:2px 8px; border-radius:12px; cursor:pointer; font-weight:bold;">🔑 スタッフ用 Googleログイン連携</button>
               </div>
-              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">C. GBP・Googleマップ運用（現状{{SCORE_C}}点 ➔ <span style="color:#34d399;">+{{GAIN_C}}点改善で 20点満点</span>）</strong>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">C. GBP・Googleマップ運用（現状<span id="score-val-c">{{SCORE_C}}</span>点 ➔ <span style="color:#34d399;">+<span id="score-gain-c">{{GAIN_C}}</span>点改善で 20点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(96,165,250,0.3);">
-                <summary style="cursor: pointer; color: #60a5fa; font-weight: bold; font-size: 0.82rem;">▶︎ クリックで現場・MEO担当が実行すべき【Googleマップ運用 全12原則仕様書】を開く</summary>
-                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #60a5fa; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【GBP・Googleマップ AI＆MEO最適化 運用仕様書 (全12原則)】:</strong><br>
-                  1. <strong>NAP（施設名・住所・電話番号）の完全一致</strong>: 公式HP・全OTAと <code>那須ユートピア美野沢</code> / <code>栃木県那須郡那須町箕輪318</code> と1字一句統一。<br>
-                  2. <strong>Google Hotel Center (無料リスティング) 直販予約連携</strong>: 公式HPの直販予約システムと連携し、マップ上に自社直販価格を表示。<br>
-                  3. <strong>カテゴリ別 高画質写真30枚以上の投稿</strong>:<br>
-                  &nbsp;&nbsp;・客室・ヴィラ内部（5枚）: グランピングヴィラ全景、ベッド、専用テラス、コンセント周り<br>
-                  &nbsp;&nbsp;・サウナ・整いスペース（8枚）: バレルサウナCUBERU外観・内部、薪サウナRekka、水風呂15℃、外気浴チェアー<br>
-                  &nbsp;&nbsp;・ドッグラン・愛犬設備（5枚）: 150㎡専用ドッグラン全景、足洗い場、愛犬アメニティ<br>
-                  &nbsp;&nbsp;・食事・BBQ（5枚）: 那須特製手ぶらBBQ肉セット、グリル機、朝食バゲット<br>
-                  &nbsp;&nbsp;・外観・アクセス（7枚）: 旧美野沢小学校校舎・アート作品、無料駐車場30台、看板<br>
-                  4. <strong>属性・アメニティチェック（全40項目以上）</strong>: 無料Wi-Fi、無料駐車場30台、ペット同伴可、サウナあり、完全禁煙、車椅子対応等を全チェック。<br>
-                  5. <strong>「ビジネス情報（750文字説明文）」のAI最適化</strong>: 冒頭に「旧美野沢小学校アートリノベーション」「貸切バレルサウナCUBERU」「150㎡専用ドッグラン」等のキーワードを網羅。<br>
-                  6. <strong>「最新情報（投稿機能）」の週1回定期更新</strong>: 「今週のサウナ水温（15℃）」「季節の手ぶらBBQメニュー」などの新着情報を週1投稿。<br>
-                  7. <strong>一問一答 Q&A（事前回答）10問登録</strong>: 「愛犬の同伴条件は？」「サウナの利用時間は？」等のQ&Aをオーナーアカウントから事前登録。<br>
-                  8. <strong>口コミ獲得施策（QRコード＆自動フォローメール）</strong>: チェックアウト時のQRコード提示で月5件以上の新規口コミを獲得。<br>
-                  9. <strong>口コミ個別具体返信 100%徹底</strong>: 定型文を廃止し、「〇月〇日に水風呂の自動冷却装置を導入しました」等の具体改善返信。<br>
-                  10. <strong>特別営業時間・祝日営業日の正確な設定</strong>: GW・お盆・年末年始の営業時間を事前設定し、不一致ペナルティを防止。<br>
-                  11. <strong>ウェブサイトURLへのUTMパラメータ付与</strong>: <code>?utm_source=google&utm_medium=gbp</code> を付与しアクセス解析を正確化。<br>
-                  12. <strong>月次インサイト分析と検索クエリ最適化</strong>: 「那須 サウナ 宿」「那須 犬と泊まれる ヴィラ」等のローカル検索ワードの確認と最適化。
+                <summary style="cursor: pointer; color: #60a5fa; font-weight: bold; font-size: 0.82rem;">▶︎ クリックで現場・MEO担当が実行すべき【{{FACILITY_NAME}} Googleマップ運用 全12原則仕様書】を開く</summary>
+                <div id="spec-content-c" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  {{SPEC_C}}
                 </div>
               </details>
             </div>
 
-            <!-- 4. OTA表記修正 (全10原則・OTA担当用アコーディオン仕様書・実地調査完全適応版) -->
+            <!-- 4. OTA表記修正 -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #f43f5e;">
               <div style="font-size: 0.75rem; color: #f43f5e; font-weight: 800;">修正場所: 📱 「楽天トラベル / じゃらん / Booking / 一休 / Agoda」管理画面</div>
-              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">D. OTA掲載品質・売上極大化（現状{{SCORE_D}}点 ➔ <span style="color:#34d399;">+{{GAIN_D}}点改善で 15点満点</span>）</strong>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">D. OTA掲載品質・売上極大化（現状<span id="score-val-d">{{SCORE_D}}</span>点 ➔ <span style="color:#34d399;">+<span id="score-gain-d">{{GAIN_D}}</span>点改善で 15点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(244,63,94,0.3);">
-                <summary style="cursor: pointer; color: #f43f5e; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでOTA担当が実行すべき【OTA掲載品質・実地完全適応 全10原則仕様書 ＆ 入力チェックシート】を開く</summary>
-                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #f43f5e; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【OTA担当が実行すべき OTA掲載品質・売上極大化 仕様書 (全10原則)】:</strong><br>
-                  1. <strong>全媒体間NAP 1字一部ブレの完全統一（★最優先）</strong>: 全OTAで <code>那須ユートピア美野沢</code>（じゃらん: <code>【全室サウナ付き】那須ユートピア｜貸切サウナの宿</code>） / <code>〒329-3437 栃木県那須郡那須町蓑沢563-4</code>（TEL: 0287-73-5333）と完全統一（※誤値『箕輪318』を全廃）。<br>
-                  2. <strong>プランタイトルのAI＆人間最適化（冒頭30文字ルール）</strong>: タイトル先頭に <code>【愛犬同伴OK×貸切サウナ】</code> <code>【整い重視×手ぶらBBQ】</code> 等のペルソナタグを必須配置し、55〜60文字に圧縮。<br>
-                  3. <strong>全サイト写真100枚以上登録 ＆ タグ分類徹底（★現状約12枚からの引き上げ）</strong>: 各OTAのギャラリーに客室・全7室（ツイン5/その他2）、サウナCUBERU/REKKA、15℃水風呂、150㎡ドッグラン、手ぶらBBQ等の写真をタグ付きで100枚以上アップロード。<br>
-                  4. <strong>客室タイプスペックの具体数値表記（全7室構成の整合）</strong>: 「全7室（ツイン5室/その他2室）」「ヴィラA 50㎡ / 専用ドッグラン150㎡」「定員1〜6名」等の具体ファクトを客室説明文へ明記。<br>
-                  5. <strong>管理画面アメニティチェック項目の全埋め（実地補完）</strong>: 楽天・じゃらんの「ペット可」「サウナ（120分交代制）」「無料駐車場40台（※30台ではなく実値40台に更新）」「全室Wi-Fi」「無料送迎あり（那須塩原駅14:30発）」を全チェック。<br>
-                  6. <strong>サイトコントローラー（TL-リンカーン / ねっぱん等）による在庫・料金100%同期</strong>: 全媒体での在庫売り漏れ・オーバーブックゼロ化。<br>
-                  7. <strong>キャンセル規定 ＆ チェックイン時刻の全媒体完全同期</strong>: <code>当日 100% / 1日前 80% / 2日前 60% / 3〜7日前 30%</code> / <code>15:00イン / 10:00アウト</code>（※全OTA・予約エンジン間で完全一致）。<br>
-                  8. <strong>OTA独自プロモーション・参画企画の最適活用</strong>: 楽天スーパーSALE、じゃらんクーポンフェス等の販促イベントへの常時エントリー。<br>
-                  9. <strong>口コミ件数・獲得施策 ＆ 個別具体返信100%徹底</strong>: じゃらん等のレビュー件数閾値到達に向け、チェックアウト時QR提示で月30件以上の新規口コミを獲得し、個別具体返信。<br>
-                  10. <strong>インバウンドOTA (Booking.com / Agoda / Trip.com) の多言語・現地通貨対応</strong>: 英語・中国語・韓国語のプラン説明文およびスペック表記の完全最適化。
                 </div>
               </details>
             </div>
