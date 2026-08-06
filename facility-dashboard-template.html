@@ -355,31 +355,57 @@ A3. 敷地内に30台分の無料駐車場を備えています（予約不要�
               </details>
             </div>
 
-            <!-- 2. 公式HP ＆ 構造化データ修正 (アコーディオン詳細展開) -->
+            <!-- 2. 公式HP ＆ 構造化データ修正 (全16原則・Web制作会社様用アコーディオン仕様書) -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #34d399;">
-              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800;">修正場所: 🌐 「公式HP `<head>` コード」＆ 「サーバー直下」</div>
-              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 構造化データ（現状{{SCORE_B}}点 ➔ <span style="color:#34d399;">+{{GAIN_B}}点改善で 20点満点</span>）</strong>
+              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800;">修正場所: 🌐 「公式HP `<head>` コード」「サーバールート」＆「HTML全ページ」</div>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 全体Web品質（現状{{SCORE_B}}点 ➔ <span style="color:#34d399;">+{{GAIN_B}}点改善で 20点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(52,211,153,0.3);">
-                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb制作業者様へ渡す全5項目＆Schema.orgコード例を開く</summary>
+                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb制作会社様・DX担当へ渡す【公式HP改修 全16原則仕様書＆全コード例】を開く</summary>
                 <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  <strong style="color:#fff;">【Web制作会社様・DX担当へ渡す本物改修チェックリスト】:</strong><br>
-                  1. <strong>Schema.org 4型 (JSON-LD) 埋め込み</strong>: HTMLの `<head>` 内に Hotel, HotelRoom, Offer, FAQPage を埋め込み。<br>
-                  2. <strong>Rich Results Test 0エラー化</strong>: `priceCurrency: "JPY"`, `availability: "InStock"` を記述。<br>
-                  3. <strong>amenityFeature (アメニティ構造化)</strong>: CUBERUサウナ, 150㎡ドッグラン, 駐車場30台をコード化。<br>
-                  4. <strong>`llms.txt` / `robots.txt` 設置</strong>: ルートに `llms.txt` を置き、`GPTBot` の `Allow: /` を指定。<br>
-                  5. <strong>生テキスト化</strong>: チラシ画像の埋め込みを全廃し、HTMLテキストで記述。<br>
+                  <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【Web制作会社様・DX担当へ渡す 本物HP改修仕様書 (全16原則)】:</strong><br>
+                  1. <strong>Schema.org 4型 (JSON-LD) 完全埋め込み</strong>: HTMLの <code>&lt;head&gt;</code> 内に Hotel, HotelRoom, Offer, FAQPage を埋め込み。<br>
+                  2. <strong>Rich Results Test 0エラー化</strong>: <code>priceCurrency: "JPY"</code>, <code>availability: "InStock"</code>, 税・サービス料を明記。<br>
+                  3. <strong>amenityFeature (アメニティ構造化) 10項目</strong>: CUBERU/Rekkaサウナ, 150㎡ドッグラン, 水風呂15℃, 駐車場30台, Wi-Fi等をコード化。<br>
+                  4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> に <code>GPTBot</code>, <code>PerplexityBot</code>, <code>ClaudeBot</code> 許可 ＆ ルートに <code>/llms.txt</code> / <code>/llms-full.txt</code> を配置。<br>
+                  5. <strong>画像バナー依存の完全廃止（生テキスト化）</strong>: プラン内容・料金・注意事項を画像埋め込みせず、全て <code>&lt;h1&gt;~&lt;h3&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;table&gt;</code> の生テキストで記述。<br>
+                  6. <strong>OGP ＆ MetaタグのAI最適化</strong>: <code>&lt;title&gt;</code>, <code>&lt;meta name="description"&gt;</code>, <code>og:image</code> にRAG数値ファクトと購買理由タグを含める。<br>
+                  7. <strong>Semantic HTML5（セマンティック構造）</strong>: <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;footer&gt;</code> でAIクローラー解析精度を向上。<br>
+                  8. <strong>一問一答 FAQ アコーディオン 10問実装</strong>: HTML <code>&lt;details&gt;&lt;summary&gt;</code> ＋ Schema.org FAQPage の二重実装。<br>
+                  9. <strong>Core Web Vitals ＆ モバイル高速化</strong>: 次世代画像 (WebP/AVIF) 化、<code>loading="lazy"</code>, PageSpeed 90点以上を達成。<br>
+                  10. <strong>アクセス・交通手段の具体数値表記</strong>: 「那須塩原駅から車20分 / 無料駐車場30台」等、AIが数値認識できる形式でテキスト明記。<br>
+                  11. <strong>客室・グランピングヴィラの具体スペック表記</strong>: 「広さ50㎡」「専用ドッグラン150㎡」「ベッド4台」等のスペック化。<br>
+                  12. <strong>キャンセルポリシー ＆ 規約の明記</strong>: 「3日前30%/前日50%/当日100%」をHTMLテーブルで明記。<br>
+                  13. <strong>DMO・自治体（那須町観光協会）相互リンク（被リンク）</strong>: フッターまたはアクセス欄に相互リンクバナー設置。<br>
+                  14. <strong>多言語（英語・簡体字・繁体字・韓国語）独立ディレクトリ</strong>: <code>/en/</code>, <code>/zh/</code>, <code>/ko/</code> の設置と <code>hreflang</code> タグ実装。<br>
+                  15. <strong>SSL (HTTPS) ＆ セキュリティヘッダー完備</strong>: HSTS, CSP, X-Frame-Options などの信頼性シグナル設置。<br>
+                  16. <strong>直販最安値保証 (Best Rate Guarantee) 表記</strong>: Direct Booking リンクとOTA価格比較表の明記。<br><br>
+
+                  <strong style="color:#34d399;">【コピペ用 Schema.org 4型 構造化データコード例】:</strong>
                   <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">&lt;script type="application/ld+json"&gt;
 {
   "@context": "https://schema.org",
-  "@type": "Hotel",
-  "name": "那須ユートピア美野沢",
-  "description": "旧美野沢小学校アートリノベーション。貸切バレルサウナCUBERUと150㎡ドッグランヴィラ",
-  "address": { "@type": "PostalAddress", "addressRegion": "栃木県", "addressLocality": "那須郡那須町", "streetAddress": "箕輪318" },
-  "geo": { "@type": "GeoCoordinates", "latitude": 36.9928, "longitude": 140.0381 },
-  "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "完全貸切バレルサウナ (CUBERU/Rekka)", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "150㎡専用ドッグラン付きヴィラ", "value": true }
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "name": "那須ユートピア美野沢",
+      "description": "旧美野沢小学校アートリノベーション。貸切バレルサウナCUBERUと150㎡ドッグランヴィラ",
+      "address": { "@type": "PostalAddress", "addressRegion": "栃木県", "addressLocality": "那須郡那須町", "streetAddress": "箕輪318" },
+      "geo": { "@type": "GeoCoordinates", "latitude": 36.9928, "longitude": 140.0381 },
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "完全貸切バレルサウナ (CUBERU/Rekka)", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "150㎡専用ドッグラン付きヴィラ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場30台完備", "value": true }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "貸切バレルサウナの利用時間は？",
+        "acceptedAnswer": { "@type": "Answer", "text": "90分完全貸切制です（15:00〜22:00 / 7:00〜10:00）。" }
+      }]
+    }
   ]
 }
 &lt;/script&gt;</pre>
