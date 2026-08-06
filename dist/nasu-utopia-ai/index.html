@@ -424,28 +424,39 @@
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 1rem; font-size: 0.83rem; color: #e2e8f0; line-height: 1.5;">
             
-            <!-- 1. プラン修正 (アコーディオン詳細展開) -->
+            <!-- 1. プラン修正 (宿泊プラン作成エージェント全自動連動) -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid var(--accent-color);">
-              <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 800;">修正場所: 🏨 「宿泊プラン作成エージェント」画面</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 800;">修正場所: 🏨 「宿泊プラン作成エージェント」画面</div>
+                <a href="/nasu-utopia/plan/index.html" style="background: var(--accent-gradient); border: none; color: #000; font-size: 0.75rem; font-weight: 900; padding: 4px 12px; border-radius: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(212,175,55,0.4);">
+                  🤖 AIで1ボタン全自動生成・作成する ➔
+                </a>
+              </div>
               <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">A. 宿泊プラン品質（現状16点 ➔ <span style="color:#34d399;">+9点改善で 25点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);">
-                <summary style="cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 0.82rem;">▶︎ クリックで具体的な修正項目・那須ユートピアRAG例文・FAQコードを開く</summary>
+                <summary style="cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 0.82rem;">▶︎ クリックでAI作成エージェントが適用する【那須ユートピア固有 RAG 10原則仕様書】を開く</summary>
                 <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  <strong style="color:#fff;">【那須ユートピア美野沢 固有の修正7原則チェックリスト】:</strong><br>
-                  1. <strong>タイトル冒頭タグ</strong>: <code>【愛犬同伴×貸切サウナ】</code> <code>【整い重視×手ぶらBBQ】</code> を先頭に付ける。<br>
-                  2. <strong>タイトル本格例</strong>: <code>【愛犬同伴×貸切サウナ】旧美野沢小学校リノベーションヴィラで過ごす、150㎡専用ドッグラン＆手ぶら本格BBQつき1泊2食プラン</code><br>
+                  <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid var(--accent-color); padding-bottom:2px; display:inline-block; margin-bottom:6px;">【「宿泊プラン作成エージェント」が自動適用する那須ユートピア 10原則】:</strong><br>
+                  1. <strong>タイトル冒頭属性タグ</strong>: <code>【愛犬同伴×貸切サウナ】</code> <code>【整い重視×手ぶらBBQ】</code> を先頭に自動付与。<br>
+                  2. <strong>タイトル本格構成</strong>: <code>【愛犬同伴×貸切サウナ】旧美野沢小学校リノベーションヴィラで過ごす、150㎡専用ドッグラン＆手ぶら本格BBQつき1泊2食プラン</code><br>
                   3. <strong>冒頭1行結論</strong>: 「那須高原の大自然に抱かれた旧美野沢小学校リノベーションリゾート。完全貸切バレルサウナ（CUBERU/Rekka）と水風呂15℃、150㎡専用ドッグラン完備のヴィラでととのう特別な休日。」<br>
                   4. <strong>5つの数値ファクト記述</strong>: 「客室広さ50㎡」「専用ドッグラン150㎡」「サウナ最高90℃」「水風呂15℃」「無料駐車場30台」「那須塩原駅から車20分」<br>
                   5. <strong>買う理由 (Because)</strong>: 「なぜ当館か：完全プライベート空間で愛犬とノーリードで過ごし、周りを気にせず90分貸切サウナを堪能できるため。」<br>
-                  6. <strong>キャンセル規定の明記</strong>: 「3日前30% / 前日50% / 当日・不泊100%」を本文中に明記。<br>
-                  7. <strong>文末一問一答FAQ 3問（コピペ用）</strong>:<br>
+                  6. <strong>ターゲットペルソナ選定</strong>: サウナー・愛犬家・家族ファミリー・アート好きカップルへの明確な訴求。<br>
+                  7. <strong>夕朝食スペック明記</strong>: 「那須高原和牛BBQセット」「朝食焼き立てバゲット」の食材スペック。<br>
+                  8. <strong>キャンセル規定の明記</strong>: 「3日前30% / 前日50% / 当日・不泊100%」を本文中に明記。<br>
+                  9. <strong>アクセス数値明記</strong>: 「那須塩原駅から車20分 / 無料駐車場30台」の記載。<br>
+                  10. <strong>文末一問一答FAQ 3問自動生成（コピペ＆AI検索対応）</strong>:<br>
                   <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 貸切バレルサウナの利用時間は？
 A1. 90分完全貸切制です。15:00〜22:00 / 7:00〜10:00からご希望の時間枠をお選びいただけます。
 Q2. 愛犬同伴の条件は？
 A2. 狂犬病・ワクチン証明提示で中型犬2頭まで可。150㎡のプライベートドッグランを完備しています。
 Q3. 駐車場料金は？
 A3. 敷地内に30台分の無料駐車場を備えています（予約不要）。</pre>
+                  <a href="/nasu-utopia/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">
+                    🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する
+                  </a>
                 </div>
               </details>
             </div>
