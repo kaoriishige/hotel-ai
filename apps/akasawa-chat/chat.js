@@ -60,3 +60,14 @@ function removeLoadingMessage(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
 }
+
+function sendQuickQuestion(text) {
+    const inputEl = document.getElementById('userInput');
+    if (inputEl) {
+        inputEl.value = text;
+        const formEl = document.getElementById('chatForm');
+        if (formEl) {
+            formEl.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    }
+}

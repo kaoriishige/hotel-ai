@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "./",
+  base: "/akasawa/dp/",
   envDir: path.resolve(__dirname, "../../"),
   css: {
     postcss: {

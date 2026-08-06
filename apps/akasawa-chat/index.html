@@ -8,10 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div style="max-width:800px;margin:0 auto;padding:0.8rem 1.5rem 0;">
+        <a href="../index.html" style="color:#d4af37;text-decoration:none;font-size:0.85rem;font-weight:600;">← ダッシュボードに戻る</a>
+    </div>
     <header class="header">
         <div class="logo">
             <span class="sub">自家源泉100% ぬる湯と渓流の宿</span>
-            <h1>赤沢温泉旅館</h1>
+            <h1>塩原温泉 赤沢温泉旅館</h1>
         </div>
     </header>
 
@@ -26,9 +29,17 @@
                 <h3>💬 AIコンシェルジュに質問する</h3>
             </div>
 
+            <!-- クイック質問ボタン群 -->
+            <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 16px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06);">
+                <button onclick="sendQuickQuestion('温泉の利用時間とぬる湯の特徴を教えてください')" style="background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#a7f3d0; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">♨️ 温泉・ぬる湯について</button>
+                <button onclick="sendQuickQuestion('看板猫たちにはどこで会えますか？')" style="background:rgba(251,191,36,0.15); border:1px solid #fbbf24; color:#fef08a; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🐱 看板猫について</button>
+                <button onclick="sendQuickQuestion('夕食のメニューやジンギスカンについて教えてください')" style="background:rgba(244,63,94,0.15); border:1px solid #f43f5e; color:#fecdd3; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🍖 お食事・ジンギスカン</button>
+                <button onclick="sendQuickQuestion('チェックイン・チェックアウト時間とアクセスは？')" style="background:rgba(96,165,250,0.15); border:1px solid #60a5fa; color:#bfdbfe; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🚗 時間・アクセス</button>
+            </div>
+
             <div class="chat-box" id="chatBox">
                 <div class="chat-message bot">
-                    こんにちは！赤沢温泉旅館のAIデジタルコンシェルジュです。温泉の入浴時間、お食事、館内施設など、何でもお気軽にお尋ねください。
+                    こんにちは！塩原温泉 赤沢温泉旅館のAIデジタルコンシェルジュです。温泉の入浴時間、お食事、看板猫、館内施設など、何でもお気軽にお尋ねください。
                 </div>
             </div>
 
