@@ -162,9 +162,114 @@ if (fs.existsSync(templatePath)) {
         .replace(/サウナー・愛犬家・家族ファミリー・アート好きカップル/g, '温泉・長湯愛好家・猫好き・静養・温泉治癒を求めるお客様')
         .replace(/Q1\. 貸切バレルサウナの利用時間は？/g, 'Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？')
         .replace(/A1\. 90分完全貸切制です。15:00〜22:00 \/ 7:00〜10:00からご希望の時間枠をお選びいただけます。/g, 'A1. 当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。')
-        .replace(/Q2\. 愛犬同伴の条件は？/g, 'Q2. 看板猫たちとのふれあいや過ごし方について')
-        .replace(/A2\. 狂犬病・ワクチン証明提示で中型犬2頭まで可。150㎡のプライベートドッグランを完備しています。/g, 'A2. ロビーや館内にて看板猫たちがのんびりと過ごしております。猫好きな方に静かな癒しの時間を提供しています。');
     }
+
+    // 各施設専用の動的仕様書HTML (SPEC_A 〜 SPEC_FG) の生成
+    const isAkasawaSpec = item.folder.includes('akasawa');
+
+    const specA = isAkasawaSpec ? `
+      1. <strong>1行結論＋ベネフィット記載</strong>: 【塩原温泉 源泉かけ流しぬる湯＆看板猫のいる静養宿】至福の長湯と癒やし体験。<br>
+      2. <strong>数値ファクトの明記</strong>: 「加温加水なし 38〜40℃天然ぬる湯」「箒川沿い一軒宿」「無料駐車場30台」。<br>
+      3. <strong>アイキャッチ【】タグの付与</strong>: 【猫とぬる湯】【赤沢風ジンギスカン】【湯治・静養】。<br>
+      4. <strong>ターゲットペルソナ選定</strong>: 温泉・長湯愛好家、猫好き、静養・温泉治癒を求めるお客様への訴求。<br>
+      5. <strong>夕朝食スペック明記</strong>: 「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の山菜料理」。<br>
+      6. <strong>アクセス数値明記</strong>: 「那須塩原駅よりバス・車でアクセス / 無料駐車場30台」。<br>
+      7. <strong>文末一問一答FAQ 3問自動生成</strong>:<br>
+      <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？
+A1. 加温・加水なし38〜40度天然ぬる湯です。副交感神経を優位にし、至福の長湯・静養体験が可能です。
+Q2. 看板猫たちとの過ごし方は？
+A2. ロビーや館内で看板猫たちがのんびり過ごしています。
+Q3. 駐車場について
+A3. 敷地内に30台分の無料駐車場を備えています。</pre>
+      <a href="/${item.folder}/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する</a>
+    ` : `
+      1. <strong>1行結論＋ベネフィット記載</strong>: 【アート×サウナ×大自然】旧美野沢小学校リノベーションリゾート体験。<br>
+      2. <strong>数値ファクトの明記</strong>: 「完全貸切バレルサウナ CUBERU/Rekka 90分」「150㎡ドッグラン」「無料駐車場30台」。<br>
+      3. <strong>アイキャッチ【】タグの付与</strong>: 【サウナ貸切無料】【手ぶらBBQ】【愛犬同伴ヴィラ】。<br>
+      4. <strong>ターゲットペルソナ選定</strong>: サウナー、愛犬家、ファミリー、アート好きカップルへの明確な訴求。<br>
+      5. <strong>夕朝食スペック明記</strong>: 「那須高原和牛BBQセット」「朝食焼き立てバゲット」。<br>
+      6. <strong>アクセス数値明記</strong>: 「那須塩原駅から車20分 / 那須ICから車35分 / 無料駐車場30台」。<br>
+      7. <strong>文末一問一答FAQ 3問自動生成</strong>:<br>
+      <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 貸切バレルサウナの利用時間は？
+A1. 90分完全貸切制（15:00〜22:00 / 7:00〜10:00）です。
+Q2. 愛犬同伴の条件は？
+A2. 狂犬病・ワクチン証明提示で中型犬2頭まで可。150㎡ドッグラン完備。
+Q3. 駐車場料金は？
+A3. 敷地内に30台分の無料駐車場を備えています。</pre>
+      <a href="/${item.folder}/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する</a>
+    `;
+
+    const specB = isAkasawaSpec ? `
+      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【塩原温泉 赤沢温泉旅館 公式HP改修仕様書 (全16原則)】:</strong><br>
+      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に塩原温泉 赤沢温泉旅館専用 JSON-LD を記述。<br>
+      2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
+      3. <strong>amenityFeature 10項目コード化</strong>: 源泉かけ流しぬる湯, 看板猫, 箒川一軒宿, 鹿肉ジンギスカン, 駐車場30台等を指定。<br>
+      4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
+      5. <strong>生テキスト化</strong>: 料金・客室・温泉・キャンセル規定をHTML生テキストで記述。<br>
+      6. <strong>DMO・自治体（塩原温泉観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
+      7. <strong>多言語独立ディレクトリの開設</strong>: 英語・アジア言語独立ページの設置。
+    ` : `
+      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【那須ユートピア美野沢 公式HP改修仕様書 (全16原則)】:</strong><br>
+      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に那須ユートピア美野沢専用 JSON-LD を記述。<br>
+      2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
+      3. <strong>amenityFeature 10項目コード化</strong>: CUBERU/Rekkaサウナ, 150㎡ドッグラン, 手ぶらBBQ, 駐車場30台等を指定。<br>
+      4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
+      5. <strong>生テキスト化</strong>: 料金・客室・サウナ・キャンセル規定をHTML生テキストで記述。<br>
+      6. <strong>DMO・自治体（那須町観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
+      7. <strong>多言語独立ディレクトリの開設</strong>: 英語・アジア言語独立ページの設置。
+    `;
+
+    const specC = isAkasawaSpec ? `
+      1. <strong>GBP写真 30枚以上の追加</strong>: 源泉かけ流しぬる湯、看板猫、箒川の景観、鹿肉ジンギスカン、和室客室の写真。<br>
+      2. <strong>公式名称の一貫性</strong>: 「塩原温泉 赤沢温泉旅館」で統一。<br>
+      3. <strong>ビジネスカテゴリ設定</strong>: 「温泉旅館」「旅館」「日帰り温泉」を追加。<br>
+      4. <strong>ビジネスの説明文（750文字）</strong>: 「那須塩原市塩原1149」「加温加水なし38〜40℃ぬる湯」「看板猫のおもてなし」を含める。<br>
+      5. <strong>口コミへの100%返信</strong>: 「塩原温泉」「ぬる湯」「猫」を含めた感謝の個別返信。
+    ` : `
+      1. <strong>GBP写真 30枚以上の追加</strong>: バレルサウナ（CUBERU/Rekka）、水風呂、ドッグランヴィラ、BBQ料理の写真。<br>
+      2. <strong>公式名称の一貫性</strong>: 「那須ユートピア美野沢」で統一。<br>
+      3. <strong>ビジネスカテゴリ設定</strong>: 「リゾートホテル」「サウナ」「グランピング」「貸別荘」を追加。<br>
+      4. <strong>ビジネスの説明文（750文字）</strong>: 「那須塩原駅から車20分」「150㎡ドッグラン」「90分貸切サウナ」を含める。<br>
+      5. <strong>口コミへの100%返信</strong>: 「那須 サウナ」「ドッグラン」を含めた感謝の個別返信。
+    `;
+
+    const specD = isAkasawaSpec ? `
+      1. <strong>全OTA名称統一</strong>: 楽天・じゃらんで「塩原温泉 赤沢温泉旅館」の完全一致。<br>
+      2. <strong>プランタイトルの【】タグ最適化</strong>: 【源泉かけ流しぬる湯】【看板猫のいる宿】【鹿肉ジンギスカン】。<br>
+      3. <strong>実地ファクトの全チャネル整合</strong>: 所在地「栃木県那須塩原市塩原1149」、無料駐車場「30台」、天然ぬる湯の表記統一。<br>
+      4. <strong>アクセス数値統一</strong>: 「那須塩原駅・西那須野駅よりバス・車アクセス / 無料駐車場30台」。
+    ` : `
+      1. <strong>全OTA名称統一</strong>: 楽天・じゃらんで「那須ユートピア美野沢」の完全一致。<br>
+      2. <strong>プランタイトルの【】タグ最適化</strong>: 【サウナ貸切無料】【手ぶらBBQ】【150㎡ドッグラン】。<br>
+      3. <strong>実地ファクトの全チャネル整合</strong>: 所在地「栃木県那須郡那須町箕輪563-4」、無料駐車場「40台」、客室数「全7室」の表記統一。<br>
+      4. <strong>アクセス数値統一</strong>: 「那須塩原駅から車20分 / 無料駐車場30台」。
+    `;
+
+    const specE = `
+      1. <strong>全口コミへ48時間以内の100%返信</strong>: 届いた全レビューへ感謝の気持ちを個別具体的に返信。<br>
+      2. <strong>定型文の完全廃止</strong>: お客様が言及したエピソード（温泉、料理、おもてなし）に触れて返信。<br>
+      3. <strong>口コミ自動返信AIの活用</strong>: トーン＆マナーを保った感動的な返信文を1ボタンでAI生成。
+    `;
+
+    const specFG = isAkasawaSpec ? `
+      1. <strong>自治体・DMO（塩原温泉観光協会 / 栃木県観光物産協会）公式ページへの被リンク登録</strong>: 会員ページに自社HPのURLを登録申請。<br>
+      2. <strong>公式HP内へのSNSアカウント動線および OGPタグ（og:image）設置</strong>: メタタグ・SNSリンクの完備。<br>
+      3. <strong>「SNS動画・投稿自動生成AI」による発信</strong>: ぬる湯、看板猫、箒川の静養動画を自動生成発信。<br>
+      4. <strong>多言語独立ディレクトリ・FAQの整備</strong>: インバウンドゲスト向け多言語対応。
+    ` : `
+      1. <strong>自治体・DMO（那須町観光協会 / 栃木県観光物産協会）公式ページへの被リンク登録</strong>: 会員ページに自社HPのURLを登録申請。<br>
+      2. <strong>公式HP内へのSNSアカウント動線および OGPタグ（og:image）設置</strong>: メタタグ・SNSリンクの完備。<br>
+      3. <strong>「SNS動画・投稿自動生成AI」による発信</strong>: サウナ、BBQ、ドッグラン動画を自動生成発信。<br>
+      4. <strong>多言語独立ディレクトリ・FAQの整備</strong>: インバウンドゲスト向け多言語対応。
+    `;
+
+    renderedHtml = renderedHtml
+      .replace(/\{\{SPEC_A\}\}/g, specA)
+      .replace(/\{\{SPEC_B\}\}/g, specB)
+      .replace(/\{\{SPEC_C\}\}/g, specC)
+      .replace(/\{\{SPEC_D\}\}/g, specD)
+      .replace(/\{\{SPEC_E\}\}/g, specE)
+      .replace(/\{\{SPEC_FG\}\}/g, specFG);
 
     // AI検索エンジン (ChatGPT, Perplexity, Google AI Overviews) 用 Schema.org 4型 構造化データ (JSON-LD) の動的生成
     const isAkasawaFacility = item.folder.includes('akasawa');

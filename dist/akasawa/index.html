@@ -407,7 +407,7 @@
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 1rem; font-size: 0.83rem; color: #e2e8f0; line-height: 1.5;">
             
-            <!-- 1. 宿泊プラン修正 (全10原則・AI作成エージェント即起動・実地ファクト全一致仕様書) -->
+            <!-- 1. 宿泊プラン修正 -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #d4af37;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                 <div style="font-size: 0.75rem; color: #d4af37; font-weight: 800;">修正場所: 🏨 「宿泊プラン作成エージェント」画面</div>
@@ -415,60 +415,37 @@
                   🤖 AIで1ボタン全自動生成・作成する ➔
                 </a>
               </div>
-              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">A. 宿泊プラン品質（現状17点 ➔ <span style="color:#34d399;">+8点改善で 25点満点</span>）</strong>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">A. 宿泊プラン品質（現状<span id="score-val-a">17</span>点 ➔ <span style="color:#34d399;">+<span id="score-gain-a">8</span>点改善で 25点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);">
-                  6. <strong>ターゲットペルソナ選定</strong>: 温泉・長湯愛好家・猫好き・静養・温泉治癒を求めるお客様への明確な訴求。<br>
-                  7. <strong>夕朝食スペック明記</strong>: 「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の味覚」の食材スペック。<br>
-                  8. <strong>キャンセル規定の明記</strong>: 「3日前30% / 前日50% / 当日・不泊100%」を本文中に明記。<br>
-                  9. <strong>アクセス数値明記</strong>: 「那須塩原駅から車20分 / 無料駐車場30台」の記載。<br>
-                  10. <strong>文末一問一答FAQ 3問自動生成（コピペ＆AI検索対応）</strong>:<br>
-                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？
-A1. 当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。
-Q2. 看板猫たちとのふれあいや過ごし方について
-A2. ロビーや館内にて看板猫たちがのんびりと過ごしております。猫好きな方に静かな癒しの時間を提供しています。
-Q3. 駐車場料金は？
-A3. 敷地内に30台分の無料駐車場を備えています（予約不要）。</pre>
-                  <a href="/nasu-utopia/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">
-                    🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する
-                  </a>
+                <summary style="cursor: pointer; color: #d4af37; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb担当が実行すべき【赤沢温泉旅館 宿泊プランAI改修仕様書 (全10原則)】を開く</summary>
+                <div id="spec-content-a" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  
+      1. <strong>1行結論＋ベネフィット記載</strong>: 【塩原温泉 源泉かけ流しぬる湯＆看板猫のいる静養宿】至福の長湯と癒やし体験。<br>
+      2. <strong>数値ファクトの明記</strong>: 「加温加水なし 38〜40℃天然ぬる湯」「箒川沿い一軒宿」「無料駐車場30台」。<br>
+      3. <strong>アイキャッチ【】タグの付与</strong>: 【猫とぬる湯】【赤沢風ジンギスカン】【湯治・静養】。<br>
+      4. <strong>ターゲットペルソナ選定</strong>: 温泉・長湯愛好家、猫好き、静養・温泉治癒を求めるお客様への訴求。<br>
+      5. <strong>夕朝食スペック明記</strong>: 「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の山菜料理」。<br>
+      6. <strong>アクセス数値明記</strong>: 「那須塩原駅よりバス・車でアクセス / 無料駐車場30台」。<br>
+      7. <strong>文末一問一答FAQ 3問自動生成</strong>:<br>
+      <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？
+A1. 加温・加水なし38〜40度天然ぬる湯です。副交感神経を優位にし、至福の長湯・静養体験が可能です。
+Q2. 看板猫たちとの過ごし方は？
+A2. ロビーや館内で看板猫たちがのんびり過ごしています。
+Q3. 駐車場について
+A3. 敷地内に30台分の無料駐車場を備えています。</pre>
+      <a href="/akasawa/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する</a>
+    
                 </div>
               </details>
             </div>
 
-            <!-- 2. 公式HP ＆ 構造化データ修正 (全16原則・Web制作会社様用アコーディオン仕様書・納品即合格完全コード) -->
+            <!-- 2. 公式HP ＆ 構造化データ修正 -->
             <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #34d399;">
               <div style="font-size: 0.75rem; color: #34d399; font-weight: 800;">修正場所: 🌐 「公式HP `<head>` コード」「サーバールート」＆「HTML全ページ」</div>
-              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 全体Web品質（現状10点 ➔ <span style="color:#34d399;">+10点改善で 20点満点</span>）</strong>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 全体Web品質（現状<span id="score-val-b">10</span>点 ➔ <span style="color:#34d399;">+<span id="score-gain-b">10</span>点改善で 20点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(52,211,153,0.3);">
-                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb制作会社様へそのまま渡せる【本物改修仕様書 (全16原則) ＆ 納品即合格 完全JSON-LDコード】を開く</summary>
-                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【Web制作会社様・DX担当へ渡す 本物HP改修仕様書 (全16原則)】:</strong><br>
-                  1. <strong>Schema.org 4型 (Hotel/HotelRoom/Offer/FAQPage) 完全埋め込み</strong>: HTMLの <code>&lt;head&gt;</code> 内に下記コードをそのまま貼り付け。<br>
-                  2. <strong>Rich Results Test 0エラー保証</strong>: <code>priceCurrency</code>, <code>availability</code>, <code>priceSpecification</code>, <code>valueAddedTaxIncluded</code> を完備。<br>
-                  3. <strong>amenityFeature 10項目個別コード化</strong>: CUBERU/REKKAサウナ, 水風呂15℃, 150㎡ドッグラン, 駐車場30台, Wi-Fi200Mbps, BBQ等を完全指定。<br>
-                  4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> に <code>GPTBot</code>, <code>ClaudeBot</code>, <code>PerplexityBot</code> 許可 ＆ ルートに <code>/llms.txt</code> / <code>/llms-full.txt</code> を配置。<br>
-                  5. <strong>生テキスト化</strong>: 画像バナー埋め込みを廃止し、料金・客室・キャンセル規定を <code>&lt;h1&gt;~&lt;h3&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;table&gt;</code> の生テキストで記述。<br>
-                  6. <strong>OGP ＆ MetaタグのAI最適化</strong>: <code>&lt;title&gt;</code>, <code>&lt;meta name="description"&gt;</code>, <code>og:image</code> にRAG数値ファクトと購買理由タグを含める。<br>
-                  7. <strong>Semantic HTML5（セマンティック構造）</strong>: <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;footer&gt;</code> で構成。<br>
-                  8. <strong>一問一答 FAQ 10問実装</strong>: HTML <code>&lt;details&gt;&lt;summary&gt;</code> ＋ Schema.org FAQPage 10問の二重実装。<br>
-                  9. <strong>Core Web Vitals ＆ モバイル高速化</strong>: 次世代画像 (WebP/AVIF) 化、<code>loading="lazy"</code>, PageSpeed 90点以上。<br>
-                  10. <strong>アクセス交通手段の数値テキスト化</strong>: 「那須塩原駅から車30分 / 那須ICから車35分 / 無料駐車場30台」を明記。<br>
-                  11. <strong>客室スペックの数値表記</strong>: 「ヴィラA 50㎡/ドッグラン150㎡/定員6」「ヴィラB 85㎡/定員8」等の具体スペック化。<br>
-                  12. <strong>キャンセル規定のHTMLテーブル化</strong>: 「7日前無料 / 3〜6日前30% / 前日50% / 当日100%」を明記。<br>
-                  13. <strong>DMO・自治体（塩原温泉観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
-                  14. <strong>多言語（英語・簡体字・韓国語）独立ディレクトリ</strong>: <code>/en/</code>, <code>/zh/</code>, <code>/ko/</code> の設置と <code>hreflang</code> タグ実装。<br>
-                  15. <strong>SSL (HTTPS) ＆ セキュリティヘッダー完備</strong>: HSTS, CSP, X-Frame-Options 設置。<br>
-                  16. <strong>直販最安値保証 (Best Rate Guarantee) 表記</strong>: Direct Booking リンクの明記。<br><br>
-
-                  <strong style="color:#34d399;">【制作会社様用：そのまま `<head>` に貼れる 納品即合格 4型 Schema.org 完全コード】:</strong>
-                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;">&lt;script type="application/ld+json"&gt;
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": ["Hotel", "LodgingBusiness"],
       "@id": "https://hotel-ai.netlify.app/akasawa/#hotel",
       "name": "塩原温泉 赤沢温泉旅館",
       "alternateName": "SHIOBARA ONSEN AKASAWA RYOKAN",
