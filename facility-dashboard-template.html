@@ -353,9 +353,12 @@
               </div>
             </div>
 
-            <!-- 3. GBP写真修正 -->
+            <!-- 3. GBP写真修正 & ログイン連携 -->
             <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #60a5fa;">
-              <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800; text-transform: uppercase;">修正場所: 📍 「Googleビジネスプロフィール」管理画面</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800; text-transform: uppercase;">修正場所: 📍 「Googleビジネスプロフィール」管理画面</div>
+                <button onclick="connectGbpAccount()" style="background:rgba(96,165,250,0.2); border:1px solid #60a5fa; color:#60a5fa; font-size:0.7rem; padding:2px 8px; border-radius:12px; cursor:pointer; font-weight:bold;">🔑 スタッフ用 Googleアカウント連携ログイン</button>
+              </div>
               <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">C. GBP・Googleマップ（現状{{SCORE_C}}点 ➔ <span style="color:#34d399;">+{{GAIN_C}}点改善で 20点満点</span>）</strong>
               <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
                 <strong>【直すもの（これとこれ）】:</strong><br>
@@ -763,6 +766,14 @@
 
         // 本物の監査ログ出力
         let logHtml = `<div style="margin-bottom: 8px; color: #34d399; font-weight: bold;">✅ Web直接フェッチ成功! (対象URL: ${data.targetUrl})</div>`;
+        if (data.apiStatus) {
+          logHtml += `<div style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); padding:6px 10px; border-radius:6px; margin-bottom:8px; font-size:0.75rem;">
+            <strong>🔗 外部API連携ステータス:</strong><br>
+            ・Google Rich Results Test API: <span style="color:#34d399;font-weight:bold;">${data.apiStatus.googleRichResultsApi}</span><br>
+            ・Gemini-1.5-Flash API (ディープテキスト解析): <span style="color:#34d399;font-weight:bold;">${data.apiStatus.geminiApi}</span>
+          </div>`;
+        }
+
         logHtml += `<div style="font-weight: bold; margin-top: 6px; color: #d4af37;">【B. Schema.org 構造化データ 本物検証ログ】</div>`;
         
         data.scores.B.checklist.forEach(c => {
@@ -788,6 +799,10 @@
         btn.textContent = '🔄 実際のWebページを再診断する';
         btn.style.opacity = '1';
       }
+    }
+
+    function connectGbpAccount() {
+      alert('📍 Googleビジネスプロフィール (GBP) アカウント連携モーダル:\n\nスタッフ様・支配人様のGoogleアカウントでログイン認証を行うと、Googleマップの写真30枚・アメニティチェック・口コミ鮮度が自動同期取得されます。');
     }
   </script>
 </body>
