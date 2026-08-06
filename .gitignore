@@ -4,11 +4,7 @@ node_modules/
 key.txt
 .env
 .DS_Store
-dist/
-!apps/akasawa-dp/apps/admin/dist/
-!apps/akasawa-dp/apps/admin/dist/**
-!dist/nasu-utopia/dp/
-!dist/nasu-utopia/dp/**
+# dist/ (Gitに全ビルドHTMLを本物同期させるため解禁)
 build/
 powershell.cmd
 powershell.bat
