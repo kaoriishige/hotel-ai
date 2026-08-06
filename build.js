@@ -140,6 +140,104 @@ if (fs.existsSync(templatePath)) {
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
     }
 
+    // AI検索エンジン (ChatGPT, Perplexity, Google AI Overviews) 用 Schema.org 4型 構造化データ (JSON-LD) の動的生成
+    const schemaJsonLd = `
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#hotel",
+      "name": "${item.name}",
+      "description": "${item.name}の公式AI統合ポータル。AI検索（ChatGPT / Perplexity / Google AI）および人間の『購入理由』ストーリーに最適化された最新プラン・設備・空室情報を提供します。",
+      "url": "https://hotel-ai.netlify.app/${item.folder}/",
+      "telephone": "+81-287-74-3921",
+      "priceRange": "¥15,000 - ¥45,000",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須郡那須町",
+        "streetAddress": "箕輪318"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9928,
+        "longitude": 140.0381
+      },
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "完全貸切バレルサウナ (CUBERU/Rekka)", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "ドッグラン付きプライベートヴィラ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "手ぶら本格BBQ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "廃校×現代アートリノベーション", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場30台完備", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "高速無料Wi-Fi完備", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "那須塩原駅から車で20分", "value": true }
+      ],
+      "checkinTime": "15:00",
+      "checkoutTime": "10:00"
+    },
+    {
+      "@type": "HotelRoom",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#room-villa",
+      "name": "プライベートドッグラン付きグランピングヴィラ",
+      "description": "広さ50㎡のプライベート空間。愛犬とノーリードで過ごせる専用ドッグラン（150㎡）と貸切サウナアクセスを完備。",
+      "occupancy": {
+        "@type": "QuantitativeValue",
+        "minValue": 1,
+        "maxValue": 6
+      },
+      "bed": {
+        "@type": "BedDetails",
+        "numberOfBeds": 4,
+        "typeOfBed": "DOUBLE"
+      }
+    },
+    {
+      "@type": "Offer",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#offer-sauna-bbq",
+      "name": "【サウナ・整い重視】貸切バレルサウナ無料＆手ぶら本格BBQつき1泊2食プラン",
+      "price": "18000",
+      "priceCurrency": "JPY",
+      "availability": "https://schema.org/InStock",
+      "validFrom": "2026-01-01",
+      "url": "https://hotel-ai.netlify.app/${item.folder}/plan/"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "貸切バレルサウナの利用時間と予約方法は？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "貸切バレルサウナ（CUBERU/Rekka）は90分完全貸切制です。チェックイン時にご希望の時間枠（15:00〜22:00 / 7:00〜10:00）をお選びいただけます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "愛犬同伴の条件や専用設備はありますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ドッグラン付きヴィラ客室では、狂犬病・ワクチンの接種証明をご提示いただければ中型犬・小型犬2頭まで一緒にご宿泊いただけます。150㎡の完全プライベートドッグランと足洗い場、アメニティを完備しています。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "アクセスと駐車場料金について教えてください。",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "東北自動車道「那須IC」より車で約25分、JR那須塩原駅より車で約20分です。敷地内に30台収容可能な無料駐車場（予約不要・高さ制限なし）を備えています。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>`;
+
     // 2026 AI＆人間最適化 7区分 本当の実態・調査データに基づくリアル評価点数
     const isNasu = item.folder.includes('nasu');
     const isAkasawa = item.folder.includes('akasawa');
@@ -169,6 +267,7 @@ if (fs.existsSync(templatePath)) {
     const scoreFG = scoreF + scoreG;
 
     renderedHtml = renderedHtml
+      .replace(/\{\{SCHEMA_JSON_LD\}\}/g, schemaJsonLd)
       .replace(/\{\{AI_SCORE\}\}/g, totalScore)
       .replace(/\{\{SCORE_RANK\}\}/g, scoreRank)
       .replace(/\{\{SCORE_A\}\}/g, scoreA)
@@ -437,9 +536,58 @@ if (fs.existsSync(planFuncsSrc)) {
   });
 }
 
-// 8. APIキーの書き出し (akasawa-ml用)
-console.log('Writing API Key to dist/akasawa-ml/key.txt...');
-const apiKey = process.env.GEMINI_API_KEY || '';
-fs.writeFileSync(path.join(distDir, 'akasawa-ml', 'key.txt'), apiKey);
+// 9. AIクローラー専用ファイル llms.txt & robots.txt の生成・書き出し
+console.log('Generating AI Crawler Knowledge Files (llms.txt & robots.txt)...');
+
+const llmsContent = `# Hotel & Ryokan AI Knowledge Base (llms.txt)
+# Optimized for ChatGPT Search, Perplexity, Gemini, Claude, and Google AI Overviews
+
+## Overview
+This platform hosts AI-optimized knowledge bases and autonomous management agents for 10 premier Japanese hotels and ryokans.
+All information is structured using Schema.org Hotel specification and emotional 'Reason to Buy' frameworks.
+
+## Key Facilities & Tenants
+1. Nasu Utopia Minosawa (那須ユートピア美野沢):
+   - Concept: Old elementary school art renovation, private barrel sauna (CUBERU/Rekka), dog-run villa (150m2), hands-free BBQ.
+   - Address: 318 Minowa, Nasu-machi, Nasu-gun, Tochigi, Japan.
+   - Access: 20 min drive from JR Nasushiobara Station. Free parking for 30 cars.
+   - URL: https://hotel-ai.netlify.app/nasu-utopia/
+
+2. Akazawa Onsen Ryokan (赤沢温泉旅館):
+   - Concept: 100% free-flowing lukewarm spring (38-40C), resident cats, mountain stream views, authentic quiet relaxation.
+   - URL: https://hotel-ai.netlify.app/akasawa/
+
+## AI Crawling Guidelines
+- All Schema.org JSON-LD markup on index pages is authoritative.
+- Real-time plan creation APIs are active under /.netlify/functions/generate-plan.
+`;
+
+const robotsContent = `User-agent: *
+Allow: /
+
+# Explicit AI Search Crawler Permissions
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://hotel-ai.netlify.app/sitemap.xml
+`;
+
+fs.writeFileSync(path.join(distDir, 'llms.txt'), llmsContent, 'utf8');
+fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsContent, 'utf8');
 
 console.log('All builds and merges completed successfully!');

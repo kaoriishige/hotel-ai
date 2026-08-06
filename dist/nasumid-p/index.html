@@ -5,6 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>那須ユートピア美野沢 統合AIシステムポータル</title>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- AI検索エンジン(ChatGPT / Perplexity / Google AI)向け Schema.org 4型 構造化データ (JSON-LD) -->
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://hotel-ai.netlify.app/nasumid-p/#hotel",
+      "name": "那須ユートピア美野沢",
+      "description": "那須ユートピア美野沢の公式AI統合ポータル。AI検索（ChatGPT / Perplexity / Google AI）および人間の『購入理由』ストーリーに最適化された最新プラン・設備・空室情報を提供します。",
+      "url": "https://hotel-ai.netlify.app/nasumid-p/",
+      "telephone": "+81-287-74-3921",
+      "priceRange": "¥15,000 - ¥45,000",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須郡那須町",
+        "streetAddress": "箕輪318"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9928,
+        "longitude": 140.0381
+      },
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "完全貸切バレルサウナ (CUBERU/Rekka)", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "ドッグラン付きプライベートヴィラ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "手ぶら本格BBQ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "廃校×現代アートリノベーション", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場30台完備", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "高速無料Wi-Fi完備", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "那須塩原駅から車で20分", "value": true }
+      ],
+      "checkinTime": "15:00",
+      "checkoutTime": "10:00"
+    },
+    {
+      "@type": "HotelRoom",
+      "@id": "https://hotel-ai.netlify.app/nasumid-p/#room-villa",
+      "name": "プライベートドッグラン付きグランピングヴィラ",
+      "description": "広さ50㎡のプライベート空間。愛犬とノーリードで過ごせる専用ドッグラン（150㎡）と貸切サウナアクセスを完備。",
+      "occupancy": {
+        "@type": "QuantitativeValue",
+        "minValue": 1,
+        "maxValue": 6
+      },
+      "bed": {
+        "@type": "BedDetails",
+        "numberOfBeds": 4,
+        "typeOfBed": "DOUBLE"
+      }
+    },
+    {
+      "@type": "Offer",
+      "@id": "https://hotel-ai.netlify.app/nasumid-p/#offer-sauna-bbq",
+      "name": "【サウナ・整い重視】貸切バレルサウナ無料＆手ぶら本格BBQつき1泊2食プラン",
+      "price": "18000",
+      "priceCurrency": "JPY",
+      "availability": "https://schema.org/InStock",
+      "validFrom": "2026-01-01",
+      "url": "https://hotel-ai.netlify.app/nasumid-p/plan/"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://hotel-ai.netlify.app/nasumid-p/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "貸切バレルサウナの利用時間と予約方法は？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "貸切バレルサウナ（CUBERU/Rekka）は90分完全貸切制です。チェックイン時にご希望の時間枠（15:00〜22:00 / 7:00〜10:00）をお選びいただけます。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "愛犬同伴の条件や専用設備はありますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ドッグラン付きヴィラ客室では、狂犬病・ワクチンの接種証明をご提示いただければ中型犬・小型犬2頭まで一緒にご宿泊いただけます。150㎡の完全プライベートドッグランと足洗い場、アメニティを完備しています。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "アクセスと駐車場料金について教えてください。",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "東北自動車道「那須IC」より車で約25分、JR那須塩原駅より車で約20分です。敷地内に30台収容可能な無料駐車場（予約不要・高さ制限なし）を備えています。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
   <style>
     :root {
       --bg-dark: #0a1118;
