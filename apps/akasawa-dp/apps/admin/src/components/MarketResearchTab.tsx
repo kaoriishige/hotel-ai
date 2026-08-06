@@ -52,7 +52,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
   const [realVacantCount, setRealVacantCount] = useState<number | null>(null);
   const [apiCompetitorsData, setApiCompetitorsData] = useState<MarketResearchData[] | null>(null);
   const [isFetchingOcc, setIsFetchingOcc] = useState<boolean>(false);
-  const TOTAL_SHIOBARA_HOTELS = 89; // 那須エリアの総施設数（仕様に基づく）
+  const TOTAL_SHIOBARA_HOTELS = 67; // 塩原温泉の総施設数（仕様に基づく）
 
   // リアルタイム市場データフェッチ
   useEffect(() => {
@@ -364,7 +364,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
               </div>
               
               <div className="mr-stat-box outline">
-                <div className="mr-stat-label">那須町全体の最安値 〜 最高値</div>
+                <div className="mr-stat-label">塩原全体の最安値 〜 最高値</div>
                 <div className="mr-stat-value sm">
                   {allMin ? `¥${allMin.toLocaleString()}` : "---"} <span className="text-stone-400">〜</span> {allMax ? `¥${allMax.toLocaleString()}` : "---"}
                 </div>
@@ -443,7 +443,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
       case "all_range":
         return (
           <div className="mr-kpi-view">
-            <span className="mr-kpi-label">那須町エリア全体の相場感</span>
+            <span className="mr-kpi-label">塩原エリア全体の相場感</span>
             <div className="mr-kpi-value" style={{color: '#1e293b', fontSize: '56px'}}>
               {allMin && allMax ? `¥${allMin.toLocaleString()} 〜 ¥${allMax.toLocaleString()}` : "データ不足"}
             </div>
@@ -484,7 +484,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
       case "pet_range":
         return (
           <div className="mr-kpi-view">
-            <span className="mr-kpi-label">ぬる湯・静養プランの相場</span>
+            <span className="mr-kpi-label">ペット同伴の付加価値相場</span>
             <div className="mr-kpi-value" style={{color: '#7e22ce', fontSize: '56px'}}>
               {petMin && petMax ? `¥${petMin.toLocaleString()} 〜 ¥${petMax.toLocaleString()}` : "販売データなし"}
             </div>
@@ -504,10 +504,10 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
         <h2 className="mr-header-title">市場相場 インサイトビュー</h2>
         
         <div className="mr-header-intro">
-          <p>支配人様、いつもお疲れ様です。</p>
+          <p>遠藤オーナー、いつもお疲れ様です。</p>
           <p>
-            本画面は市場の相場データを自動で集計し、支配人様の価格調整（値上げ・値下げ）の判断をサポートする分析パネルです。<br/>
-            カレンダーから日付を選び、見たい項目をクリックするだけで、塩原温泉エリアの販売状況から抽出した「価格判断の材料」が一目でわかるようになっています。<br/>
+            本画面は市場の相場データを自動で集計し、オーナー様の価格調整（値上げ・値下げ）の判断をサポートする分析パネルです。<br/>
+            カレンダーから日付を選び、見たい項目をクリックするだけで、塩原エリアの販売状況から抽出した「価格判断の材料」が一目でわかるようになっています。<br/>
             繁忙期や週末の単価（RevPAR）を最大化するための重要な判断材料としてご活用ください。
           </p>
         </div>
@@ -541,21 +541,38 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
                     <span style={{ fontSize: '18px' }}>♨️</span> 塩原温泉エリア 全体宿泊率
                   </h3>
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                    対象: 楽天トラベル掲載の塩原温泉エリア全施設
+                    対象: 楽天トラベル掲載の塩原エリア全施設（67軒）
                   </p>
-                  {occ !== -1 ? (
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: occ >= 80 ? '#ef4444' : occ >= 60 ? '#f59e0b' : '#34d399' }}>
+                  {realVacantCount !== null && occ !== -1 && !isSimulated && (
+                    <p style={{ fontSize: '13px', color: '#a7f3d0', margin: '6px 0 0 0', fontWeight: 'bold' }}>
+                      空室: {realVacantCount} 軒 / 満室: {TOTAL_SHIOBARA_HOTELS - realVacantCount} 軒
+                    </p>
+                  )}
+                  {occ !== -1 && !isSimulated && (
+                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                      🟢 楽天トラベルよりリアルタイム取得済
+                    </div>
+                  )}
+                  {occ === -1 && (
+                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                      🔴 データ未取得
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  {isFetchingOcc ? (
+                    <div style={{ color: '#94a3b8', fontSize: '13px' }}>取得中...</div>
+                  ) : occ === -1 ? (
+                    <div style={{ fontSize: '24px', color: '#cbd5e1', fontWeight: 'bold' }}>---</div>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: occ >= 85 ? '#ef4444' : occ >= 60 ? '#f59e0b' : '#3b82f6' }}>
                         {occ}%
                       </div>
-                      <div style={{ fontSize: '11px', color: occ >= 80 ? '#fca5a5' : occ >= 60 ? '#fde68a' : '#a7f3d0', marginTop: '4px', fontWeight: 'bold' }}>
-                        {occ >= 80 ? '🔥 エリア超高稼働（値上げ推奨）' : occ >= 60 ? '⚡️ エリア高稼働（強気維持）' : '🌿 エリア標準稼働'}
+                      <div style={{ fontSize: '11px', color: occ >= 85 ? '#fca5a5' : occ >= 60 ? '#fcd34d' : '#93c5fd', marginTop: '4px', fontWeight: 600 }}>
+                        {occ >= 85 ? '満室直前' : occ >= 60 ? '高需要' : '通常'}
                       </div>
-                    </div>
-                  ) : (
-                    <div style={{ textAlign: 'right', fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>
-                      リアルタイム通信中...
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -567,16 +584,25 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
                     <span style={{ fontSize: '18px' }}>📋</span> 調査対象{TARGET_FACILITIES.length}施設 満室率
                   </div>
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                    塩原温泉エリア指定{TARGET_FACILITIES.length}施設の実地監視
+                    リサーチしている競合・参考宿（計{TARGET_FACILITIES.length}軒）のうち満室の割合
                   </p>
+                  <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                    🔍 リアルタイム満室判定
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '32px', fontWeight: 'bold', color: fullRate >= 50 ? '#ef4444' : fullRate >= 20 ? '#f59e0b' : '#34d399' }}>
-                    {fullRate}%
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#e2e8f0', marginTop: '4px', fontWeight: 600 }}>
-                    {totalTargetCount}施設中 {targetFullCount} 軒が満室
-                  </div>
+                  {totalTargetCount === 0 ? (
+                    <div style={{ fontSize: '24px', color: '#cbd5e1', fontWeight: 'bold' }}>---</div>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: fullRate >= 80 ? '#ef4444' : fullRate >= 40 ? '#f59e0b' : '#10b981' }}>
+                        {fullRate}%
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#e2e8f0', marginTop: '4px', fontWeight: 600 }}>
+                        {TARGET_FACILITIES.length}施設中 {targetFullCount} 軒が満室
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -601,15 +627,15 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
           <ul className="mr-reasons-list">
             <li>
               <strong>🔵 直接比較（5施設）</strong>
-              塩原温泉エリアの同規模温泉旅館。この平均・最安値が塩原温泉 赤沢温泉旅館の「基準価格」のベースになります。
+              まじま荘など同規模旅館。この平均・最安値が赤沢の「基準価格」のベースになります。
             </li>
             <li>
               <strong>🔘 相場参考（3施設）</strong>
-              塩原温泉郷の中位〜上位温泉宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
+              奥塩原高原ホテルなど中位〜上位宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
             </li>
             <li>
               <strong>🟣 独自需要（2施設）</strong>
-              ぬる湯専門宿、猫のいる湯宿。長湯静養や看板猫等の独自需要がどれほどの「プレミアム」を生むかの指標です。
+              元泉館、わんわんパラダイス。ペット同伴などの独自需要がどれほどの「プレミアム」を生むかの指標です。
             </li>
           </ul>
         </div>
