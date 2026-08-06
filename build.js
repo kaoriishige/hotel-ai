@@ -129,7 +129,7 @@ if (fs.existsSync(templatePath)) {
       .replace(/\{\{FACILITY_NAME\}\}/g, item.name)
       .replace(/\{\{FACILITY_PATH\}\}/g, item.folder);
 
-    // 那須ユートピア美野沢専用のRAG・9システム文言の完全カスタマイズ
+    // 那須ユートピア美野沢・赤沢温泉旅館それぞれのRAG・9システム文言の完全カスタマイズ
     if (item.folder.includes('nasu')) {
       renderedHtml = renderedHtml
         .replace(/「ととのう」の、その先へ(?!\s*\(BEYOND)/g, '「ととのう」の、その先へ (BEYOND TOTONOU FEELING)')
@@ -138,10 +138,98 @@ if (fs.existsSync(templatePath)) {
         .replace(/オーナー遠藤正俊氏のトーン＆マナー/g, '那須ユートピアの温かみと『ととのい体験』に寄り添うトーン＆マナー')
         .replace(/赤沢温泉の独自の強み（ぬる湯、猫、おもてなし）/g, '那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）')
         .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
+    } else if (item.folder.includes('akasawa')) {
+      renderedHtml = renderedHtml
+        .replace(/旧美野沢小学校リノベーションリゾート/g, '塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿')
+        .replace(/サウナ（CUBERU\/Rekka）、グランピングヴィラ、手ぶらBBQのご案内/g, '源泉かけ流しぬる湯、看板猫、箒川一軒宿、鹿肉ジンギスカンのご案内')
+        .replace(/那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）/g, '塩原温泉 赤沢温泉旅館の独自の強み（天然ぬる湯、看板猫のおもてなし、箒川のせせらぎ）')
+        .replace(/那須ユートピア美野沢の全データ/g, '塩原温泉 赤沢温泉旅館の全データ');
     }
 
     // AI検索エンジン (ChatGPT, Perplexity, Google AI Overviews) 用 Schema.org 4型 構造化データ (JSON-LD) の動的生成
-    const schemaJsonLd = `
+    const isAkasawaFacility = item.folder.includes('akasawa');
+
+    const schemaJsonLd = isAkasawaFacility ? `
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#hotel",
+      "name": "塩原温泉 赤沢温泉旅館",
+      "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
+      "url": "https://hotel-ai.netlify.app/${item.folder}/",
+      "telephone": "+81-287-32-2411",
+      "priceRange": "¥10,000 - ¥28,000",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須塩原市",
+        "streetAddress": "塩原1149"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9712,
+        "longitude": 139.8145
+      },
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "看板猫のおもてなし（猫のいる静養宿）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "箒川を望む渓流一軒宿ロケーション", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "赤沢風 鹿×豚ジンギスカン料理", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場完備", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "那須塩原駅・西那須野駅よりバスアクセス", "value": true }
+      ],
+      "checkinTime": "15:00",
+      "checkoutTime": "10:00"
+    },
+    {
+      "@type": "HotelRoom",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#room-shiobara",
+      "name": "箒川を望む和室",
+      "description": "川のせせらぎと塩原の大自然に包まれる落ち着いた和室。心身のリセットと静養に最適です。",
+      "occupancy": {
+        "@type": "QuantitativeValue",
+        "minValue": 1,
+        "maxValue": 5
+      }
+    },
+    {
+      "@type": "Offer",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#offer-shiobara-plan",
+      "name": "【猫とぬる湯とリセット旅】塩原天然ぬる湯＆地物味覚 1泊2食静養基本プラン",
+      "price": "14500",
+      "priceCurrency": "JPY",
+      "availability": "https://schema.org/InStock",
+      "url": "https://hotel-ai.netlify.app/${item.folder}/"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://hotel-ai.netlify.app/${item.folder}/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "塩原温泉 赤沢温泉旅館のぬる湯の特徴は？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "看板猫たちとのふれあいや過ごし方について",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ロビーや館内にて看板猫たちがのんびりと過ごしております。猫好きな方に静かな癒しの時間を提供しています。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>` : `
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
