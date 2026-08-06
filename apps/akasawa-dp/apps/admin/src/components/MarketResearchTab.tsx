@@ -543,19 +543,40 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
                     対象: 楽天トラベル掲載の塩原温泉エリア全施設
                   </p>
-                  {realVacantCount !== null && occ !== -1 && !isSimulated && (
-                    <p style={{ fontSize: '13px', color: '#a7f3d0', margin: '6px 0 0 0', fontWeight: 'bold' }}>
-                      空室: {realVacantCount} 軒 / 満室: {TOTAL_SHIOBARA_HOTELS - realVacantCount} 軒
-                    </p>
-                  )}
-                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: fullRate >= 80 ? '#ef4444' : fullRate >= 40 ? '#f59e0b' : '#10b981' }}>
-                        {fullRate}%
+                  {occ !== -1 ? (
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: occ >= 80 ? '#ef4444' : occ >= 60 ? '#f59e0b' : '#34d399' }}>
+                        {occ}%
                       </div>
-                      <div style={{ fontSize: '11px', color: '#e2e8f0', marginTop: '4px', fontWeight: 600 }}>
-                        {TARGET_FACILITIES.length}施設中 {targetFullCount} 軒が満室
+                      <div style={{ fontSize: '11px', color: occ >= 80 ? '#fca5a5' : occ >= 60 ? '#fde68a' : '#a7f3d0', marginTop: '4px', fontWeight: 'bold' }}>
+                        {occ >= 80 ? '🔥 エリア超高稼働（値上げ推奨）' : occ >= 60 ? '⚡️ エリア高稼働（強気維持）' : '🌿 エリア標準稼働'}
                       </div>
-                    </>
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'right', fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>
+                      リアルタイム通信中...
+                    </div>
                   )}
+                </div>
+              </div>
+
+              {/* 調査対象施設 満室率カード */}
+              <div className="mr-kpi-card" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '24px', borderRadius: '12px', border: '1px solid #334155', borderLeftColor: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="mr-kpi-label" style={{ fontSize: '16px', color: '#a7f3d0', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '18px' }}>📋</span> 調査対象{TARGET_FACILITIES.length}施設 満室率
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                    塩原温泉エリア指定{TARGET_FACILITIES.length}施設の実地監視
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', color: fullRate >= 50 ? '#ef4444' : fullRate >= 20 ? '#f59e0b' : '#34d399' }}>
+                    {fullRate}%
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#e2e8f0', marginTop: '4px', fontWeight: 600 }}>
+                    {totalTargetCount}施設中 {targetFullCount} 軒が満室
+                  </div>
                 </div>
               </div>
 
@@ -580,15 +601,15 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
           <ul className="mr-reasons-list">
             <li>
               <strong>🔵 直接比較（5施設）</strong>
-              那須ロイヤルホテルなど同規模リゾート・サウナ施設。この平均・最安値が那須ユートピア美野沢の「基準価格」のベースになります。
+              塩原温泉エリアの同規模温泉旅館。この平均・最安値が塩原温泉 赤沢温泉旅館の「基準価格」のベースになります。
             </li>
             <li>
               <strong>🔘 相場参考（3施設）</strong>
-              ホテルエピナール那須や那須サンクチュアリなど中位〜上位リゾート宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
+              塩原温泉郷の中位〜上位温泉宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
             </li>
             <li>
               <strong>🟣 独自需要（2施設）</strong>
-              那須ドッグリゾート木もれ陽の里、わんわんリゾート那須。ペット同伴やプライベートサウナ等の独自需要がどれほどの「プレミアム」を生むかの指標です。
+              ぬる湯専門宿、猫のいる湯宿。長湯静養や看板猫等の独自需要がどれほどの「プレミアム」を生むかの指標です。
             </li>
           </ul>
         </div>
