@@ -428,14 +428,17 @@
               </div>
             </div>
 
-            <!-- 2. RAG数値修正 -->
+            <!-- 2. 公式HP ＆ 構造化データ修正 -->
             <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #34d399;">
-              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800; text-transform: uppercase;">修正場所: 📝 「現場のおすすめ・最新プラン登録」画面 (RAG)</div>
-              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP・構造化（現状9点 ➔ <span style="color:#34d399;">+11点改善で 20点満点</span>）</strong>
+              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800; text-transform: uppercase;">修正場所: 🌐 「公式HP `<head>` コード」＆ 「`llms.txt` サーバー配置」</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 構造化データ（現状9点 ➔ <span style="color:#34d399;">+11点改善で 20点満点</span>）</strong>
               <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
-                <strong>【直すもの（これとこれ）】:</strong><br>
-                ① アクセス欄に「車で便利」ではなく <strong>「那須塩原駅から車で20分 / 無料駐車場30台」</strong> と数字を記入<br>
-                ② 客室説明に <strong>「客室広さ50㎡ / サウナ温度90℃」</strong> と具体数値を追加入力
+                <strong>【直すもの全5項目（Web制作業者様・DX担当対応）】:</strong><br>
+                ① <strong>Schema.org 4型 (JSON-LD) 埋め込み</strong>: Hotel / Room / Offer / FAQPage タグ埋込 (+7点)<br>
+                ② <strong>Rich Results Test 0エラー</strong>: 通貨(JPY)・価格・税表記の欠損修正 (+4点)<br>
+                ③ <strong>amenityFeature10項目</strong>: サウナ・ドッグラン・駐車場30台のコード化 (+4点)<br>
+                ④ <strong>robots.txt / llms.txt</strong>: GPTBot等のAI許可＆ルート配置 (+3点)<br>
+                ⑤ <strong>生テキスト化</strong>: 画像バナー埋め込みを廃止しHTMLテキスト化 (+2点)
               </div>
             </div>
 
