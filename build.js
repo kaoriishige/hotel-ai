@@ -200,14 +200,65 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
     `;
 
     const specB = isAkasawaSpec ? `
-      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【塩原温泉 赤沢温泉旅館 公式HP改修仕様書 (全16原則)】:</strong><br>
-      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に塩原温泉 赤沢温泉旅館専用 JSON-LD を記述。<br>
+      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【塩原温泉 赤沢温泉旅館 公式HP改修仕様書 ＆ 正確なJSON-LDコード例】:</strong><br>
+      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に公式データ準拠のJSON-LDを記述。<br>
       2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
-      3. <strong>amenityFeature 10項目コード化</strong>: 源泉かけ流しぬる湯, 看板猫, 箒川一軒宿, 鹿肉ジンギスカン, 駐車場30台等を指定。<br>
-      4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
-      5. <strong>生テキスト化</strong>: 料金・客室・温泉・キャンセル規定をHTML生テキストで記述。<br>
-      6. <strong>DMO・自治体（塩原温泉観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
-      7. <strong>多言語独立ディレクトリの開設</strong>: 英語・アジア言語独立ページの設置。
+      3. <strong>実在ファクト完全準拠</strong>: NAP（公式ドメイン https://akasawaonsen.com/ / 0287-46-5700 / 〒329-2921 栃木県那須塩原市塩原1149）、チェックアウト 10:00。<br>
+      4. <strong>amenityFeature 実在設備10項目コード化</strong>: 無加水無循環天然ぬる湯 (38〜40℃), 箒川沿い渓流一軒宿, 看板猫のおもてなし, 赤沢風 鹿×豚ジンギスカン, 敷地内無料駐車場 30台等。<br>
+      5. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
+      6. <strong>生テキスト化 ＆ FAQ整備</strong>: 料金・客室・温泉・キャンセル規定をHTML生テキストで記述し、一問一答FAQを設置。<br>
+      <details style="margin-top:6px; background:#000; padding:8px; border-radius:6px;">
+        <summary style="color:#34d399; cursor:pointer; font-size:0.75rem; font-weight:bold;">▶ 埋め込み用 JSON-LD コード例（コピー可）</summary>
+        <pre style="margin-top:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;">
+&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://akasawaonsen.com/#hotel",
+      "name": "塩原温泉 赤沢温泉旅館",
+      "alternateName": "SHIOBARA ONSEN AKASAWA RYOKAN",
+      "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
+      "url": "https://akasawaonsen.com/",
+      "telephone": "+81-287-46-5700",
+      "priceRange": "¥10,000 - ¥28,000",
+      "address": {
+        "@type": "PostalAddress",
+        "postalCode": "329-2921",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須塩原市",
+        "streetAddress": "塩原1149"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9712,
+        "longitude": 139.8145
+      },
+      "checkinTime": "15:00",
+      "checkoutTime": "10:00",
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃・無加水無循環）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "箒川を望む露天風呂・静養空間", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "看板猫のおもてなし（猫のいる静養宿）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "赤沢風 鹿×豚ジンギスカン料理", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場 30台完備(予約不要)", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "塩原温泉バスターミナルより送迎対応(要予約)", "value": true }
+      ]
+    },
+    {
+      "@type": "HotelRoom",
+      "@id": "https://akasawaonsen.com/#room-shiobara",
+      "name": "箒川を望む和室（全10室）",
+      "description": "川のせせらぎと塩原の大自然に包まれる落ち着いた和室。心身のリセットと静養に最適です。",
+      "occupancy": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 5 }
+    }
+  ]
+}
+&lt;/script&gt;
+        </pre>
+      </details>
     ` : `
       <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【那須ユートピア美野沢 公式HP改修仕様書 (全16原則)】:</strong><br>
       1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に那須ユートピア美野沢専用 JSON-LD を記述。<br>
@@ -343,10 +394,11 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       "name": "塩原温泉 赤沢温泉旅館",
       "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
       "url": "https://hotel-ai.netlify.app/${item.folder}/",
-      "telephone": "+81-287-32-2411",
+      "telephone": "+81-287-46-5700",
       "priceRange": "¥10,000 - ¥28,000",
       "address": {
         "@type": "PostalAddress",
+        "postalCode": "329-2921",
         "addressCountry": "JP",
         "addressRegion": "栃木県",
         "addressLocality": "那須塩原市",

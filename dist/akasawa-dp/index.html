@@ -17,10 +17,11 @@
       "name": "塩原温泉 赤沢温泉旅館",
       "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
       "url": "https://hotel-ai.netlify.app/akasawa-dp/",
-      "telephone": "+81-287-32-2411",
+      "telephone": "+81-287-46-5700",
       "priceRange": "¥10,000 - ¥28,000",
       "address": {
         "@type": "PostalAddress",
+        "postalCode": "329-2921",
         "addressCountry": "JP",
         "addressRegion": "栃木県",
         "addressLocality": "那須塩原市",
@@ -446,66 +447,68 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
               <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 全体Web品質（現状<span id="score-val-b">10</span>点 ➔ <span style="color:#34d399;">+<span id="score-gain-b">10</span>点改善で 20点満点</span>）</strong>
               
               <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(52,211,153,0.3);">
-      "@id": "https://hotel-ai.netlify.app/akasawa/#hotel",
+                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb担当が実行すべき【赤沢温泉旅館 公式HP ＆ 構造化データ仕様書】を開く</summary>
+                <div id="spec-content-b" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  
+      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【塩原温泉 赤沢温泉旅館 公式HP改修仕様書 ＆ 正確なJSON-LDコード例】:</strong><br>
+      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に公式データ準拠のJSON-LDを記述。<br>
+      2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
+      3. <strong>実在ファクト完全準拠</strong>: NAP（公式ドメイン https://akasawaonsen.com/ / 0287-46-5700 / 〒329-2921 栃木県那須塩原市塩原1149）、チェックアウト 10:00。<br>
+      4. <strong>amenityFeature 実在設備10項目コード化</strong>: 無加水無循環天然ぬる湯 (38〜40℃), 箒川沿い渓流一軒宿, 看板猫のおもてなし, 赤沢風 鹿×豚ジンギスカン, 敷地内無料駐車場 30台等。<br>
+      5. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
+      6. <strong>生テキスト化 ＆ FAQ整備</strong>: 料金・客室・温泉・キャンセル規定をHTML生テキストで記述し、一問一答FAQを設置。<br>
+      <details style="margin-top:6px; background:#000; padding:8px; border-radius:6px;">
+        <summary style="color:#34d399; cursor:pointer; font-size:0.75rem; font-weight:bold;">▶ 埋め込み用 JSON-LD コード例（コピー可）</summary>
+        <pre style="margin-top:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;">
+&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://akasawaonsen.com/#hotel",
       "name": "塩原温泉 赤沢温泉旅館",
       "alternateName": "SHIOBARA ONSEN AKASAWA RYOKAN",
       "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
-      "url": "https://hotel-ai.netlify.app/akasawa/",
-      "telephone": "+81-287-00-0000",
-      "priceRange": "¥¥¥",
-      "address": { "@type": "PostalAddress", "postalCode": "329-3215", "addressRegion": "栃木県", "addressLocality": "那須塩原市", "streetAddress": "塩原1149" },
-      "geo": { "@type": "GeoCoordinates", "latitude": 36.9928, "longitude": 140.0381 },
+      "url": "https://akasawaonsen.com/",
+      "telephone": "+81-287-46-5700",
+      "priceRange": "¥10,000 - ¥28,000",
+      "address": {
+        "@type": "PostalAddress",
+        "postalCode": "329-2921",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須塩原市",
+        "streetAddress": "塩原1149"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9712,
+        "longitude": 139.8145
+      },
       "checkinTime": "15:00",
-      "checkoutTime": "11:00",
-      "petsAllowed": true,
-      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "215" },
+      "checkoutTime": "10:00",
       "amenityFeature": [
-        { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃・加温加水なし）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃・無加水無循環）", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "箒川を望む露天風呂・静養空間", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "看板猫のおもてなし（猫のいる静養宿）", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "無料駐車場 30台完備(高さ制限 2.1m・予約不要)", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "館内無料 Wi-Fi(SSID: nasu-utopia-guest・最大 200Mbps)", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "赤沢風 鹿×豚ジンギスカン料理", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "24時間利用可の温泉シャワー(客室個別)", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "乳幼児対応(ベビーベッド 2台・ベビーチェア貸出)", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "EV 充電スタンド 200V × 2口(無料・要予約)", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "客室専用露天風呂(ヴィラ A棟のみ・予約優先)", "value": true }
-      ],
-      "sameAs": [
-        "https://www.instagram.com/nasu-utopia/",
-        "https://x.com/nasu_utopia",
-        "https://travel.rakuten.co.jp/HOTEL/nasu-utopia/",
-        "https://www.booking.com/hotel/jp/nasu-utopia.html"
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場 30台完備(予約不要)", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "塩原温泉バスターミナルより送迎対応(要予約)", "value": true }
       ]
     },
     {
       "@type": "HotelRoom",
-      "@id": "https://hotel-ai.netlify.app/akasawa/#villaA",
-      "name": "箒川を望む和室（定員 5名）",
-      "description": "50㎡の 1棟貸切ヴィラ。ツインベッド 2台 + 和室 10畳 布団 2組。専用 BBQデッキ・専用露天風呂。",
-      "occupancy": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 6 },
-      "floorSize": { "@type": "QuantitativeValue", "value": 50, "unitCode": "MTK" }
-    },
-    {
-      "@type": "HotelRoom",
-      "@id": "https://hotel-ai.netlify.app/akasawa/#villaB",
-      "name": "特別和室（静養・湯治向け）",
-      "description": "85㎡の 1棟貸切ヴィラ。CUBERU バレルサウナ + REKKA 水風呂 + 4名用ダイニング。",
-      "occupancy": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 8 },
-      "floorSize": { "@type": "QuantitativeValue", "value": 85, "unitCode": "MTK" }
-    },
-    {
-                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb担当が実行すべき【赤沢温泉旅館 公式HP ＆ 構造化データ仕様書】を開く</summary>
-                <div id="spec-content-b" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
-                  
-      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【塩原温泉 赤沢温泉旅館 公式HP改修仕様書 (全16原則)】:</strong><br>
-      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に塩原温泉 赤沢温泉旅館専用 JSON-LD を記述。<br>
-      2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
-      3. <strong>amenityFeature 10項目コード化</strong>: 源泉かけ流しぬる湯, 看板猫, 箒川一軒宿, 鹿肉ジンギスカン, 駐車場30台等を指定。<br>
-      4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
-      5. <strong>生テキスト化</strong>: 料金・客室・温泉・キャンセル規定をHTML生テキストで記述。<br>
-      6. <strong>DMO・自治体（塩原温泉観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
-      7. <strong>多言語独立ディレクトリの開設</strong>: 英語・アジア言語独立ページの設置。
+      "@id": "https://akasawaonsen.com/#room-shiobara",
+      "name": "箒川を望む和室（全10室）",
+      "description": "川のせせらぎと塩原の大自然に包まれる落ち着いた和室。心身のリセットと静養に最適です。",
+      "occupancy": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 5 }
+    }
+  ]
+}
+&lt;/script&gt;
+        </pre>
+      </details>
     
                 </div>
               </details>
