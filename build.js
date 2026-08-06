@@ -829,4 +829,20 @@ Sitemap: https://hotel-ai.netlify.app/sitemap.xml
 fs.writeFileSync(path.join(distDir, 'llms.txt'), llmsContent, 'utf8');
 fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsContent, 'utf8');
 
+// dist/_redirects の自動生成 (Netlify Functions の保護 ＆ SPAルーティング)
+const redirectsContent = `# Netlify Serverless Functions 保護 (最優先リダイレクト)
+/.netlify/functions/*  /.netlify/functions/:splat  200
+/api/*                 /.netlify/functions/:splat  200
+
+# ダイナミックプライシング SPA ルーティング
+/nasu-utopia/dp/*  /nasu-utopia/dp/index.html  200
+/akasawa/dp/*      /akasawa/dp/index.html      200
+/akasawa-dp/*      /akasawa-dp/index.html      200
+
+# 施設別ポータルルーティング
+/akasawa      /akasawa/index.html      200
+/nasu-utopia  /nasu-utopia/index.html  200
+`;
+fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
+
 console.log('All builds and merges completed successfully!');
