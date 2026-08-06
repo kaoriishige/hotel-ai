@@ -118,7 +118,7 @@
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
               <span style="background: #34d399; color: #000; font-size: 0.78rem; font-weight: 900; padding: 4px 12px; border-radius: 20px;">Google API ＆ Gemini API 実連携稼働中</span>
-              <button onclick="runRealWebAudit()" id="real-audit-btn" style="background: #34d399; border: none; color: #000; font-size: 0.85rem; font-weight: 900; padding: 6px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(52,211,153,0.4); transition: all 0.2s;">🔍 今すぐ本物のWebページをAI自動診断する ➔</button>
+              <button onclick="runRealWebAudit()" id="real-audit-btn" style="background: #34d399; border: none; color: #000; font-size: 0.85rem; font-weight: 900; padding: 6px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(52,211,153,0.4); transition: all 0.2s;">🔍 今すぐWebページをAI自動診断する ➔</button>
             </div>
             <h2 style="font-size: 1.4rem; color: #fff; font-family: 'Shippori Mincho', serif; margin-top: 4px;">🏆 那須ユートピア美野沢 AIと人間に選ばれる本物査定スコア</h2>
           </div>
@@ -376,6 +376,21 @@ A3. 敷地内に30台分の無料駐車場を備えています（予約不要�
 
         document.getElementById('real-total-score').textContent = data.realTotalScore;
         document.getElementById('real-score-rank').textContent = data.realRank;
+
+        // 7区分の点数を内訳カードにリアルタイム動的反映
+        if (data.scores) {
+          const maxScores = { A: 25, B: 20, C: 20, D: 15, E: 10, F: 6, G: 4 };
+          ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(key => {
+            const upperKey = key.toUpperCase();
+            const scoreObj = data.scores[upperKey];
+            if (scoreObj && typeof scoreObj.score === 'number') {
+              const valElem = document.getElementById(`score-val-${key}`);
+              const gainElem = document.getElementById(`score-gain-${key}`);
+              if (valElem) valElem.textContent = scoreObj.score;
+              if (gainElem) gainElem.textContent = Math.max(0, maxScores[upperKey] - scoreObj.score);
+            }
+          });
+        }
 
         let logHtml = `<div style="margin-bottom: 8px; color: #34d399; font-weight: bold;">✅ Web直接フェッチ成功! (対象URL: ${data.targetUrl})</div>`;
         if (data.apiStatus) {

@@ -346,7 +346,7 @@
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
               <span style="background: #34d399; color: #000; font-size: 0.78rem; font-weight: 900; padding: 4px 12px; border-radius: 20px;">Google API ＆ Gemini API 実連携稼働中</span>
-              <button onclick="runRealWebAudit()" id="real-audit-btn" style="background: #34d399; border: none; color: #000; font-size: 0.85rem; font-weight: 900; padding: 6px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(52,211,153,0.4); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">🔍 今すぐ本物のWebページをAI自動診断する ➔</button>
+              <button onclick="runRealWebAudit()" id="real-audit-btn" style="background: #34d399; border: none; color: #000; font-size: 0.85rem; font-weight: 900; padding: 6px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(52,211,153,0.4); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">🔍 今すぐWebページをAI自動診断する ➔</button>
             </div>
             <h2 style="font-size: 1.4rem; color: #fff; font-family: 'Shippori Mincho', serif; margin-top: 4px;">🏆 京都祇園 伝統庵AI AIと人間に選ばれる本物査定スコア</h2>
           </div>
@@ -364,37 +364,36 @@
           </div>
         </div>
 
-        <!-- 7つの区分別スコア内訳 (修正時の加点シミュレーション明記) -->
-        <h4 style="font-size: 0.9rem; color: var(--accent-color); margin-bottom: 0.8rem;">📊 7区分の評価スコア内訳 (修正でプラス何点アップするかが一目瞭然)</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
+        <!-- 7つの区分別スコア内訳 (リアルタイム動的連動表示) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem;">
           
-          <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(212,175,55,0.4);">
+          <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
             <div style="font-size: 0.78rem; color: #e2e8f0; font-weight: 700;">A. 宿泊プラン品質 (自社+OTA)</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 14点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +11点 ➔ 25点満点)</span></div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 <span id="score-val-a">14</span>点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +<span id="score-gain-a">11</span>点 ➔ 25点満点)</span></div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">1行結論・数値ファクト・タグ【】・一問一答FAQ</div>
           </div>
 
-          <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(52,211,153,0.3);">
+          <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
             <div style="font-size: 0.78rem; color: #e2e8f0; font-weight: 700;">B. 公式HP ＆ 構造化データ</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 8点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +12点 ➔ 20点満点)</span></div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 <span id="score-val-b">8</span>点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +<span id="score-gain-b">12</span>点 ➔ 20点満点)</span></div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">Schema.org 4型 (JSON-LD)・llms.txt設置</div>
           </div>
 
           <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
             <div style="font-size: 0.78rem; color: #e2e8f0; font-weight: 700;">C. GBP ＆ Googleマップ</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 12点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +8点 ➔ 20点満点)</span></div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 <span id="score-val-c">12</span>点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +<span id="score-gain-c">8</span>点 ➔ 20点満点)</span></div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">写真30枚追加・設備タグ全埋め・HotelCenter</div>
           </div>
 
           <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
             <div style="font-size: 0.78rem; color: #e2e8f0; font-weight: 700;">D. OTA掲載品質 (楽天/じゃらん等)</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 9点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +6点 ➔ 15点満点)</span></div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 <span id="score-val-d">9</span>点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +<span id="score-gain-d">6</span>点 ➔ 15点満点)</span></div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">表記ブレ完全解消・4サイト同定一致</div>
           </div>
 
           <div style="background: rgba(15, 23, 42, 0.75); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
             <div style="font-size: 0.78rem; color: #e2e8f0; font-weight: 700;">E. レビュー鮮度 ＆ 返信品質</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 5点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +5点 ➔ 10点満点)</span></div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px;">現状 <span id="score-val-e">5</span>点 <span style="font-size: 0.8rem; color: #34d399; font-weight: bold;">(修正で +<span id="score-gain-e">5</span>点 ➔ 10点満点)</span></div>
             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">直近90日10件追加・具体個別返信100%</div>
           </div>
 
@@ -987,6 +986,22 @@ A3. 敷地内に30台分の無料駐車場を備えています（予約不要�
         // スコア更新
         const totalEl = document.getElementById('real-total-score');
         const rankEl = document.getElementById('real-score-rank');
+        
+        // 7区分の点数を内訳カードにリアルタイム動的反映
+        if (data.scores) {
+          const maxScores = { A: 25, B: 20, C: 20, D: 15, E: 10, F: 6, G: 4 };
+          ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(key => {
+            const upperKey = key.toUpperCase();
+            const scoreObj = data.scores[upperKey];
+            if (scoreObj && typeof scoreObj.score === 'number') {
+              const valElem = document.getElementById(`score-val-${key}`);
+              const gainElem = document.getElementById(`score-gain-${key}`);
+              if (valElem) valElem.textContent = scoreObj.score;
+              if (gainElem) gainElem.textContent = Math.max(0, maxScores[upperKey] - scoreObj.score);
+            }
+          });
+        }
+        
         if (totalEl) totalEl.textContent = data.realTotalScore;
         if (rankEl) {
           rankEl.textContent = data.realRank;
