@@ -1012,16 +1012,33 @@ Sitemap: https://hotel-ai.netlify.app/akasawa/sitemap.xml</pre>
 
       try {
         const tenantId = 'akasawa-dp';
+        const facilityName = '赤沢温泉旅館';
         const response = await fetch('/.netlify/functions/audit-website', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenantId, url: window.location.href })
+          body: JSON.stringify({ tenantId, facilityName, facilityPath: tenantId, url: window.location.href })
         });
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          throw new Error(`サーバーレスポンスエラー (${response.status}): JSON以外の応答が返されました。`);
+        }
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || '診断中にエラーが発生しました。');
+          throw new Error(data.error || data.message || '診断中にエラーが発生しました。');
+        }
+
+        // AI診断に基づくアコーディオン仕様書テキスト (specTexts) のリアルタイム動的書き換え
+        if (data.specTexts) {
+          if (data.specTexts.specA && document.getElementById('spec-content-a')) document.getElementById('spec-content-a').innerHTML = data.specTexts.specA;
+          if (data.specTexts.specB && document.getElementById('spec-content-b')) document.getElementById('spec-content-b').innerHTML = data.specTexts.specB;
+          if (data.specTexts.specC && document.getElementById('spec-content-c')) document.getElementById('spec-content-c').innerHTML = data.specTexts.specC;
+          if (data.specTexts.specD && document.getElementById('spec-content-d')) document.getElementById('spec-content-d').innerHTML = data.specTexts.specD;
+          if (data.specTexts.specE && document.getElementById('spec-content-e')) document.getElementById('spec-content-e').innerHTML = data.specTexts.specE;
+          if (data.specTexts.specFG && document.getElementById('spec-content-fg')) document.getElementById('spec-content-fg').innerHTML = data.specTexts.specFG;
         }
 
         // スコア更新
@@ -1050,7 +1067,7 @@ Sitemap: https://hotel-ai.netlify.app/akasawa/sitemap.xml</pre>
         }
 
         // 本物の監査ログ出力
-        let logHtml = `<div style="margin-bottom: 8px; color: #34d399; font-weight: bold;">✅ Web直接フェッチ成功! (対象URL: ${data.targetUrl})</div>`;
+        let logHtml = `<div style="margin-bottom: 8px; color: #34d399; font-weight: bold;">✅ Web直接スキャン・AI診断成功! (対象URL: ${data.targetUrl})</div>`;
         if (data.apiStatus) {
           logHtml += `<div style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); padding:6px 10px; border-radius:6px; margin-bottom:8px; font-size:0.75rem;">
             <strong>🔗 外部API連携ステータス:</strong><br>
