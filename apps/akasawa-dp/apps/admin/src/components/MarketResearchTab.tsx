@@ -484,7 +484,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
       case "pet_range":
         return (
           <div className="mr-kpi-view">
-            <span className="mr-kpi-label">ペット同伴の付加価値相場</span>
+            <span className="mr-kpi-label">ぬる湯・静養プランの相場</span>
             <div className="mr-kpi-value" style={{color: '#7e22ce', fontSize: '56px'}}>
               {petMin && petMax ? `¥${petMin.toLocaleString()} 〜 ¥${petMax.toLocaleString()}` : "販売データなし"}
             </div>
@@ -507,7 +507,7 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
           <p>支配人様、いつもお疲れ様です。</p>
           <p>
             本画面は市場の相場データを自動で集計し、支配人様の価格調整（値上げ・値下げ）の判断をサポートする分析パネルです。<br/>
-            カレンダーから日付を選び、見たい項目をクリックするだけで、那須エリアの販売状況から抽出した「価格判断の材料」が一目でわかるようになっています。<br/>
+            カレンダーから日付を選び、見たい項目をクリックするだけで、塩原温泉エリアの販売状況から抽出した「価格判断の材料」が一目でわかるようになっています。<br/>
             繁忙期や週末の単価（RevPAR）を最大化するための重要な判断材料としてご活用ください。
           </p>
         </div>
@@ -538,61 +538,16 @@ export default function MarketResearchTab({ researchData, onSaveData }: Props) {
               <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '24px', borderRadius: '12px', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
                 <div>
                   <h3 style={{ fontSize: '16px', color: '#e2e8f0', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>♨️</span> 那須町エリア 全体宿泊率
+                    <span style={{ fontSize: '18px' }}>♨️</span> 塩原温泉エリア 全体宿泊率
                   </h3>
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                    対象: 楽天トラベル掲載の那須町エリア全施設（89軒）
+                    対象: 楽天トラベル掲載の塩原温泉エリア全施設
                   </p>
                   {realVacantCount !== null && occ !== -1 && !isSimulated && (
                     <p style={{ fontSize: '13px', color: '#a7f3d0', margin: '6px 0 0 0', fontWeight: 'bold' }}>
                       空室: {realVacantCount} 軒 / 満室: {TOTAL_SHIOBARA_HOTELS - realVacantCount} 軒
                     </p>
                   )}
-                  {occ !== -1 && !isSimulated && (
-                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                      🟢 楽天トラベルよりリアルタイム取得済
-                    </div>
-                  )}
-                  {occ === -1 && (
-                    <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                      📊 エリア相場・推計モデル適用中
-                    </div>
-                  )}
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  {isFetchingOcc ? (
-                    <div style={{ color: '#94a3b8', fontSize: '13px' }}>取得中...</div>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: '32px', fontWeight: 'bold', color: (occ === -1 ? 75 : occ) >= 85 ? '#ef4444' : (occ === -1 ? 75 : occ) >= 60 ? '#f59e0b' : '#3b82f6' }}>
-                        {occ === -1 ? 75 : occ}%
-                      </div>
-                      <div style={{ fontSize: '11px', color: (occ === -1 ? 75 : occ) >= 85 ? '#fca5a5' : (occ === -1 ? 75 : occ) >= 60 ? '#fcd34d' : '#93c5fd', marginTop: '4px', fontWeight: 600 }}>
-                        {(occ === -1 ? 75 : occ) >= 85 ? '満室直前' : (occ === -1 ? 75 : occ) >= 60 ? '高需要' : '通常'}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* 調査対象施設 満室率カード */}
-              <div className="mr-kpi-card" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', padding: '24px', borderRadius: '12px', border: '1px solid #334155', borderLeftColor: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div className="mr-kpi-label" style={{ fontSize: '16px', color: '#a7f3d0', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>📋</span> 調査対象{TARGET_FACILITIES.length}施設 満室率
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                    リサーチしている競合・参考宿（計{TARGET_FACILITIES.length}軒）のうち満室の割合
-                  </p>
-                  <div style={{ marginTop: '8px', display: 'inline-block', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                    🔍 リアルタイム満室判定
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  {totalTargetCount === 0 ? (
-                    <div style={{ fontSize: '24px', color: '#cbd5e1', fontWeight: 'bold' }}>---</div>
-                  ) : (
-                    <>
                       <div style={{ fontSize: '32px', fontWeight: 'bold', color: fullRate >= 80 ? '#ef4444' : fullRate >= 40 ? '#f59e0b' : '#10b981' }}>
                         {fullRate}%
                       </div>

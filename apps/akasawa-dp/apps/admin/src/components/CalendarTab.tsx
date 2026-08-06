@@ -53,16 +53,16 @@ export default function CalendarTab({
         }
         if (json.competitors) {
           const TARGET_HOTELS = [
-            { id: "nasu-royal", name: "那須ロイヤルホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/1234/" },
-            { id: "nasu-sauna-villa", name: "那須高原サウナヴィラ", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/2345/" },
-            { id: "nasu-glamping", name: "那須グランピングリゾート RAUS", rating: 4.6, url: "https://travel.rakuten.co.jp/HOTEL/3456/" },
-            { id: "nasu-forest", name: "那須フォレストヴィラ", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/4567/" },
-            { id: "epinard-nasu", name: "ホテルエピナール那須", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/5678/" },
-            { id: "nasu-kogen-hotel", name: "那須高原ホテル", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/6789/" },
-            { id: "nasu-sanctuary", name: "那須サンクチュアリ", rating: 4.7, url: "https://travel.rakuten.co.jp/HOTEL/7890/" },
-            { id: "nasu-pension-sauna", name: "ペンション那須 with SAUNA", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/8901/" },
-            { id: "nasu-dog-resort", name: "那須ドッグリゾート木もれ陽の里", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/9012/" },
-            { id: "nasu-wan-resort", name: "わんわんリゾート 那須", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/9123/" }
+            { id: "shiobara-1", name: "塩原温泉 ぬる湯の宿", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/1234/" },
+            { id: "shiobara-2", name: "塩原渓谷 秘湯の宿", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/2345/" },
+            { id: "shiobara-3", name: "箒川沿い 温泉旅館", rating: 4.6, url: "https://travel.rakuten.co.jp/HOTEL/3456/" },
+            { id: "shiobara-4", name: "塩原温泉 源泉の宿", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/4567/" },
+            { id: "shiobara-5", name: "塩原温泉 老舗旅館", rating: 4.2, url: "https://travel.rakuten.co.jp/HOTEL/5678/" },
+            { id: "shiobara-6", name: "塩原温泉 静養の宿", rating: 4.5, url: "https://travel.rakuten.co.jp/HOTEL/6789/" },
+            { id: "shiobara-7", name: "塩原温泉 渓流露天の宿", rating: 4.7, url: "https://travel.rakuten.co.jp/HOTEL/7890/" },
+            { id: "shiobara-8", name: "塩原温泉 猫のいる湯宿", rating: 4.8, url: "https://travel.rakuten.co.jp/HOTEL/8901/" },
+            { id: "shiobara-9", name: "塩原温泉 湯治の宿", rating: 4.3, url: "https://travel.rakuten.co.jp/HOTEL/9012/" },
+            { id: "shiobara-10", name: "塩原温泉 隠れ家の宿", rating: 4.4, url: "https://travel.rakuten.co.jp/HOTEL/9123/" }
           ];
 
           const formatted = json.competitors.map((c: any) => {
@@ -355,10 +355,10 @@ export default function CalendarTab({
                   <div>
                     <div style={{ fontSize: "24px", marginBottom: "4px" }}>♨️</div>
                     <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", margin: "0 0 4px 0" }}>
-                      那須町エリア 全体宿泊率
+                      塩原温泉エリア 全体宿泊率
                     </h3>
                     <div style={{ fontSize: "12px", color: "#15803d", marginBottom: "16px" }}>
-                      対象: 楽天トラベル掲載の那須町エリア全施設（89軒）
+                      対象: 楽天トラベル掲載の塩原温泉エリア全施設
                     </div>
                     
                     <div style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", marginBottom: "12px" }}>
@@ -529,15 +529,15 @@ export default function CalendarTab({
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div>
                   <strong style={{ color: "#1e3a8a" }}>🔵 直接比較（5施設）</strong><br />
-                  那須ロイヤルホテルなど同規模リゾート・サウナ施設。この平均・最安値が那須ユートピア美野沢の「基準価格」のベースになります。
+                  塩原温泉エリアの同規模温泉旅館。この平均・最安値が塩原温泉 赤沢温泉旅館の「基準価格」のベースになります。
                 </div>
                 <div>
                   <strong style={{ color: "#4b5563" }}>🔘 相場参考（3施設）</strong><br />
-                  ホテルエピナール那須や那須サンクチュアリなど中位〜上位リゾート宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
+                  塩原温泉郷の中位〜上位温泉宿。連休でエリアがどこまで高騰するかの「天井」を探ります。
                 </div>
                 <div>
                   <strong style={{ color: "#6d28d9" }}>🟣 独自需要（2施設）</strong><br />
-                  那須ドッグリゾート木もれ陽の里、わんわんリゾート那須。ペット同伴やプライベートサウナ等の独自需要がどれほどの「プレミアム」を生むかの指標です。
+                  ぬる湯専門宿、猫のいる湯宿。長湯静養や看板猫等の独自需要がどれほどの「プレミアム」を生むかの指標です。
                 </div>
               </div>
             </div>
