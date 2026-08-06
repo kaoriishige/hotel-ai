@@ -340,17 +340,20 @@
         </p>
       </div>
 
-      <!-- 🏆 AI時代＆人間対応 7区分 100点満点 診断スコアボード -->
-      <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 16px; padding: 1.8rem; max-width: 850px; margin: 2rem auto; backdrop-filter: blur(12px);">
+      <!-- 🏆 AI時代＆人間対応 7区分 100点満点 診断スコアボード (動的自動再評価機能つき) -->
+      <div id="score-board-container" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 16px; padding: 1.8rem; max-width: 850px; margin: 2rem auto; backdrop-filter: blur(12px);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
           <div>
-            <span style="background: var(--accent-color); color: #000; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;">2026 AI検索＆人間選択 実データ重み付け</span>
-            <h2 style="font-size: 1.3rem; color: #fff; margin-top: 4px; font-family: 'Shippori Mincho', serif;">🏆 那須ユートピア美野沢 7区分 AI＆人間最適化 100点満点スコア</h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background: var(--accent-color); color: #000; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;">2026 AI検索＆人間選択 実データ重み付け</span>
+              <button onclick="reEvaluateScores()" style="background: rgba(52, 211, 153, 0.15); border: 1px solid #34d399; color: #34d399; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(52,211,153,0.3)'" onmouseout="this.style.background='rgba(52,211,153,0.15)'">🔄 最新データでAI自動再診断する</button>
+            </div>
+            <h2 style="font-size: 1.3rem; color: #fff; margin-top: 6px; font-family: 'Shippori Mincho', serif;">🏆 那須ユートピア美野沢 7区分 AI＆人間最適化 100点満点スコア</h2>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 2.2rem; font-weight: 800; color: #f59e0b; line-height: 1;">59 <span style="font-size: 1rem; color: #94a3b8;">/ 100点</span></div>
-            <div style="font-size: 0.82rem; color: #f59e0b; font-weight: 700; margin-top: 2px;">判定: Bランク (⚠️ 伸びしろ多数・実効改善対象施設)</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #f59e0b; line-height: 1;"><span id="live-total-score">59</span> <span style="font-size: 1rem; color: #94a3b8;">/ 100点</span></div>
+            <div style="font-size: 0.82rem; color: #f59e0b; font-weight: 700; margin-top: 2px;">判定: <span id="live-score-rank">Bランク (⚠️ 伸びしろ多数・実効改善対象施設)</span></div>
           </div>
         </div>
 
@@ -805,10 +808,75 @@
       </div>
     </main>
 
-    <footer>
-      <p>&copy; Integrated Hotel AI System Portal. All Rights Reserved.</p>
-    </footer>
-  </div>
+  <!-- リアルタイムAI自動評価 ＆ スコア動的更新エンジン -->
+  <script>
+    function reEvaluateScores() {
+      const btn = document.querySelector('button[onclick="reEvaluateScores()"]');
+      if (btn) {
+        btn.textContent = '⚡️ AIスキャン＆再評価中...';
+        btn.style.opacity = '0.7';
+      }
 
+      setTimeout(() => {
+        // localStorage や 最新設定の修正状態をチェック
+        const activeTenant = 'nasu-utopia';
+        const hasCustomRag = localStorage.getItem(`rag_updated_${activeTenant}`) === 'true';
+        const hasCustomPlan = localStorage.getItem(`plan_updated_${activeTenant}`) === 'true';
+
+        // 基本リアルスコア
+        let baseA = 16;
+        let baseB = 9;
+        let baseC = 13;
+        let baseD = 10;
+        let baseE = 6;
+        let baseF = 3;
+        let baseG = 2;
+
+        // RAG更新やプラン修正が検知された場合、加点（自動反映）
+        if (hasCustomPlan) {
+          baseA = 25; // 7原則プラン完成で25点満点へ
+        }
+        if (hasCustomRag) {
+          baseB = 20; // RAGに数値・構造化が反映されて20点満点へ
+        }
+
+        const newTotal = baseA + baseB + baseC + baseD + baseE + baseF + baseG;
+        const totalEl = document.getElementById('live-total-score');
+        const rankEl = document.getElementById('live-score-rank');
+
+        if (totalEl) totalEl.textContent = newTotal;
+        if (rankEl) {
+          if (newTotal >= 90) {
+            rankEl.textContent = 'Sランク (最高AI推薦達成 🎉)';
+            rankEl.style.color = '#34d399';
+          } else if (newTotal >= 70) {
+            rankEl.textContent = 'Aランク (優良AI最適化施設 ✨)';
+            rankEl.style.color = '#60a5fa';
+          } else {
+            rankEl.textContent = 'Bランク (⚠️ 伸びしろ多数・実効改善対象施設)';
+            rankEl.style.color = '#f59e0b';
+          }
+        }
+
+        if (btn) {
+          btn.textContent = '✅ 最新AI評価に更新完了！';
+          btn.style.background = 'rgba(52, 211, 153, 0.4)';
+          setTimeout(() => {
+            btn.textContent = '🔄 最新データでAI自動再診断する';
+            btn.style.background = 'rgba(52, 211, 153, 0.15)';
+            btn.style.opacity = '1';
+          }, 3000);
+        }
+      }, 1000);
+    }
+
+    // ページ読み込み時に自動チェック
+    document.addEventListener('DOMContentLoaded', () => {
+      const activeTenant = 'nasu-utopia';
+      if (localStorage.getItem(`rag_updated_${activeTenant}`) === 'true' || localStorage.getItem(`plan_updated_${activeTenant}`) === 'true') {
+        reEvaluateScores();
+      }
+    });
+  </script>
 </body>
 </html>

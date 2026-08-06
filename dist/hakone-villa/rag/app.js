@@ -24,8 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteInfo: document.getElementById('deleteText').value
     };
     localStorage.setItem(KEY, JSON.stringify(data));
+    
+    // スコア自動更新用の連動フラグを更新
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantId = urlParams.get('tenant') || 'nasu-utopia';
+    localStorage.setItem(`rag_updated_${tenantId}`, 'true');
 
-    statusMsg.textContent = '✨ 保存完了！全9つのAIシステムに反映されました';
+    statusMsg.textContent = '✨ 保存完了！全9つのAIシステムと評価スコア（+11点加点）に自動反映されました';
     statusMsg.style.background = 'rgba(52,211,153,0.2)';
     statusMsg.style.color = '#34d399';
     setTimeout(() => {

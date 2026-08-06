@@ -175,6 +175,9 @@ async function generatePlan() {
     generatedPlans.yearRoundPlan = data.yearRoundPlan;
     generatedPlans.shortTermPlan = data.shortTermPlan;
 
+    // スコア自動更新用の連動フラグを更新
+    localStorage.setItem(`plan_updated_${tenantId}`, 'true');
+
     // 表示切り替え
     el.placeholderView.classList.add('hidden');
     el.outputContent.classList.remove('hidden');
