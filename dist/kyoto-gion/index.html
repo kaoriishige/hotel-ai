@@ -305,42 +305,82 @@
 
         </div>
 
-        <!-- 担当ロール別 7区分現場改善アクションリスト（加点目標明記） -->
-        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 1.3rem;">
-          <h4 style="font-size: 0.95rem; color: var(--accent-color); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 6px;">
-            <span>🛠️</span> 修正タスクと加点シミュレーション (全作業で +49点アップ ➔ 100点達成)
-          </h4>
+        <!-- 現場スタッフ専用：修正場所特定 ＆ ピンポイント変更指示カード -->
+        <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 14px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem;">
+            <h4 style="font-size: 1rem; color: var(--accent-color); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              <span>📌</span> 現場スタッフ用 修正場所特定 ＆ 加点ピンポイント指示書
+            </h4>
+            <span style="background: var(--accent-color); color: #000; font-size: 0.72rem; font-weight: 900; padding: 3px 10px; border-radius: 20px;">全タスク完了で +49点 ➔ 100点到達</span>
+          </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.8rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 1rem; font-size: 0.83rem; color: #e2e8f0; line-height: 1.5;">
             
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-color);">
-              <strong style="color: var(--accent-color);">[A. プラン修正] 現状 14点 ➔ 修正で【 +11点 アップ 】で 25点満点！</strong><br>
-              ・<strong>「🏨 宿泊プラン作成エージェント」</strong>で、冒頭1行結論＋数値＋ペルソナタグ【】を含む7原則プランを生成し、OTA・公式HPの全プラン文末に「一問一答FAQ」を追加する。
+            <!-- 1. プラン修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid var(--accent-color);">
+              <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 800; text-transform: uppercase;">修正場所: 🏨 「宿泊プラン作成エージェント」画面</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">A. プラン品質（現状14点 ➔ <span style="color:#34d399;">+11点改善で 25点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① プランタイトル冒頭に <strong>【サウナ・整い重視】</strong> 等のタグを付与<br>
+                ② 本文最初の1行に <strong>「那須町・全ヴィラ・貸切バレルサウナ」</strong> と結論表記<br>
+                ③ 文末に <strong>「よくある質問と回答（FAQ 3問）」</strong> をコピペ追加
+              </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #34d399;">
-              <strong style="color: #34d399;">[B. Web/DX修正] 現状 8点 ➔ 修正で【 +12点 アップ 】で 20点満点！</strong><br>
-              ・Schema.org 4型 (Hotel, HotelRoom, Offer, FAQPage) のJSON-LDコードをHP裏側に埋め込み、`llms.txt` をルートディレクトリに設置する。
+            <!-- 2. RAG数値修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #34d399;">
+              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800; text-transform: uppercase;">修正場所: 📝 「現場のおすすめ・最新プラン登録」画面 (RAG)</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP・構造化（現状8点 ➔ <span style="color:#34d399;">+12点改善で 20点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① アクセス欄に「車で便利」ではなく <strong>「那須塩原駅から車で20分 / 無料駐車場30台」</strong> と数字を記入<br>
+                ② 客室説明に <strong>「客室広さ50㎡ / サウナ温度90℃」</strong> と具体数値を追加入力
+              </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #60a5fa;">
-              <strong style="color: #60a5fa;">[C. GBP修正] 現状 12点 ➔ 修正で【 +8点 アップ 】で 20点満点！</strong><br>
-              ・GBPの写真に客室全景・サウナ・朝食・駐車場・コンセント等の写真を10枚以上追加し、全設備タグを入力してGoogle Hotel Centerと連携する。
+            <!-- 3. GBP写真修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #60a5fa;">
+              <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800; text-transform: uppercase;">修正場所: 📍 「Googleビジネスプロフィール」管理画面</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">C. GBP・Googleマップ（現状12点 ➔ <span style="color:#34d399;">+8点改善で 20点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① 写真フォルダから <strong>客室・サウナ・朝食・駐車場・コンセント周り</strong> の写真を計30枚追加<br>
+                ② 設備タグ（無料Wi-Fi、駐車場、ペット可等）のチェックを入れる
+              </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #f43f5e;">
-              <strong style="color: #f43f5e;">[D. OTA修正] 現状 9点 ➔ 修正で【 +6点 アップ 】で 15点満点！</strong><br>
-              ・楽天/じゃらん/Booking/一休の4サイトに掲載し、公式HPと施設名・住所・価格・規定の表記ブレを完全に解消する。
+            <!-- 4. OTA表記修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #f43f5e;">
+              <div style="font-size: 0.75rem; color: #f43f5e; font-weight: 800; text-transform: uppercase;">修正場所: 📱 「楽天トラベル / じゃらん / Booking」管理画面</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">D. OTA掲載品質（現状9点 ➔ <span style="color:#34d399;">+6点改善で 15点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① 各OTAの施設名・住所の表記ブレを <strong>「那須ユートピア美野沢」に公式HPと1字一句完全統一</strong><br>
+                ② キャンセル規定・チェックイン時刻を公式HPと一致させる
+              </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #a855f7;">
-              <strong style="color: #a855f7;">[E. レビュー修正] 現状 5点 ➔ 修正で【 +5点 アップ 】で 10点満点！</strong><br>
-              ・滞在後24時間以内のレビュー依頼メール・QRを導入し、過去の低評価口コミへ具体改善を込めた個別返信（返信率100%）を行う。
+            <!-- 5. レビュー返信修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #a855f7;">
+              <div style="font-size: 0.75rem; color: #a855f7; font-weight: 800; text-transform: uppercase;">修正場所: 💬 「レビュー返信 / 口コミ自動メール」画面</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">E. レビュー鮮度・返信（現状5点 ➔ <span style="color:#34d399;">+5点改善で 10点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① 退去後24時間以内の自動レビュー依頼メールを有効化<br>
+                ② 低評価口コミへ <strong>「〇月〇日に〇〇を改善しました」</strong> と個別具体返信
+              </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border-left: 3px solid #eab308;">
-              <strong style="color: #eab308;">[F & G. 広報/翻訳修正] 現状 3点 ➔ 修正で【 +7点 アップ 】で 10点満点！</strong><br>
-              ・那須町観光協会/DMOからの公式被リンク獲得、地域メディアへの露出を実施し、英語・アジア言語の客室・アクセス・FAQページを整備する。
+            <!-- 6 & 7. 被リンク＆多言語修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 12px 14px; border-radius: 10px; border-left: 4px solid #eab308;">
+              <div style="font-size: 0.75rem; color: #eab308; font-weight: 800; text-transform: uppercase;">修正場所: 🌐 「那須町観光協会会員ページ」＆「HP多言語設定」</div>
+              <strong style="font-size: 0.92rem; color: #fff; display: block; margin: 4px 0;">F&G. 第三者言及・多言語（現状3点 ➔ <span style="color:#34d399;">+7点改善で 10点満点</span>）</strong>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
+                <strong>【直すもの（これとこれ）】:</strong><br>
+                ① 観光協会の自施設ページに公式HPのURL（被リンク）を登録申請<br>
+                ② 客室・アクセス・FAQの <strong>英語・中国語・韓国語独立ページ</strong> を公開
+              </div>
             </div>
 
           </div>
