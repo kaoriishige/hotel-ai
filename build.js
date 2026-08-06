@@ -767,13 +767,7 @@ if (fs.existsSync(akasawaDpSrc)) {
   copyFolderSync(akasawaDpSrc, path.join(akasawaDestDir, 'dp'));
 }
 
-// _redirects ルーティングファイルの書き出し
-const redirectsContent = `
-/akasawa/dp/*  /akasawa/dp/index.html  200
-/nasu-utopia/dp/*  /nasu-utopia/dp/index.html  200
-/akasawa-dp/*  /akasawa-dp/index.html  200
-`;
-fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
+// _redirects ルーティングファイルの書き出し準備
 
 // 9. AIクローラー専用ファイル llms.txt & robots.txt の生成・書き出し
 console.log('Generating AI Crawler Knowledge Files (llms.txt & robots.txt)...');
