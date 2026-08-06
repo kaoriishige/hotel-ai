@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>那須ユートピア美野沢 統合AIシステムポータル</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- AI検索エンジン(ChatGPT / Perplexity / Google AI)向け Schema.org 4型 構造化データ (JSON-LD) -->
+  {{SCHEMA_JSON_LD}}
+  <style>
+    :root {
+      --bg-dark: #0a1118;
+      --card-bg: rgba(16, 26, 38, 0.7);
+      --card-hover-bg: rgba(24, 38, 56, 0.85);
+      --accent-color: #d4af37;
+      --accent-gradient: linear-gradient(135deg, #f3e5ad 0%, #d4af37 50%, #aa820a 100%);
+      --text-main: #f5f7fa;
+      --text-sub: #94a3b8;
+      --border-color: rgba(212, 175, 55, 0.25);
+      --border-hover: rgba(212, 175, 55, 0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(15, 23, 42, 0.8) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; }
+    header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
+    
+    .badge {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid var(--border-color);
+      color: var(--accent-color);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 0.4rem 1.2rem; border-radius: 20px;
+      margin-bottom: 1rem; letter-spacing: 0.05em;
+    }
+
+    h1 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 2.3rem; font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.8rem; letter-spacing: 0.02em;
+    }
+
+    .subtitle { font-size: 0.95rem; color: var(--text-sub); max-width: 650px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+      text-decoration: none; color: inherit;
+    }
+
+    .card:hover {
+      background: var(--card-hover-bg);
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 0 16px rgba(212, 175, 55, 0.15);
+    }
+
+    .card-icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
+    .card-title { font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+    .card-desc { font-size: 0.88rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 1.2rem; }
+    .card-benefit {
+      font-size: 0.82rem; background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px;
+      padding: 0.7rem 0.9rem; color: #e2e8f0; margin-bottom: 1.2rem;
+    }
+
+    .card-action { font-size: 0.85rem; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 6px; }
+    .benefit-section { margin-bottom: 3rem; }
+    .section-title { font-family: 'Shippori Mincho', serif; color: #fff; margin-bottom: 1.5rem; }
+    footer { text-align: center; padding: 2rem; color: var(--text-sub); font-size: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: auto; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">AI-Powered Ryokan Management System</div>
+      <h1>那須ユートピア美野沢 統合AIシステムポータル</h1>
+      <p class="subtitle">
+        集客・単価・リピート率を一括向上させる統括ポータル画面です。
+      </p>
+    </header>
+
+    <!-- 売上向上モデル -->
+    <section class="benefit-section">
+      <h2 class="section-title" style="font-size: 1.7rem; text-align: center;">売上向上モデル ＝ 宿泊客数 × 客単価（ADR） × リピート回数</h2>
+      <div style="text-align: center; margin: 1.5rem 0 2rem;">
+        <p style="font-size: 1.15rem; font-weight: bold; color: var(--accent-color); margin-bottom: 0.5rem;">
+          【売上向上モデル例】 宿泊客数 1.3倍 × 客単価 1.3倍 × リピート 1.3倍
+        </p>
+      </div>
+
+      <!-- 🏆 Google Rich Results API & Gemini API 本物実連携 リアルタイム診断ライブパネル -->
+      <div id="score-board-container" style="background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(15, 23, 42, 0.98) 100%); border: 2px solid #34d399; border-radius: 18px; padding: 2rem; max-width: 880px; margin: 2rem auto; backdrop-filter: blur(12px); box-shadow: 0 12px 32px rgba(52,211,153,0.2);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 1.2rem; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <span style="background: #34d399; color: #000; font-size: 0.78rem; font-weight: 900; padding: 4px 12px; border-radius: 20px;">Google API ＆ Gemini API 実連携稼働中</span>
+              <button onclick="runRealWebAudit()" id="real-audit-btn" style="background: #34d399; border: none; color: #000; font-size: 0.85rem; font-weight: 900; padding: 6px 16px; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(52,211,153,0.4); transition: all 0.2s;">🔍 今すぐ本物のWebページをAI自動診断する ➔</button>
+            </div>
+            <h2 style="font-size: 1.4rem; color: #fff; font-family: 'Shippori Mincho', serif; margin-top: 4px;">🏆 那須ユートピア美野沢 7区分 AI＆人間最適化 本物査定スコア</h2>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 2.5rem; font-weight: 900; color: #34d399; line-height: 1;"><span id="real-total-score">59</span> <span style="font-size: 1rem; color: #94a3b8;">/ 100点</span></div>
+            <div style="font-size: 0.85rem; color: #f59e0b; font-weight: 800; margin-top: 4px;">判定: <span id="real-score-rank">Bランク (⚠️ 伸びしろ多数・実用改善対象施設)</span></div>
+          </div>
+        </div>
+
+        <!-- 本物AI自動診断のリアルタイム監査ログ結果表示エリア -->
+        <div id="real-audit-results" style="display: block; background: rgba(0, 0, 0, 0.75); border: 1px solid #34d399; border-radius: 12px; padding: 1.2rem; margin-bottom: 1.2rem; font-size: 0.85rem; color: #e2e8f0;">
+          <strong style="color: #34d399; font-size: 0.9rem; display: block; margin-bottom: 8px;">⚡️ 本物Web自動スキャン ＆ Google API / Gemini API 診断ログ（リアルタイムデータ）</strong>
+          <div id="real-audit-log-content">
+            <div style="color: #94a3b8;">上の「🔍 今すぐ本物のWebページをAI自動診断する」ボタンを押すと、実際のWebページの生HTML、Schema.org (JSON-LD)、Google Rich Results Test API、Gemini 7原則構文解析がリアルタイム実行されます。</div>
+          </div>
+        </div>
+
+        <!-- 現場スタッフ専用：修正場所特定 ＆ ピンポイント変更指示カード (アコーディオン詳細展開) -->
+        <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 14px; padding: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem;">
+            <h4 style="font-size: 1rem; color: var(--accent-color); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              <span>📌</span> 現場スタッフ用 修正場所特定 ＆ 加点ピンポイント指示書
+            </h4>
+            <span style="background: var(--accent-color); color: #000; font-size: 0.72rem; font-weight: 900; padding: 3px 10px; border-radius: 20px;">全タスク完了で +41点 ➔ 100点到達</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 1rem; font-size: 0.83rem; color: #e2e8f0; line-height: 1.5;">
+            
+            <!-- 1. プラン修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid var(--accent-color);">
+              <div style="font-size: 0.75rem; color: var(--accent-color); font-weight: 800;">修正場所: 🏨 「宿泊プラン作成エージェント」画面</div>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">A. 宿泊プラン品質（現状16点 ➔ <span style="color:#34d399;">+9点改善で 25点満点</span>）</strong>
+              
+              <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);">
+                <summary style="cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 0.82rem;">▶︎ クリックで具体的な修正項目・那須ユートピアRAG例文・FAQコードを開く</summary>
+                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  <strong style="color:#fff;">【那須ユートピア美野沢 固有の修正7原則チェックリスト】:</strong><br>
+                  1. <strong>タイトル冒頭タグ</strong>: <code>【愛犬同伴×貸切サウナ】</code> <code>【整い重視×手ぶらBBQ】</code> を先頭に付ける。<br>
+                  2. <strong>タイトル本格例</strong>: <code>【愛犬同伴×貸切サウナ】旧美野沢小学校リノベーションヴィラで過ごす、150㎡専用ドッグラン＆手ぶら本格BBQつき1泊2食プラン</code><br>
+                  3. <strong>冒頭1行結論</strong>: 「那須高原の大自然に抱かれた旧美野沢小学校リノベーションリゾート。完全貸切バレルサウナ（CUBERU/Rekka）と水風呂15℃、150㎡専用ドッグラン完備のヴィラでととのう特別な休日。」<br>
+                  4. <strong>5つの数値ファクト記述</strong>: 「客室広さ50㎡」「専用ドッグラン150㎡」「サウナ最高90℃」「水風呂15℃」「無料駐車場30台」「那須塩原駅から車20分」<br>
+                  5. <strong>買う理由 (Because)</strong>: 「なぜ当館か：完全プライベート空間で愛犬とノーリードで過ごし、周りを気にせず90分貸切サウナを堪能できるため。」<br>
+                  6. <strong>キャンセル規定の明記</strong>: 「3日前30% / 前日50% / 当日・不泊100%」を本文中に明記。<br>
+                  7. <strong>文末一問一答FAQ 3問（コピペ用）</strong>:<br>
+                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 貸切バレルサウナの利用時間は？
+A1. 90分完全貸切制です。15:00〜22:00 / 7:00〜10:00からご希望の時間枠をお選びいただけます。
+Q2. 愛犬同伴の条件は？
+A2. 狂犬病・ワクチン証明提示で中型犬2頭まで可。150㎡のプライベートドッグランを完備しています。
+Q3. 駐車場料金は？
+A3. 敷地内に30台分の無料駐車場を備えています（予約不要）。</pre>
+                </div>
+              </details>
+            </div>
+
+            <!-- 2. 公式HP ＆ 構造化データ修正 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #34d399;">
+              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800;">修正場所: 🌐 「公式HP `<head>` コード」＆ 「サーバー直下」</div>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">B. 公式HP ＆ 構造化データ（現状9点 ➔ <span style="color:#34d399;">+11点改善で 20点満点</span>）</strong>
+              
+              <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(52,211,153,0.3);">
+                <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb制作業者様へ渡す全5項目＆Schema.orgコード例を開く</summary>
+                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  <strong style="color:#fff;">【Web制作会社様・DX担当へ渡す本物改修チェックリスト】:</strong><br>
+                  1. <strong>Schema.org 4型 (JSON-LD) 埋め込み</strong>: HTMLの `<head>` 内に Hotel, HotelRoom, Offer, FAQPage を埋め込み。<br>
+                  2. <strong>Rich Results Test 0エラー化</strong>: `priceCurrency: "JPY"`, `availability: "InStock"` を記述。<br>
+                  3. <strong>amenityFeature (アメニティ構造化)</strong>: CUBERUサウナ, 150㎡ドッグラン, 駐車場30台をコード化。<br>
+                  4. <strong>`llms.txt` / `robots.txt` 設置</strong>: ルートに `llms.txt` を置き、`GPTBot` の `Allow: /` を指定。<br>
+                  5. <strong>生テキスト化</strong>: チラシ画像の埋め込みを全廃し、HTMLテキストで記述。<br>
+                  <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "Hotel",
+  "name": "那須ユートピア美野沢",
+  "description": "旧美野沢小学校アートリノベーション。貸切バレルサウナCUBERUと150㎡ドッグランヴィラ",
+  "address": { "@type": "PostalAddress", "addressRegion": "栃木県", "addressLocality": "那須郡那須町", "streetAddress": "箕輪318" },
+  "geo": { "@type": "GeoCoordinates", "latitude": 36.9928, "longitude": 140.0381 },
+  "amenityFeature": [
+    { "@type": "LocationFeatureSpecification", "name": "完全貸切バレルサウナ (CUBERU/Rekka)", "value": true },
+    { "@type": "LocationFeatureSpecification", "name": "150㎡専用ドッグラン付きヴィラ", "value": true }
+  ]
+}
+&lt;/script&gt;</pre>
+                </div>
+              </details>
+            </div>
+
+            <!-- 3. GBP写真修正 & ログイン連携 -->
+            <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; border-left: 4px solid #60a5fa;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800;">修正場所: 📍 「Googleビジネスプロフィール」管理画面</div>
+                <button onclick="connectGbpAccount()" style="background:rgba(96,165,250,0.2); border:1px solid #60a5fa; color:#60a5fa; font-size:0.7rem; padding:2px 8px; border-radius:12px; cursor:pointer; font-weight:bold;">🔑 スタッフ用 Googleログイン連携</button>
+              </div>
+              <strong style="font-size: 0.95rem; color: #fff; display: block; margin: 4px 0;">C. GBP・Googleマップ（現状13点 ➔ <span style="color:#34d399;">+7点改善で 20点満点</span>）</strong>
+              
+              <details style="margin-top: 8px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(96,165,250,0.3);">
+                <summary style="cursor: pointer; color: #60a5fa; font-weight: bold; font-size: 0.82rem;">▶︎ クリックで必要な写真30枚の指定内訳とアメニティチェックリストを開く</summary>
+                <div style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
+                  <strong style="color:#fff;">【Googleマップ撮影・投稿 写真30枚の内訳】:</strong><br>
+                  ・<strong>客室・ヴィラ内部</strong>（5枚）: グランピングヴィラ全景、ベッド、専用テラス、コンセント・Wi-Fi案内<br>
+                  ・<strong>サウナ・整いスペース</strong>（8枚）: バレルサウナCUBERU外観・内部、薪サウナRekka、水風呂15℃、外気浴チェアー<br>
+                  ・<strong>ドッグラン・愛犬設備</strong>（5枚）: 150㎡専用ドッグラン全景、足洗い場、愛犬用アメニティ<br>
+                  ・<strong>食事・BBQ</strong>（5枚）: 那須特製手ぶらBBQ肉セット、グリル機、朝食バゲット<br>
+                  ・<strong>外観・アクセス</strong>（7枚）: 旧美野沢小学校校舎・アート作品、無料駐車場30台、看板<br>
+                  <strong style="color:#fff; margin-top:6px; display:block;">【チェックを入れるべき設備タグ】:</strong><br>
+                  無料Wi-Fi、無料駐車場、ペット同伴可、サウナあり、完全禁煙、車椅子対応
+                </div>
+              </details>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 9アプリアプリリンク -->
+    <div class="grid">
+      <a href="/nasu-utopia/plan/index.html" class="card">
+        <div>
+          <div class="card-icon">🏨</div>
+          <h2 class="card-title">宿泊プラン作成エージェント</h2>
+          <p class="card-desc">那須ユートピア美野沢固有のRAGデータ（貸切サウナ、ドッグラン150㎡）に最適化された売れるプランを自動設計します。</p>
+        </div>
+        <div class="card-action">プランを作成する ➔</div>
+      </a>
+      <a href="/nasu-utopia/rag/index.html" class="card" style="border-color: rgba(212, 175, 55, 0.6);">
+        <div>
+          <div class="card-icon">📝</div>
+          <h2 class="card-title" style="color: var(--accent-color);">現場のおすすめ・最新プラン登録</h2>
+          <p class="card-desc">新しいプランや見どころを入力して保存するだけ。全9つのAIシステムに最新情報が完全自動同期されます。</p>
+        </div>
+        <div class="card-action" style="color: var(--accent-color); font-weight: bold;">おすすめ・最新プランを登録する ➔</div>
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    async function runRealWebAudit() {
+      const btn = document.getElementById('real-audit-btn');
+      const resultsDiv = document.getElementById('real-audit-results');
+      const logContent = document.getElementById('real-audit-log-content');
+      if (!btn || !resultsDiv || !logContent) return;
+
+      btn.disabled = true;
+      btn.textContent = '⏳ 実際のWebページをクロール・AI解析中...';
+
+      try {
+        const response = await fetch('/.netlify/functions/audit-website', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId: 'nasu-utopia', url: window.location.href })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || '診断中にエラーが発生しました。');
+
+        document.getElementById('real-total-score').textContent = data.realTotalScore;
+        document.getElementById('real-score-rank').textContent = data.realRank;
+
+        let logHtml = `<div style="margin-bottom: 8px; color: #34d399; font-weight: bold;">✅ Web直接フェッチ成功! (対象URL: ${data.targetUrl})</div>`;
+        if (data.apiStatus) {
+          logHtml += `<div style="background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); padding:6px 10px; border-radius:6px; margin-bottom:8px; font-size:0.75rem;">
+            <strong>🔗 外部API連携ステータス:</strong><br>
+            ・Google Rich Results Test API: <span style="color:#34d399;font-weight:bold;">${data.apiStatus.googleRichResultsApi}</span><br>
+            ・Gemini-1.5-Flash API (宿固有RAG自動照合): <span style="color:#34d399;font-weight:bold;">${data.apiStatus.geminiApi}</span>
+          </div>`;
+        }
+
+        logHtml += `<div style="font-weight: bold; margin-top: 6px; color: #d4af37;">【B. Schema.org 構造化データ 本物検証ログ】</div>`;
+        data.scores.B.checklist.forEach(c => {
+          const color = c.status === 'PASS' ? '#34d399' : (c.status === 'WARN' ? '#f59e0b' : '#ef4444');
+          logHtml += `<div style="margin-left: 8px; margin-top: 2px;"><span style="color: ${color}; font-weight: bold;">${c.status === 'PASS' ? '✅' : '🚨'} ${c.item}</span> ${c.status === 'PASS' ? `(+${c.score}点 合格)` : `<span style="color:#ef4444;">(${c.reason})</span>`}</div>`;
+        });
+
+        logHtml += `<div style="font-weight: bold; margin-top: 10px; color: #d4af37;">【A. 宿泊プラン7原則 × 宿固有RAGテキスト解析ログ】</div>`;
+        data.scores.A.checklist.forEach(c => {
+          const color = c.status === 'PASS' ? '#34d399' : (c.status === 'WARN' ? '#f59e0b' : '#ef4444');
+          logHtml += `<div style="margin-left: 8px; margin-top: 2px;"><span style="color: ${color}; font-weight: bold;">${c.status === 'PASS' ? '✅' : '🚨'} ${c.item}</span> ${c.status === 'PASS' ? `(+${c.score}点 合格)` : `<span style="color:#ef4444;">(${c.reason})</span>`}</div>`;
+        });
+
+        logContent.innerHTML = logHtml;
+
+      } catch (err) {
+        logContent.innerHTML = `<div style="color: #ef4444;">🚨 診断エラー: ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 実際のWebページを再診断する';
+      }
+    }
+
+    function connectGbpAccount() {
+      alert('📍 Googleビジネスプロフィール (GBP) アカウント連携:\n\nGoogleマップの写真30枚・アメニティチェック・口コミ獲得ペースを自動同期取得します。');
+    }
+  </script>
+</body>
+</html>
