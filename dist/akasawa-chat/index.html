@@ -1,60 +1,187 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赤沢温泉旅館 - AI客室デジタルコンシェルジュ</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客室案内 | 赤沢温泉旅館</title>
+  <meta name="description" content="赤沢温泉旅館の客室デジタルコンシェルジュ。猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿。お食事、館内施設、温泉のご案内、周辺観光体験情報をスマートフォンでご覧いただけます。">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div style="max-width:800px;margin:0 auto;padding:0.8rem 1.5rem 0;">
-        <a href="../index.html" style="color:#d4af37;text-decoration:none;font-size:0.85rem;font-weight:600;">← ダッシュボードに戻る</a>
-    </div>
-    <header class="header">
-        <div class="logo">
-            <span class="sub">自家源泉100% ぬる湯と渓流の宿</span>
-            <h1>塩原温泉 赤沢温泉旅館</h1>
+  <div style="max-width:800px;margin:0 auto;padding:0.8rem 1.5rem 0;position:relative;z-index:99;">
+    <a href="../index.html" style="color:#d4af37;text-decoration:none;font-size:0.85rem;font-weight:600;">← ダッシュボードに戻る</a>
+  </div>
+  <div class="app-container fade-in">
+    <!-- 和紙テクスチャオーバーレイ -->
+    <div class="washi-overlay"></div>
+
+    <!-- メインヘッダー -->
+    <header class="main-header">
+      <!-- 言語選択セレクター -->
+      <div class="lang-selector">
+        <button class="lang-selector-btn" aria-label="Select Language">
+          <svg class="globe-icon" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
+          </svg>
+          <span class="current-lang">日本語</span>
+          <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="lang-dropdown">
+          <button data-lang="ja">日本語</button>
+          <button data-lang="en">English</button>
+          <button data-lang="zh">简体中文</button>
+          <button data-lang="ko">한국어</button>
         </div>
+      </div>
+
+      <div class="logo-area">
+        <div class="logo-symbol"></div>
+        <h1 class="logo-text gold-text-gradient">赤沢温泉旅館</h1>
+        <span class="logo-sub" data-i18n="logo_sub">デジタルコンシェルジュ</span>
+      </div>
+      <div class="en-title">Akasawa Onsen Ryokan</div>
+
+      <!-- AI検索コンシェルジュ チャットエリア -->
+      <div id="inline-chat-container" class="inline-chat-wrapper">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <span class="chat-avatar">🔍</span>
+            <span class="chat-header-title" data-i18n="chat_title">AIコンシェルジュ</span>
+          </div>
+        </div>
+
+        <!-- メッセージ表示エリア -->
+        <div id="chat-messages" class="chat-messages-area">
+          <div class="chat-bubble bot">
+            <div class="bubble-content" data-i18n="chat_welcome">
+              こんにちは。赤沢温泉旅館のAI音声コンシェルジュです。客室のご案内や、宿泊予約のお手伝いをいたします。何でもお気軽にお尋ねください。
+            </div>
+          </div>
+        </div>
+
+        <!-- テキスト検索入力エリア（音声機能は完全削除） -->
+        <div class="chat-input-area">
+          <div class="chat-input-row">
+            <form id="chat-text-form" class="chat-text-form-container">
+              <input id="chat-text-input" type="text" placeholder="質問・キーワードを入力して検索..." autocomplete="off" />
+              <button type="submit" class="chat-send-button" title="Send Message">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <main class="container">
-        <section class="hero-card">
-            <h2>猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿</h2>
-            <p>赤沢温泉旅館のAI客室デジタルコンシェルジュへようこそ。温泉、お食事、館内案内をご案内いたします。</p>
-        </section>
+    <!-- コンセプト表示エリア -->
+    <section class="concept-container">
+      <div class="concept-bg-glow"></div>
+      <div class="concept-wrapper">
+        <div class="concept-horizontal">
+          <span data-i18n="concept_title">気ままな猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿</span>
+        </div>
+        <p class="concept-desc" data-i18n="concept_desc">静かな渓谷のせせらぎに耳を澄まし、自由に暮らす猫たちの気配を感じ、自家源泉100%のかけ流しぬる湯で心身をじんわりとほどく。なにもしない贅沢な静養の時間をどうぞ。</p>
+      </div>
+    </section>
 
-        <section class="chat-section">
-            <div class="chat-header">
-                <h3>💬 AIコンシェルジュに質問する</h3>
-            </div>
+    <!-- 目次メニューカード一覧 -->
+    <main class="portal-menu">
+      <!-- 1. お食事のご案内 -->
+      <a href="dining.html" class="menu-card" id="btn-dining">
+        <div class="menu-card-content">
+          <span class="menu-card-num">01</span>
+          <div>
+            <div class="menu-card-title" data-i18n="dining_title">お食事のご案内</div>
+            <div class="menu-card-desc" data-i18n="dining_desc">滋味豊かな手作り創作料理で、身体の内側からほどける</div>
+          </div>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
 
-            <!-- クイック質問ボタン群 -->
-            <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 16px; background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.06);">
-                <button onclick="sendQuickQuestion('温泉の利用時間とぬる湯の特徴を教えてください')" style="background:rgba(52,211,153,0.15); border:1px solid #34d399; color:#a7f3d0; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">♨️ 温泉・ぬる湯について</button>
-                <button onclick="sendQuickQuestion('看板猫たちにはどこで会えますか？')" style="background:rgba(251,191,36,0.15); border:1px solid #fbbf24; color:#fef08a; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🐱 看板猫について</button>
-                <button onclick="sendQuickQuestion('夕食のメニューやジンギスカンについて教えてください')" style="background:rgba(244,63,94,0.15); border:1px solid #f43f5e; color:#fecdd3; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🍖 お食事・ジンギスカン</button>
-                <button onclick="sendQuickQuestion('チェックイン・チェックアウト時間とアクセスは？')" style="background:rgba(96,165,250,0.15); border:1px solid #60a5fa; color:#bfdbfe; padding:6px 12px; border-radius:16px; font-size:0.75rem; cursor:pointer; font-weight:600;">🚗 時間・アクセス</button>
-            </div>
+      <!-- 2. 館内施設・サービス -->
+      <a href="facilities.html" class="menu-card" id="btn-facilities">
+        <div class="menu-card-content">
+          <span class="menu-card-num">02</span>
+          <div>
+            <div class="menu-card-title" data-i18n="facilities_title">館内施設・サービス</div>
+            <div class="menu-card-desc" data-i18n="facilities_desc">自由に過ごす猫たちと、静かでなにもしない静養のひととき</div>
+          </div>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
 
-            <div class="chat-box" id="chatBox">
-                <div class="chat-message bot">
-                    こんにちは！塩原温泉 赤沢温泉旅館のAIデジタルコンシェルジュです。温泉の入浴時間、お食事、看板猫、館内施設など、何でもお気軽にお尋ねください。
-                </div>
-            </div>
+      <!-- 3. 源泉100%「ぬる湯」の楽しみ方 -->
+      <a href="onsen.html" class="menu-card" id="btn-onsen">
+        <div class="menu-card-content">
+          <span class="menu-card-num">03</span>
+          <div>
+            <div class="menu-card-title" data-i18n="onsen_title">源泉100%「ぬる湯」の楽しみ方</div>
+            <div class="menu-card-desc" data-i18n="onsen_desc">無循環・自家源泉かけ流しで心身を調える</div>
+          </div>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
 
-            <form id="chatForm" class="chat-input-form" onsubmit="handleChatSubmit(event)">
-                <input type="text" id="userInput" placeholder="ご質問を入力してください..." required>
-                <button type="submit" id="sendBtn">送信</button>
-            </form>
-        </section>
+      <!-- 4. 周辺案内・体験 -->
+      <a href="sightseeing.html" class="menu-card" id="btn-sightseeing">
+        <div class="menu-card-content">
+          <span class="menu-card-num">04</span>
+          <div>
+            <div class="menu-card-title" data-i18n="sightseeing_title">周辺案内・体験</div>
+            <div class="menu-card-desc" data-i18n="sightseeing_desc">箒川の渓流散策と、塩原の豊かな自然に癒やされる</div>
+          </div>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
     </main>
 
-    <footer class="footer">
-        <p>&copy; 赤沢温泉旅館 - AI Guest Concierge System</p>
-    </footer>
+    <!-- お部屋の便利情報カード -->
+    <section class="quick-info-card">
+      <h2 class="quick-info-title">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span data-i18n="quick_info_title">お部屋の便利情報</span>
+      </h2>
+      <div class="quick-info-grid">
+        <div class="quick-info-item">
+          <span class="quick-label" data-i18n="quick_wifi_ssid">客室フリーWi-Fi SSID</span>
+          <div class="quick-value-row">
+            <span class="quick-value highlight-code">Akasawa_Guest_WiFi</span>
+            <button class="copy-btn" data-copy="Akasawa_Guest_WiFi" aria-label="SSIDをコピー">コピー</button>
+          </div>
+        </div>
+        <div class="quick-info-item">
+          <span class="quick-label" data-i18n="quick_wifi_pass">パスワード (PASSWORD)</span>
+          <div class="quick-value-row">
+            <span class="quick-value highlight-code">akasawaonsen2026</span>
+            <button class="copy-btn" data-copy="akasawaonsen2026" aria-label="パスワードをコピー">コピー</button>
+          </div>
+        </div>
+        <div class="quick-info-item full-width">
+          <span class="quick-label" data-i18n="quick_front">フロント内線</span>
+          <span class="quick-value" data-i18n="quick_front_val">お部屋の電話機より「9番」</span>
+        </div>
+      </div>
+    </section>
 
-    <script src="chat.js"></script>
-    <script src="script.js"></script>
+    <!-- フッター -->
+    <footer class="main-footer">
+      <p class="copyright">© 2026 赤沢温泉旅館 All Rights Reserved.</p>
+    </footer>
+  </div>
+
+  <script src="translations.js"></script>
+  <script src="chat.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

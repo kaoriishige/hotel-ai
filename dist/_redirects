@@ -2,6 +2,10 @@
 /.netlify/functions/*  /.netlify/functions/:splat  200
 /api/*                 /.netlify/functions/:splat  200
 
+# ダイナミックプライシング 静的アセット保護 (最優先)
+/akasawa/dp/assets/*     /akasawa/dp/assets/:splat     200
+/nasu-utopia/dp/assets/* /nasu-utopia/dp/assets/:splat 200
+
 # ダイナミックプライシング SPA ルーティング
 /nasu-utopia/dp/*  /nasu-utopia/dp/index.html  200
 /akasawa/dp/*      /akasawa/dp/index.html      200
