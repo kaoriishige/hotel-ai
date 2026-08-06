@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赤沢温泉旅館 - AI客室デジタルコンシェルジュ</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="sub">自家源泉100% ぬる湯と渓流の宿</span>
+            <h1>赤沢温泉旅館</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero-card">
+            <h2>猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿</h2>
+            <p>赤沢温泉旅館のAI客室デジタルコンシェルジュへようこそ。温泉、お食事、館内案内をご案内いたします。</p>
+        </section>
+
+        <section class="chat-section">
+            <div class="chat-header">
+                <h3>💬 AIコンシェルジュに質問する</h3>
+            </div>
+
+            <div class="chat-box" id="chatBox">
+                <div class="chat-message bot">
+                    こんにちは！赤沢温泉旅館のAIデジタルコンシェルジュです。温泉の入浴時間、お食事、館内施設など、何でもお気軽にお尋ねください。
+                </div>
+            </div>
+
+            <form id="chatForm" class="chat-input-form" onsubmit="handleChatSubmit(event)">
+                <input type="text" id="userInput" placeholder="ご質問を入力してください..." required>
+                <button type="submit" id="sendBtn">送信</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 赤沢温泉旅館 - AI Guest Concierge System</p>
+    </footer>
+
+    <script src="chat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

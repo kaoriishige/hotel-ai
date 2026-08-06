@@ -644,6 +644,32 @@ if (fs.existsSync(planFuncsSrc)) {
   });
 }
 
+// 8. 赤沢温泉旅館（akasawa）専用全9システムのサブディレクトリ展開 (/akasawa/chat, /akasawa/review, etc.)
+console.log('Deploying all sub-apps into /akasawa/ portal directory...');
+const akasawaDestDir = path.join(distDir, 'akasawa');
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-chat'), path.join(akasawaDestDir, 'chat'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(akasawaDestDir, 'review'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ota', 'public'), path.join(akasawaDestDir, 'ota'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-sns', 'public'), path.join(akasawaDestDir, 'sns'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-blog', 'public'), path.join(akasawaDestDir, 'blog'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-plan', 'public'), path.join(akasawaDestDir, 'plan'));
+
+let akasawaDpSrc = path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist');
+if (!fs.existsSync(akasawaDpSrc)) {
+  akasawaDpSrc = path.join(__dirname, 'apps', 'akasawa.dp', 'apps', 'admin', 'dist');
+}
+if (fs.existsSync(akasawaDpSrc)) {
+  copyFolderSync(akasawaDpSrc, path.join(akasawaDestDir, 'dp'));
+}
+
+// _redirects ルーティングファイルの書き出し
+const redirectsContent = `
+/akasawa/dp/*  /akasawa/dp/index.html  200
+/nasu-utopia/dp/*  /nasu-utopia/dp/index.html  200
+/akasawa-dp/*  /akasawa-dp/index.html  200
+`;
+fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
+
 // 9. AIクローラー専用ファイル llms.txt & robots.txt の生成・書き出し
 console.log('Generating AI Crawler Knowledge Files (llms.txt & robots.txt)...');
 
