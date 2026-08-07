@@ -464,14 +464,67 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
                 <summary style="cursor: pointer; color: #34d399; font-weight: bold; font-size: 0.82rem;">▶︎ クリックでWeb担当が実行すべき【那須ユートピア美野沢 公式HP ＆ 構造化データ仕様書】を開く</summary>
                 <div id="spec-content-b" style="margin-top: 10px; font-size: 0.78rem; color: #e2e8f0; line-height: 1.6;">
                   
-      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【那須ユートピア美野沢 公式HP改修仕様書 (全16原則)】:</strong><br>
-      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に那須ユートピア美野沢専用 JSON-LD を記述。<br>
+      <strong style="color:#fff; font-size:0.85rem; border-bottom:1px solid #34d399; padding-bottom:2px; display:inline-block; margin-bottom:6px;">【AI時代に選ばれる宿 RAGナレッジ（reason_to_buy_rag.md）に基づく公式HP改修仕様書】:</strong><br>
+      <div style="background:rgba(52,211,153,0.1); border-left:3px solid #34d399; padding:6px 10px; margin:4px 0 8px; font-size:0.73rem; color:#a7f3d0;">
+        💡 <strong>根拠と選定基準</strong>: AI検索エンジン（ChatGPT Search, Perplexity, Google AI Overviews）は「特徴の羅列」ではなく「**顧客がこの宿を選ぶ納得の理由（Job/Pain/Gain/Because）**」および「**公式ドメインと一致した機械可読構造化データ**」を読み取って推薦順位を決定します。
+      </div>
+      1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に公式ドメイン（https://nasu-utopia.jp/）準拠のJSON-LDを記述。<br>
       2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
-      3. <strong>amenityFeature 10項目コード化</strong>: CUBERU/Rekkaサウナ, 150㎡ドッグラン, 手ぶらBBQ, 駐車場30台等を指定。<br>
-      4. <strong>AIクローラー専用ファイル設置</strong>: <code>/robots.txt</code> ＆ <code>/llms.txt</code> を配置。<br>
-      5. <strong>生テキスト化</strong>: 料金・客室・サウナ・キャンセル規定をHTML生テキストで記述。<br>
-      6. <strong>DMO・自治体（那須町観光協会）相互リンク</strong>: フッターに被リンクバナー設置。<br>
-      7. <strong>多言語独立ディレクトリの開設</strong>: 英語・アジア言語独立ページの設置。
+      3. <strong>実在ファクト完全準拠 (NAP統一)</strong>: 公式ドメイン https://nasu-utopia.jp/ / 0287-73-5007 / 〒329-3215 栃木県那須郡那須町箕輪318 / チェックアウト 11:00。<br>
+      4. <strong>amenityFeature 実在設備10項目コード化</strong>: CUBERU/Rekka 貸切バレルサウナ(90分), 那須連山伏流水水風呂(15℃), 150㎡専用ドッグラン付きヴィラ, 那須高原和牛 手ぶら本格BBQ, 無料駐車場30台等。<br>
+      5. <strong>AIクローラー専用ナレッジ設置</strong>: <code>/robots.txt</code> でのAI許可 ＆ <code>/llms.txt</code> の常設。<br>
+      6. <strong>生テキスト化 ＆ FAQ整備</strong>: 料金・客室・サウナ・BBQ・ペット同伴規約をHTML生テキストで記述し、一問一答FAQ（最低10〜20問）を設置。<br>
+      <details style="margin-top:6px; background:#000; padding:8px; border-radius:6px;">
+        <summary style="color:#34d399; cursor:pointer; font-size:0.75rem; font-weight:bold;">▶ 埋め込み用 JSON-LD コード例（コピー可）</summary>
+        <pre style="margin-top:6px; font-size:0.68rem; color:#34d399; overflow-x:auto;">
+&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": "https://nasu-utopia.jp/#hotel",
+      "name": "那須ユートピア美野沢ヴィラ＆キャンプ",
+      "alternateName": "NASU UTOPIA MINOSAWA",
+      "description": "旧美野沢小学校を再生したアートリノベーション型プライベートヴィラ。貸切バレルサウナ CUBERU・Rekka、那須連山伏流水水風呂、150㎡ドッグラン付きヴィラ、手ぶら本格BBQを完備。",
+      "url": "https://nasu-utopia.jp/",
+      "telephone": "+81-287-73-5007",
+      "priceRange": "¥15,000 - ¥45,000",
+      "address": {
+        "@type": "PostalAddress",
+        "postalCode": "329-3215",
+        "addressCountry": "JP",
+        "addressRegion": "栃木県",
+        "addressLocality": "那須郡那須町",
+        "streetAddress": "箕輪318"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 36.9928,
+        "longitude": 140.0381
+      },
+      "checkinTime": "15:00",
+      "checkoutTime": "11:00",
+      "amenityFeature": [
+        { "@type": "LocationFeatureSpecification", "name": "CUBERU/Rekka 貸切バレルサウナ（90分完全貸切）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "那須連山伏流水かけ流し水風呂（15℃）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "150㎡プライベートドッグラン付きヴィラ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "那須高原和牛 手ぶら本格BBQ", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "無料駐車場 30台完備(予約不要)", "value": true }
+      ]
+    },
+    {
+      "@type": "HotelRoom",
+      "@id": "https://nasu-utopia.jp/#villaA",
+      "name": "ヴィラ A（150㎡専用ドッグラン付きヴィラ・定員6名）",
+      "description": "専用ドッグラン・BBQデッキ完備の1棟貸切プライベートヴィラ。",
+      "occupancy": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 6 }
+    }
+  ]
+}
+&lt;/script&gt;
+        </pre>
+      </details>
     
                 </div>
               </details>
