@@ -924,6 +924,7 @@ copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ota', 'public'), path.join(
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-sns', 'public'), path.join(akasawaDestDir, 'sns'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-blog', 'public'), path.join(akasawaDestDir, 'blog'));
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-plan', 'public'), path.join(akasawaDestDir, 'plan'));
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-rag', 'public'), path.join(akasawaDestDir, 'rag'));
 
 let akasawaDpSrc = path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist');
 if (!fs.existsSync(akasawaDpSrc)) {
