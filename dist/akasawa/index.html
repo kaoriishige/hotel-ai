@@ -266,12 +266,97 @@
       margin-top: 4rem;
     }
 
+    pre, code {
+      word-break: break-word;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     @media (max-width: 768px) {
+      body {
+        padding-bottom: 2rem;
+      }
+      header {
+        padding: 1.5rem 1rem 1rem;
+      }
+      .brand-title {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+      }
       .main-title {
-        font-size: 1.7rem;
+        font-size: 1.5rem;
+        line-height: 1.35;
+      }
+      .subtitle {
+        font-size: 0.85rem;
+        line-height: 1.55;
+      }
+      .container {
+        padding: 0 0.8rem;
+      }
+      .benefit-section {
+        padding: 1.2rem 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+      }
+      .section-title {
+        font-size: 1.2rem;
       }
       .portal-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .card {
+        padding: 1.2rem 1rem;
+        border-radius: 12px;
+      }
+      .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.6rem;
+      }
+      .card-title {
+        font-size: 1.1rem;
+      }
+      .card-desc {
+        font-size: 0.82rem;
+        margin-bottom: 0.9rem;
+      }
+      .card-benefit {
+        font-size: 0.78rem;
+        padding: 0.6rem 0.8rem;
+      }
+      .card-action {
+        font-size: 0.82rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+      /* スマホ用AI自動診断ボタン等のフィット調整 */
+      #runAuditBtn, .primary-btn {
+        width: 100% !important;
+        font-size: 0.95rem !important;
+        padding: 12px 10px !important;
+        min-height: 48px !important;
+      }
+      details summary {
+        font-size: 0.85rem !important;
+        padding: 8px 4px !important;
+        min-height: 44px !important;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-title {
+        font-size: 1.32rem;
+      }
+      .container {
+        padding: 0 0.6rem;
       }
     }
   </style>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>那須ユートピア美野沢 統合AIシステムポータル</title>
+  <title>10施設 AI統合ポータル</title>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <!-- AI検索エンジン(ChatGPT / Perplexity / Google AI)向け Schema.org 4型 構造化データ (JSON-LD) -->
   {{SCHEMA_JSON_LD}}
@@ -36,6 +36,27 @@
 
     .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; }
     header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
+
+    pre, code {
+      word-break: break-word;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem 0.8rem; }
+      header { margin-bottom: 1.5rem; }
+      h1 { font-size: 1.5rem !important; }
+      .subtitle { font-size: 0.85rem !important; }
+      .grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+      .card { padding: 1.2rem 1rem !important; }
+      #score-board-container { padding: 1.2rem 1rem !important; }
+      #real-audit-btn { width: 100% !important; margin-top: 8px !important; }
+    }
     
     .badge {
       display: inline-block;
