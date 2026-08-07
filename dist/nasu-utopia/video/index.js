@@ -145,7 +145,7 @@ if (generateAvatarVideoBtn) {
         });
         if (statusEl) statusEl.textContent = '📸 画像取得完了。HeyGenへ送信中...';
       } else {
-        if (statusEl) statusEl.textContent = '📸 デフォルト画像（支配人様）を使用。動画生成中...';
+        if (statusEl) statusEl.textContent = '📸 デフォルト画像（支配人オーナー）を使用。動画生成中...';
       }
 
       const res = await fetch('/.netlify/functions/generate-avatar-video', {
@@ -398,7 +398,7 @@ form.addEventListener('submit', async (event) => {
           let isDone = false;
           
           if (target.videoStatus === 'generating_audio') {
-            statusText = '🎙️ 那須ユートピア支配人のクローン音声を合成中...';
+            statusText = '🎙️ 支配人のクローン音声を合成中...';
           } else if (target.videoStatus === 'rendering_video') {
             statusText = '🎬 プレミアム縦型動画（Remotion）を書き出し中...';
             

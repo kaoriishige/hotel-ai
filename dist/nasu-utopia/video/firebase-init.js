@@ -3,7 +3,7 @@
 
 export const apiBase = window.AKASAWA_CONFIG?.apiBase || '/api';
 export const defaults = window.AKASAWA_CONFIG?.defaults || {
-  ownerName: '那須ユートピア支配人',
+  ownerName: '支配人',
   hotelName: '那須ユートピア美野沢',
   officialSite: 'https://akasawaonsen.com/',
   phone: '0287-46-5700',

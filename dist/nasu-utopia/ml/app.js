@@ -118,7 +118,7 @@ const templates = {
 const isSubdir = window.location.pathname.includes('/akasawa-ml');
 const SIGNATURE = `
 ------------------------------
-那須ユートピア美野沢株式会社/那須ユートピア美野沢 那須ユートピア支配人
+那須ユートピア美野沢株式会社/那須ユートピア美野沢 支配人
 〒329-2921 栃木県那須那須町市那須町1149
 TEL: 0287-46-5700　FAX：0287-46-5699
 公式サイト：https://akasawaonsen.com/

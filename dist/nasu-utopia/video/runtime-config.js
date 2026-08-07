@@ -9,7 +9,7 @@ window.AKASAWA_CONFIG = {
   },
   apiBase: "/api",
   defaults: {
-    ownerName: "那須ユートピア支配人",
+    ownerName: "支配人",
     hotelName: "那須ユートピア美野沢",
     officialSite: "https://akasawaonsen.com/",
     phone: "0287-46-5700",
