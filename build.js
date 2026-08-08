@@ -99,22 +99,14 @@ if (!fs.existsSync(adminDistPath) || !fs.existsSync(path.join(adminDistPath, 'in
   console.log('  → akasawa-dp: dist already exists, skipping build.');
 }
 
-// 6. 全10施設への「9システム統合AIダッシュボードポータル」のデプロイ
-console.log('Building and deploying 9-system AI Dashboards for all 10 facilities...');
+// 6. 全2施設への「9システム統合AIダッシュボードポータル」のデプロイ
+console.log('Building and deploying 9-system AI Dashboards for facilities...');
 const facilityMap = [
   { folder: 'akasawa', name: '赤沢温泉旅館' },
   { folder: 'akasawa-dp', name: '赤沢温泉旅館' },
   { folder: 'nasu-utopia', name: '那須ユートピア美野沢' },
   { folder: 'nasu-utopia-ai', name: '那須ユートピア美野沢' },
-  { folder: 'nasumid-p', name: '那須ユートピア美野沢' },
-  { folder: 'hakone-villa', name: '箱根強羅 AIヴィラ' },
-  { folder: 'atami-resort', name: '熱海オーシャンビューリゾート' },
-  { folder: 'karuizawa-lodge', name: '軽井沢フォレストロッジ' },
-  { folder: 'kyoto-gion', name: '京都祇園 伝統庵AI' },
-  { folder: 'furano-snow', name: '富良野スノーリゾート' },
-  { folder: 'iseshima-villa', name: '伊勢志摩ベイサイドヴィラ' },
-  { folder: 'yufuin-hanare', name: '由布院 温泉離れAI' },
-  { folder: 'miyakojima-suite', name: '宮古島 プレミアムスイート' }
+  { folder: 'nasumid-p', name: '那須ユートピア美野沢' }
 ];
 
 const templatePath = path.join(__dirname, 'facility-dashboard-template.html');
@@ -893,15 +885,6 @@ if (fs.existsSync(endoFuncsSrc)) {
 // 7.5. apps/akasawa-review のコピー (静的)
 console.log('Copying akasawa-review...');
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(distDir, 'akasawa-review'));
-
-// 7.6. 全10施設の専用AIダッシュボードフォルダのコピーとエイリアス作成
-console.log('Copying 10 facility dashboards...');
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-review', 'public'), path.join(distDir, 'hakone-villa'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ml', 'public'), path.join(distDir, 'atami-resort'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-sns', 'public'), path.join(distDir, 'karuizawa-lodge'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ota', 'public'), path.join(distDir, 'furano-snow'));
-copyFolderSync(path.join(__dirname, 'apps', 'akasawa-plan', 'public'), path.join(distDir, 'iseshima-villa'));
-copyFolderSync(path.join(__dirname, 'apps', 'endo-sns', 'public'), path.join(distDir, 'yufuin-hanare'));
 
 
 // akasawa-review functions
