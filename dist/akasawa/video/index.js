@@ -1327,6 +1327,258 @@ async function loadTrendSuggestions() {
   }
 }
 
+// -------------------------------------------------------------
+// 🎬 ショート動画2本接続（結合）スタジオ 制御ロジック
+// -------------------------------------------------------------
+const concatState = {
+  video1: { file: null, url: '', duration: 15, base64: '' },
+  video2: { file: null, url: '', duration: 15, base64: '' },
+  lastGeneratedUrl: ''
+};
+
+const concatVideoFile1 = document.getElementById('concatVideoFile1');
+const concatVideoUrl1 = document.getElementById('concatVideoUrl1');
+const previewConcatVideo1 = document.getElementById('previewConcatVideo1');
+const previewConcatVideo1Empty = document.getElementById('previewConcatVideo1Empty');
+const video1DurationBadge = document.getElementById('video1DurationBadge');
+
+const concatVideoFile2 = document.getElementById('concatVideoFile2');
+const concatVideoUrl2 = document.getElementById('concatVideoUrl2');
+const previewConcatVideo2 = document.getElementById('previewConcatVideo2');
+const previewConcatVideo2Empty = document.getElementById('previewConcatVideo2Empty');
+const video2DurationBadge = document.getElementById('video2DurationBadge');
+
+const swapVideosBtn = document.getElementById('swapVideosBtn');
+const startConcatBtn = document.getElementById('startConcatBtn');
+const concatProgressArea = document.getElementById('concatProgressArea');
+const concatResultArea = document.getElementById('concatResultArea');
+const concatFinalVideoPreview = document.getElementById('concatFinalVideoPreview');
+const concatFinalDownloadLink = document.getElementById('concatFinalDownloadLink');
+const useConcatVideoForPostBtn = document.getElementById('useConcatVideoForPostBtn');
+const useAvatarAsVideo1Btn = document.getElementById('useAvatarAsVideo1Btn');
+
+// ファイルをBase64に変換するヘルパー
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// 動画①のセット
+function setVideo1Source(source, isFile = false) {
+  if (isFile) {
+    concatState.video1.file = source;
+    concatState.video1.url = URL.createObjectURL(source);
+    previewConcatVideo1.src = concatState.video1.url;
+  } else {
+    concatState.video1.file = null;
+    concatState.video1.url = source;
+    previewConcatVideo1.src = source;
+    if (concatVideoUrl1) concatVideoUrl1.value = source;
+  }
+  previewConcatVideo1.style.display = 'block';
+  if (previewConcatVideo1Empty) previewConcatVideo1Empty.style.display = 'none';
+
+  previewConcatVideo1.onloadedmetadata = () => {
+    const dur = Math.round(previewConcatVideo1.duration || 15);
+    concatState.video1.duration = dur;
+    if (video1DurationBadge) video1DurationBadge.textContent = `⏱️ ${dur}秒`;
+  };
+}
+
+// 動画②のセット
+function setVideo2Source(source, isFile = false) {
+  if (isFile) {
+    concatState.video2.file = source;
+    concatState.video2.url = URL.createObjectURL(source);
+    previewConcatVideo2.src = concatState.video2.url;
+  } else {
+    concatState.video2.file = null;
+    concatState.video2.url = source;
+    previewConcatVideo2.src = source;
+    if (concatVideoUrl2) concatVideoUrl2.value = source;
+  }
+  previewConcatVideo2.style.display = 'block';
+  if (previewConcatVideo2Empty) previewConcatVideo2Empty.style.display = 'none';
+
+  previewConcatVideo2.onloadedmetadata = () => {
+    const dur = Math.round(previewConcatVideo2.duration || 15);
+    concatState.video2.duration = dur;
+    if (video2DurationBadge) video2DurationBadge.textContent = `⏱️ ${dur}秒`;
+  };
+}
+
+if (concatVideoFile1) {
+  concatVideoFile1.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideo1Source(e.target.files[0], true);
+    }
+  });
+}
+
+if (concatVideoUrl1) {
+  concatVideoUrl1.addEventListener('input', (e) => {
+    const url = e.target.value.trim();
+    if (url) setVideo1Source(url, false);
+  });
+}
+
+if (concatVideoFile2) {
+  concatVideoFile2.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideo2Source(e.target.files[0], true);
+    }
+  });
+}
+
+if (concatVideoUrl2) {
+  concatVideoUrl2.addEventListener('input', (e) => {
+    const url = e.target.value.trim();
+    if (url) setVideo2Source(url, false);
+  });
+}
+
+// AIアバター動画を動画①にセット
+if (useAvatarAsVideo1Btn) {
+  useAvatarAsVideo1Btn.addEventListener('click', () => {
+    const avatarPreview = document.getElementById('avatarVideoPreview');
+    const avatarDownloadLink = document.getElementById('avatarVideoDownloadLink');
+    const url = (avatarPreview && avatarPreview.src) || (avatarDownloadLink && avatarDownloadLink.href);
+
+    if (!url || url.includes('#') || url === 'about:blank') {
+      alert('先に「ステップ4: HeyGenでAIアバター動画」を制作してください。');
+      return;
+    }
+
+    setVideo1Source(url, false);
+    alert('✅ AIアバター動画を「動画①（前編）」にセットしました！');
+    // スタジオへスムーズスクロール
+    document.getElementById('startConcatBtn')?.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+// 動画①と動画②のスワップ
+if (swapVideosBtn) {
+  swapVideosBtn.addEventListener('click', () => {
+    const temp = { ...concatState.video1 };
+    concatState.video1 = { ...concatState.video2 };
+    concatState.video2 = temp;
+
+    if (concatState.video1.file) {
+      setVideo1Source(concatState.video1.file, true);
+    } else if (concatState.video1.url) {
+      setVideo1Source(concatState.video1.url, false);
+    } else {
+      previewConcatVideo1.style.display = 'none';
+      if (previewConcatVideo1Empty) previewConcatVideo1Empty.style.display = 'block';
+      if (video1DurationBadge) video1DurationBadge.textContent = '未選択';
+    }
+
+    if (concatState.video2.file) {
+      setVideo2Source(concatState.video2.file, true);
+    } else if (concatState.video2.url) {
+      setVideo2Source(concatState.video2.url, false);
+    } else {
+      previewConcatVideo2.style.display = 'none';
+      if (previewConcatVideo2Empty) previewConcatVideo2Empty.style.display = 'block';
+      if (video2DurationBadge) video2DurationBadge.textContent = '未選択';
+    }
+  });
+}
+
+// 結合実行処理
+if (startConcatBtn) {
+  startConcatBtn.addEventListener('click', async () => {
+    if (!concatState.video1.url && !concatState.video1.file) {
+      alert('「動画①」を選択またはURLを入力してください。');
+      return;
+    }
+    if (!concatState.video2.url && !concatState.video2.file) {
+      alert('「動画②」を選択またはURLを入力してください。');
+      return;
+    }
+
+    startConcatBtn.disabled = true;
+    startConcatBtn.textContent = '⏳ 結合処理中...';
+    if (concatProgressArea) concatProgressArea.style.display = 'block';
+    if (concatResultArea) concatResultArea.style.display = 'none';
+
+    try {
+      let v1Data = '';
+      let v2Data = '';
+
+      if (concatState.video1.file) {
+        v1Data = await fileToBase64(concatState.video1.file);
+      }
+      if (concatState.video2.file) {
+        v2Data = await fileToBase64(concatState.video2.file);
+      }
+
+      const transitionType = document.getElementById('concatTransitionType')?.value || 'crossfade';
+      const showBranding = document.getElementById('concatShowBranding')?.checked ?? true;
+
+      const payload = {
+        video1Url: concatState.video1.file ? '' : concatState.video1.url,
+        video2Url: concatState.video2.file ? '' : concatState.video2.url,
+        video1Data: v1Data,
+        video2Data: v2Data,
+        duration1Sec: concatState.video1.duration || 15,
+        duration2Sec: concatState.video2.duration || 15,
+        transitionType,
+        showBranding
+      };
+
+      const response = await fetch('/.netlify/functions/concat-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data.error || '動画の結合に失敗しました');
+      }
+
+      if (data.videoUrl) {
+        concatState.lastGeneratedUrl = data.videoUrl;
+        if (concatFinalVideoPreview) {
+          concatFinalVideoPreview.src = data.videoUrl;
+        }
+        if (concatFinalDownloadLink) {
+          concatFinalDownloadLink.href = data.videoUrl;
+        }
+        if (concatResultArea) concatResultArea.style.display = 'block';
+        alert('🎉 2本のショート動画の結合が完了しました！');
+      } else {
+        alert('レンダリングを開始しました (Render ID: ' + (data.renderId || 'N/A') + ')');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('エラー: ' + err.message);
+    } finally {
+      startConcatBtn.disabled = false;
+      startConcatBtn.textContent = '🎬 2つの動画を接続して1本に出力する ➔';
+      if (concatProgressArea) concatProgressArea.style.display = 'none';
+    }
+  });
+}
+
+// 結合した動画をSNS投稿予約にセット
+if (useConcatVideoForPostBtn) {
+  useConcatVideoForPostBtn.addEventListener('click', () => {
+    if (!concatState.lastGeneratedUrl) {
+      alert('結合された動画がありません。');
+      return;
+    }
+    alert('✅ 完成した結合ショート動画をSNS投稿予約にセットしました！\n「🚀 STEP 6: SNS投稿」で予約を完了してください。');
+    document.getElementById('uploadForm')?.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
 // 初期起動時のデータ読み込み
 loadQueue();
 loadTrendSuggestions();
+

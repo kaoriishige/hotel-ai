@@ -1,11 +1,13 @@
 import { registerRoot, Composition } from 'remotion';
 import { getAudioDurationInSeconds } from '@remotion/media-utils';
 import { EndoReel, EndoReelProps } from './EndoReel';
+import { ConcatenatedReel, ConcatenatedReelProps } from './ConcatenatedReel';
 import React from 'react';
 
 export const RemotionVideo: React.FC = () => {
   return (
     <>
+      {/* 既存のAIアバター・思想リール動画 */}
       <Composition
         id="EndoInstagramReel"
         component={EndoReel}
@@ -43,8 +45,43 @@ export const RemotionVideo: React.FC = () => {
           };
         }}
       />
+
+      {/* 🎬 2本のショート動画を接続・結合するコンポジション */}
+      <Composition
+        id="EndoConcatenatedReel"
+        component={ConcatenatedReel}
+        durationInFrames={900} // デフォルト30秒 (15秒+15秒)
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          video1Url: '',
+          video2Url: '',
+          duration1InFrames: 450,
+          duration2InFrames: 450,
+          transitionType: 'crossfade' as const,
+          transitionDurationInFrames: 15,
+          bgmUrl: '',
+          bgmVolume: 0.2,
+          video1Volume: 1.0,
+          video2Volume: 1.0,
+          showBranding: true
+        }}
+        calculateMetadata={async ({ props }) => {
+          const dur1 = props.duration1InFrames || 450;
+          const dur2 = props.duration2InFrames || 450;
+          const trans = props.transitionType === 'crossfade' ? (props.transitionDurationInFrames || 15) : 0;
+          const totalFrames = Math.max(30, (dur1 + dur2) - trans);
+
+          return {
+            durationInFrames: totalFrames,
+            props: { ...props }
+          };
+        }}
+      />
     </>
   );
 };
 
 registerRoot(RemotionVideo);
+
