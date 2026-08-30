@@ -386,6 +386,8 @@
   </header>
 
   <div class="container">
+    
+
     <!-- 売上方程式 & ベネフィット -->
     <section class="benefit-section">
       <h2 class="section-title" style="font-size: 1.7rem; text-align: center;">売上向上モデル ＝ 宿泊客数 × 客単価（ADR） × リピート回数</h2>
@@ -1175,6 +1177,54 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
 
     function connectGbpAccount() {
       alert('📍 Googleビジネスプロフィール (GBP) アカウント連携モーダル:\n\nスタッフ様・支配人様のGoogleアカウントでログイン認証を行うと、Googleマップの写真30枚・アメニティチェック・口コミ鮮度が自動同期取得されます。');
+    }
+
+    async function triggerCeoQuickAction(prompt) {
+      const resBox = document.getElementById('ceo-live-response');
+      if (!resBox) return;
+      resBox.style.display = 'block';
+      resBox.innerHTML = '<span style="color: #d4af37;">⏳ 旅館AICEOが遠藤オーナーからの指示を分析中...</span>';
+
+      try {
+        const res = await fetch('/.netlify/functions/akasawa-ceo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, actionType: 'chat' })
+        });
+        const data = await res.json();
+        if (data.ceoResponse) {
+          resBox.innerHTML = '<strong>👑 旅館AICEO 経営判断・連動指示報告:</strong><br><br>' + 
+            data.ceoResponse.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+          resBox.innerHTML = '⚠️ エラー: ' + (data.error || '通信に失敗しました');
+        }
+      } catch (err) {
+        resBox.innerHTML = '⚠️ 通信エラー: ' + err.message;
+      }
+    }
+
+    async function triggerCeoOrchestration() {
+      const resBox = document.getElementById('ceo-live-response');
+      if (!resBox) return;
+      resBox.style.display = 'block';
+      resBox.innerHTML = '<span style="color: #10b981;">⚡️ 旅館AICEOが全9システムへ自律連動指示を発令中...</span>';
+
+      try {
+        const res = await fetch('/.netlify/functions/akasawa-ceo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actionType: 'orchestrate' })
+        });
+        const data = await res.json();
+        if (data.ceoResponse) {
+          resBox.innerHTML = '<strong>👑 旅館AICEO 【全9システム一括最適化完了報告】:</strong><br><br>' + 
+            data.ceoResponse.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+          resBox.innerHTML = '⚠️ エラー: ' + (data.error || '最適化に失敗しました');
+        }
+      } catch (err) {
+        resBox.innerHTML = '⚠️ 通信エラー: ' + err.message;
+      }
     }
   </script>
 </body>

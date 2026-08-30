@@ -68,6 +68,10 @@ endoJsFiles.forEach(file => {
   }
 });
 
+// 3.8. apps/akasawa-ceo のコピー (静的)
+console.log('Copying akasawa-ceo...');
+copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ceo'), path.join(distDir, 'akasawa-ceo'));
+
 // 4. apps/akasawa-ml のコピー (静的)
 console.log('Copying akasawa-ml...');
 copyFolderSync(path.join(__dirname, 'apps', 'akasawa-ml', 'public'), path.join(distDir, 'akasawa-ml'));
@@ -637,7 +641,66 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
     const scoreRank = totalScore >= 90 ? 'Sランク (最高AI推薦達成)' : (totalScore >= 70 ? 'Aランク (優良AI最適化施設)' : 'Bランク (⚠️ 伸びしろ多数・実効改善対象施設)');
     const scoreFG = scoreF + scoreG;
 
+    // 赤沢温泉旅館専用 組織体制 & 旅館AICEO 司令塔セクションHTML
+    const ceoSection = isAkasawaFacility ? `
+    <!-- 👑 赤沢温泉旅館 組織体制 ＆ 旅館AICEO 司令塔コンソール -->
+    <section style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(15, 23, 42, 0.95) 100%); border: 2px solid var(--accent-color); border-radius: 18px; padding: 2rem; margin-bottom: 2.5rem; backdrop-filter: blur(12px); box-shadow: 0 12px 35px rgba(212, 175, 55, 0.25);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--accent-color); color: #000; font-size: 0.78rem; font-weight: 900; padding: 3px 12px; border-radius: 16px;">
+            👑 塩原温泉 赤沢温泉旅館 新組織体制
+          </div>
+          <h2 style="font-family: 'Shippori Mincho', serif; font-size: 1.6rem; color: #fff; margin-top: 6px;">
+            遠藤正俊オーナー ⇆ 旅館AICEO 経営司令塔コックピット
+          </h2>
+        </div>
+        <a href="/akasawa/ceo/index.html" style="background: var(--accent-gradient); border: none; color: #000; font-size: 0.9rem; font-weight: 900; padding: 10px 20px; border-radius: 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(212,175,55,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+          🚀 旅館AICEO 専任コックピットを開く ➔
+        </a>
+      </div>
+
+      <!-- 組織図バー -->
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
+        <div style="font-size: 0.8rem; color: var(--accent-color); font-weight: bold; margin-bottom: 8px;">【赤沢温泉旅館 指揮・統括ヒエラルキー】</div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.85rem;">
+          <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; padding: 6px 14px; border-radius: 8px; color: #fbbf24; font-weight: bold;">
+            👤 遠藤正俊 オーナー (最高意思決定者)
+          </div>
+          <div style="color: var(--accent-color); font-weight: bold;">⇆ 専属ホットライン ⇆</div>
+          <div style="background: rgba(212, 175, 55, 0.3); border: 1px solid var(--accent-color); padding: 6px 14px; border-radius: 8px; color: #fff; font-weight: bold; box-shadow: 0 0 10px rgba(212,175,55,0.3);">
+            👑 旅館AICEO (AI最高経営責任者・全権管理)
+          </div>
+          <div style="color: var(--accent-color); font-weight: bold;">▼ 自律連動指揮 ▼</div>
+          <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 8px; color: #e2e8f0;">
+            ⚙️ 配下全9システム (DP / プラン / OTA / HP / SNS / ブログ / 接客 / 口コミ / CRM)
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: #e2e8f0; line-height: 1.7; margin-bottom: 1.2rem;">
+        遠藤正俊オーナーの経営方針・人生哲学（加温加水なし38〜40℃天然ぬる湯、看板猫、箒川の静寂、鹿肉ジンギスカン、価格競争からの脱却）を「旅館AICEO」が専属で担当・具現化。配下の全9システムを一括統括し、自律的に結果（売上・客単価・満足度）を最大化します。
+      </p>
+
+      <!-- オーナー ⇆ 旅館AICEO リアルタイム指示コンソール -->
+      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(212,175,55,0.4); border-radius: 12px; padding: 1.2rem;">
+        <div style="font-size: 0.88rem; font-weight: bold; color: #fff; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 6px;">
+          <span>⚡️</span> 遠藤オーナー クイック経営指示・全システム一括連動発令
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="triggerCeoQuickAction('今週末および直近30日の予約予測と、DP最適価格設定を報告してください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">📈 直近予約予測とDP価格報告</button>
+          <button onclick="triggerCeoQuickAction('競合10宿に対抗し、ぬる湯と鹿肉ジンギスカンを活かした秋の高単価プランを企画・各システムへ展開してください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">🏨 競合対抗・新プラン企画指示</button>
+          <button onclick="triggerCeoQuickAction('口コミ評価を分析し、看板猫やぬる湯の満足度推移と現場改善課題をまとめてください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">💬 口コミ分析と現場改善抽出</button>
+          <button onclick="triggerCeoOrchestration()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; font-weight: 900; font-size: 0.78rem; padding: 6px 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 10px rgba(16,185,129,0.3);">⚡️ 全9システム一括自動最適化を発令</button>
+        </div>
+        
+        <div id="ceo-live-response" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.7); border: 1px solid #34d399; border-radius: 8px; padding: 1rem; font-size: 0.84rem; color: #f8fafc; line-height: 1.6;">
+        </div>
+      </div>
+    </section>
+    ` : '';
+
     renderedHtml = renderedHtml
+      .replace(/\{\{FACILITY_CEO_SECTION\}\}/g, ceoSection)
       .replace(/\{\{SCHEMA_JSON_LD\}\}/g, schemaJsonLd)
       .replace(/\{\{AI_SCORE\}\}/g, totalScore)
       .replace(/\{\{SCORE_RANK\}\}/g, scoreRank)
@@ -679,10 +742,11 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
   });
 }
 
-// 6.4. 赤沢温泉旅館 Dedicated AI sub-apps (ml, video, sns, review, blog, ota, plan, dp, rag, chat) の完全デプロイ
+// 6.4. 赤沢温泉旅館 Dedicated AI sub-apps (ceo, ml, video, sns, review, blog, ota, plan, dp, rag, chat) の完全デプロイ
 console.log('Deploying Akasawa Ryokan dedicated AI sub-apps to dist/akasawa...');
 
 const akasawaAppReplacements = [
+  { subpath: 'ceo', src: path.join(__dirname, 'apps', 'akasawa-ceo') },
   { subpath: 'chat', src: path.join(__dirname, 'apps', 'akasawa-chat') },
   { subpath: 'ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
   { subpath: 'sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
@@ -830,6 +894,14 @@ console.log('Merging Netlify Functions...');
 // shared を netlify/functions/_shared としてコピー
 console.log('Copying shared to netlify/functions/_shared...');
 copyFolderSync(path.join(__dirname, 'shared'), path.join(functionsDir, '_shared'));
+
+// akasawa-ceo functions
+const ceoFuncs = path.join(__dirname, 'apps', 'akasawa-ceo', 'netlify', 'functions');
+if (fs.existsSync(ceoFuncs)) {
+  fs.readdirSync(ceoFuncs).forEach(file => {
+    fs.copyFileSync(path.join(ceoFuncs, file), path.join(functionsDir, file));
+  });
+}
 
 // akasawa-ml functions
 const mlFuncs = path.join(__dirname, 'apps', 'akasawa-ml', 'netlify', 'functions');
