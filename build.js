@@ -139,23 +139,23 @@ if (fs.existsSync(templatePath)) {
         .replace(/https:\/\/nasu-utopia\.jp\//g, 'https://hotel-ai.netlify.app/akasawa/')
         .replace(/那須ユートピア美野沢/g, '塩原温泉 赤沢温泉旅館')
         .replace(/NASU UTOPIA MINOSAWA/g, 'SHIOBARA ONSEN AKASAWA RYOKAN')
-        .replace(/旧美野沢小学校を再生したアートリノベーション型プライベートヴィラ。フィンランド式貸切バレルサウナ CUBERU・REKKA、150㎡ドッグラン付きヴィラ、那須連山の伏流水かけ流し水風呂を完備。定員 1〜8 名、駐車場 30 台無料。那須塩原駅から車 30 分、那須 IC から車 35 分。/g, '塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。')
-        .replace(/旧美野沢小学校リノベーションリゾート/g, '塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿')
+        .replace(/旧美野沢小学校を再生したアートリノベーション型プライベートヴィラ。フィンランド式貸切バレルサウナ CUBERU・REKKA、150㎡ドッグラン付きヴィラ、那須連山の伏流水かけ流し水風呂を完備。定員 1〜8 名、駐車場 30 台無料。那須塩原駅から車 30 分、那須 IC から車 35 分。/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、自然体で過ごす猫たちを静かに見守る空間（※猫と遊びたい方は徒歩10分の猫カフェへ）、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。')
+        .replace(/旧美野沢小学校リノベーションリゾート/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿')
         .replace(/那須郡那須町/g, '那須塩原市')
         .replace(/箕輪318/g, '塩原1149')
         .replace(/那須町観光協会/g, '塩原温泉観光協会')
-        .replace(/サウナ（CUBERU\/Rekka）、グランピングヴィラ、手ぶらBBQのご案内/g, '源泉かけ流しぬる湯、看板猫、箒川一軒宿、鹿肉ジンギスカンのご案内')
-        .replace(/那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）/g, '塩原温泉 赤沢温泉旅館の独自の強み（天然ぬる湯、看板猫のおもてなし、箒川のせせらぎ）')
-        .replace(/那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）/g, '塩原温泉 赤沢温泉旅館の全データ（ぬる湯・看板猫・温泉・お食事）')
+        .replace(/サウナ（CUBERU\/Rekka）、グランピングヴィラ、手ぶらBBQのご案内/g, '源泉かけ流しぬる湯、自然に過ごす猫たちの見守り（徒歩10分猫カフェ有）、箒川一軒宿、鹿肉ジンギスカンのご案内')
+        .replace(/那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）/g, '塩原温泉 赤沢温泉旅館の独自の強み（天然ぬる湯、自然に過ごす猫たちの見守り、箒川のせせらぎ）')
+        .replace(/那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）/g, '塩原温泉 赤沢温泉旅館の全データ（ぬる湯・自然に過ごす猫の見守り・温泉・お食事）')
         .replace(/那須ユートピア美野沢の全データ/g, '塩原温泉 赤沢温泉旅館の全データ')
         .replace(/CUBERU・REKKA フィンランド式バレルサウナ\(完全貸切 90分\)/g, '源泉かけ流し天然ぬる湯（38〜40℃・加温加水なし）')
         .replace(/REKKA 水風呂\(那須連山伏流水かけ流し・15℃\)/g, '箒川を望む露天風呂・静養空間')
-        .replace(/150㎡ドッグラン付きヴィラ\(小型〜中型犬 4頭まで同伴可\)/g, '看板猫のおもてなし（猫のいる静養宿）')
+        .replace(/150㎡ドッグラン付きヴィラ\(小型〜中型犬 4頭まで同伴可\)/g, '自然に過ごす猫たちの静かな見守り（※猫と遊ぶなら徒歩10分の猫カフェへ）')
         .replace(/地元食材 BBQ グリル\(ガス・炭火両対応\)/g, '赤沢風 鹿×豚ジンギスカン料理')
         .replace(/ヴィラ A\(ドッグラン 150㎡ 付き・定員 6名\)/g, '箒川を望む和室（定員 5名）')
         .replace(/ヴィラ B\(サウナ・定員 8名\)/g, '特別和室（静養・湯治向け）')
         .replace(/「那須高原和牛BBQセット」「朝食焼き立てバゲット」/g, '「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の味覚」')
-        .replace(/サウナー・愛犬家・家族ファミリー・アート好きカップル/g, '温泉・長湯愛好家・猫好き・静養・温泉治癒を求めるお客様')
+        .replace(/サウナー・愛犬家・家族ファミリー・アート好きカップル/g, '温泉・長湯愛好家・静養・温泉治癒を求めるお客様（※猫と遊びたい方は徒歩10分猫カフェ案内）')
         .replace(/Q1\. 貸切バレルサウナの利用時間は？/g, 'Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？')
         .replace(/A1\. 90分完全貸切制です。15:00〜22:00 \/ 7:00〜10:00からご希望の時間枠をお選びいただけます。/g, 'A1. 当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。')
     }
@@ -164,17 +164,17 @@ if (fs.existsSync(templatePath)) {
     const isAkasawaSpec = item.folder.includes('akasawa');
 
     const specA = isAkasawaSpec ? `
-      1. <strong>1行結論＋ベネフィット記載</strong>: 【塩原温泉 源泉かけ流しぬる湯＆看板猫のいる静養宿】至福の長湯と癒やし体験。<br>
-      2. <strong>数値ファクトの明記</strong>: 「加温加水なし 38〜40℃天然ぬる湯」「箒川沿い一軒宿」「無料駐車場30台」。<br>
-      3. <strong>アイキャッチ【】タグの付与</strong>: 【猫とぬる湯】【赤沢風ジンギスカン】【湯治・静養】。<br>
-      4. <strong>ターゲットペルソナ選定</strong>: 温泉・長湯愛好家、猫好き、静養・温泉治癒を求めるお客様への訴求。<br>
+      1. <strong>1行結論＋ベネフィット記載</strong>: 【塩原温泉 源泉かけ流しぬる湯＆自然に過ごす猫を見守る静養宿】至福の長湯と癒やし体験。<br>
+      2. <strong>数値ファクトの明記</strong>: 「加温加水なし 38〜40℃天然ぬる湯」「箒川沿い一軒宿」「無料駐車場30台」「猫カフェ徒歩10分」。<br>
+      3. <strong>アイキャッチ【】タグの付与</strong>: 【自然に過ごす猫の見守り】【赤沢風ジンギスカン】【湯治・静養】。<br>
+      4. <strong>ターゲットペルソナ選定</strong>: 温泉・長湯愛好家、静養・温泉治癒を求めるお客様への訴求（猫と遊びたい方には徒歩10分の猫カフェをご案内）。<br>
       5. <strong>夕朝食スペック明記</strong>: 「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の山菜料理」。<br>
       6. <strong>アクセス数値明記</strong>: 「那須塩原駅よりバス・車でアクセス / 無料駐車場30台」。<br>
       7. <strong>文末一問一答FAQ 3問自動生成</strong>:<br>
       <pre style="background:#000; padding:8px; border-radius:6px; font-size:0.7rem; color:#34d399; overflow-x:auto;">Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？
 A1. 加温・加水なし38〜40度天然ぬる湯です。副交感神経を優位にし、至福の長湯・静養体験が可能です。
-Q2. 看板猫たちとの過ごし方は？
-A2. ロビーや館内で看板猫たちがのんびり過ごしています。
+Q2. 館内の猫たちとの過ごし方は？
+A2. 猫は館内で自然体に過ごしていますので静かに見守ってください。猫と遊びたい方は当館から徒歩10分の猫カフェをご利用いただけます。
 Q3. 駐車場について
 A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       <a href="/${item.folder}/plan/index.html" style="display:block; text-align:center; background:var(--accent-gradient); color:#000; font-weight:900; padding:8px; border-radius:6px; margin-top:8px; text-decoration:none;">🚀 今すぐ「宿泊プラン作成エージェント」でAI自動生成する</a>
@@ -203,7 +203,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       1. <strong>Schema.org 4型 完全埋め込み</strong>: <code>&lt;head&gt;</code> 内に公式ドメイン（https://akasawaonsen.com/）準拠のJSON-LDを記述。<br>
       2. <strong>Rich Results Test 0エラー保証</strong>: 料金・空室・FAQ構造化データを完備。<br>
       3. <strong>実在ファクト完全準拠 (NAP統一)</strong>: 公式ドメイン https://akasawaonsen.com/ / 0287-46-5700 / 〒329-2921 栃木県那須塩原市塩原1149 / チェックアウト 10:00。<br>
-      4. <strong>amenityFeature 実在設備10項目コード化</strong>: 無加水無循環天然ぬる湯 (38〜40℃), 箒川沿い渓流一軒宿, 看板猫のおもてなし（自由気ままな存在尊重）, 赤沢風 鹿×豚ジンギスカン, 敷地内無料駐車場 30台等。<br>
+      4. <strong>amenityFeature 実在設備10項目コード化</strong>: 無加水無循環天然ぬる湯 (38〜40℃), 箒川沿い渓流一軒宿, 自然に過ごす猫たちの見守り（※猫と遊ぶなら徒歩10分猫カフェ案内）, 赤沢風 鹿×豚ジンギスカン, 敷地内無料駐車場 30台等。<br>
       5. <strong>AIクローラー専用ナレッジ設置</strong>: <code>/robots.txt</code> でのAI許可 ＆ <code>/llms.txt</code> の常設。<br>
       6. <strong>生テキスト化 ＆ FAQ整備</strong>: 料金・客室・温泉・静養価値をHTML生テキストで記述し、一問一答FAQ（最低10〜20問）を設置。<br>
       <details style="margin-top:6px; background:#000; padding:8px; border-radius:6px;">
@@ -218,7 +218,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       "@id": "https://akasawaonsen.com/#hotel",
       "name": "塩原温泉 赤沢温泉旅館",
       "alternateName": "SHIOBARA ONSEN AKASAWA RYOKAN",
-      "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
+      "description": "塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、自然体で過ごす猫たちを静かに見守る空間（※猫と遊びたい方は徒歩10分の猫カフェをご利用ください）、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
       "url": "https://akasawaonsen.com/",
       "telephone": "+81-287-46-5700",
       "priceRange": "¥10,000 - ¥28,000",
@@ -240,7 +240,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       "amenityFeature": [
         { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃・無加水無循環）", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "箒川を望む露天風呂・静養空間", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "看板猫のおもてなし（猫のいる静養宿）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "自然に過ごす猫たちの見守り（※猫と遊ぶなら徒歩10分猫カフェ案内）", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "赤沢風 鹿×豚ジンギスカン料理", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "無料駐車場 30台完備(予約不要)", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "塩原温泉バスターミナルより送迎対応(要予約)", "value": true }
@@ -323,11 +323,11 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
     `;
 
     const specC = isAkasawaSpec ? `
-      1. <strong>GBP写真 30枚以上の追加</strong>: 源泉かけ流しぬる湯、看板猫、箒川の景観、鹿肉ジンギスカン、和室客室の写真。<br>
+      1. <strong>GBP写真 30枚以上の追加</strong>: 源泉かけ流しぬる湯、自然に過ごす猫たち、箒川の景観、鹿肉ジンギスカン、和室客室の写真。<br>
       2. <strong>公式名称の一貫性</strong>: 「塩原温泉 赤沢温泉旅館」で統一。<br>
       3. <strong>ビジネスカテゴリ設定</strong>: 「温泉旅館」「旅館」「日帰り温泉」を追加。<br>
-      4. <strong>ビジネスの説明文（750文字）</strong>: 「那須塩原市塩原1149」「加温加水なし38〜40℃ぬる湯」「看板猫のおもてなし」を含める。<br>
-      5. <strong>口コミへの100%返信</strong>: 「塩原温泉」「ぬる湯」「猫」を含めた感謝の個別返信。
+      4. <strong>ビジネスの説明文（750文字）</strong>: 「那須塩原市塩原1149」「加温加水なし38〜40℃ぬる湯」「自然に過ごす猫たちの見守り（徒歩10分猫カフェ案内）」を含める。<br>
+      5. <strong>口コミへの100%返信</strong>: 「塩原温泉」「ぬる湯」「猫の見守り」を含めた感謝の個別返信。
     ` : `
       1. <strong>GBP写真 30枚以上の追加</strong>: バレルサウナ（CUBERU/Rekka）、水風呂、ドッグランヴィラ、BBQ料理の写真。<br>
       2. <strong>公式名称の一貫性</strong>: 「那須ユートピア美野沢」で統一。<br>
@@ -338,7 +338,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
 
     const specD = isAkasawaSpec ? `
       1. <strong>全OTA名称統一</strong>: 楽天・じゃらんで「塩原温泉 赤沢温泉旅館」の完全一致。<br>
-      2. <strong>プランタイトルの【】タグ最適化</strong>: 【源泉かけ流しぬる湯】【看板猫のいる宿】【鹿肉ジンギスカン】。<br>
+      2. <strong>プランタイトルの【】タグ最適化</strong>: 【源泉かけ流しぬる湯】【自然な猫の見守りと静養】【鹿肉ジンギスカン】。<br>
       3. <strong>実地ファクトの全チャネル整合</strong>: 所在地「栃木県那須塩原市塩原1149」、無料駐車場「30台」、天然ぬる湯の表記統一。<br>
       4. <strong>アクセス数値統一</strong>: 「那須塩原駅・西那須野駅よりバス・車アクセス / 無料駐車場30台」。
     ` : `
@@ -357,7 +357,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
     const specFG = isAkasawaSpec ? `
       1. <strong>自治体・DMO（塩原温泉観光協会 / 栃木県観光物産協会）公式ページへの被リンク登録</strong>: 会員ページに自社HPのURLを登録申請。<br>
       2. <strong>公式HP内へのSNSアカウント動線および OGPタグ（og:image）設置</strong>: メタタグ・SNSリンクの完備。<br>
-      3. <strong>「SNS動画・投稿自動生成AI」による発信</strong>: ぬる湯、看板猫、箒川の静養動画を自動生成発信。<br>
+      3. <strong>「SNS動画・投稿自動生成AI」による発信</strong>: ぬる湯、自然に過ごす猫たちの見守り、箒川の静養動画を自動生成発信。<br>
       4. <strong>多言語独立ディレクトリ・FAQの整備</strong>: インバウンドゲスト向け多言語対応。
     ` : `
       1. <strong>自治体・DMO（那須町観光協会 / 栃木県観光物産協会）公式ページへの被リンク登録</strong>: 会員ページに自社HPのURLを登録申請。<br>
@@ -366,8 +366,8 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       4. <strong>多言語独立ディレクトリ・FAQの整備</strong>: インバウンドゲスト向け多言語対応。
     `;
 
-    const catchTitle = isAkasawaSpec ? `『塩原温泉 源泉かけ流しぬる湯と看板猫のいる静養宿』` : `『「ととのう」の、その先へ (BEYOND TOTONOU FEELING)』`;
-    const catchDesc = isAkasawaSpec ? `加温・加水なし38〜40℃の天然ぬる湯、看板猫のおもてなし、箒川を望む渓流一軒宿。<br>本AIシステム群は、宿の強み・ナレッジ基盤（天然ぬる湯・看板猫・鹿肉ジンギスカン・静養湯治）と「お客様がここを選ぶ納得の理由（Because）」を直接接続し、全9システムがブレない高価値提案を自動生成します。` : `アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート。<br>本AIシステム群は、宿の思想・ナレッジ基盤（本格サウナ・ドッグランヴィラ・手ぶらBBQ・現代アート）と「お客様がここを選ぶ納得の理由（Because）」を直接接続し、全9システムがブレない高価値提案を自動生成します。`;
+    const catchTitle = isAkasawaSpec ? `『塩原温泉 源泉かけ流しぬる湯と自然に過ごす猫のいる静養宿』` : `『「ととのう」の、その先へ (BEYOND TOTONOU FEELING)』`;
+    const catchDesc = isAkasawaSpec ? `加温・加水なし38〜40℃の天然ぬる湯、自然体で過ごす猫たちの見守り（※猫と遊ぶなら徒歩10分猫カフェ案内）、箒川を望む渓流一軒宿。<br>本AIシステム群は、宿の強み・ナレッジ基盤（天然ぬる湯・自然な猫の見守り・鹿肉ジンギスカン・静養湯治）と「お客様がここを選ぶ納得の理由（Because）」を直接接続し、全9システムがブレない高価値提案を自動生成します。` : `アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート。<br>本AIシステム群は、宿の思想・ナレッジ基盤（本格サウナ・ドッグランヴィラ・手ぶらBBQ・現代アート）と「お客様がここを選ぶ納得の理由（Because）」を直接接続し、全9システムがブレない高価値提案を自動生成します。`;
 
     const ragTableRows = isAkasawaSpec ? `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-sub);">
@@ -379,8 +379,8 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-sub);">
         <td style="padding: 0.7rem 0.8rem; font-weight: bold; color: #fff;">猫好き・癒やし求道層</td>
         <td style="padding: 0.7rem 0.8rem;">旅先で人混みに疲れ静かに癒やされたい</td>
-        <td style="padding: 0.7rem 0.8rem;">看板猫たちと温かな時間を過ごす休日</td>
-        <td style="padding: 0.7rem 0.8rem;">館内やロビーで看板猫たちがのんびりとくつろぐ静養空間が広がっているから</td>
+        <td style="padding: 0.7rem 0.8rem;">自然に過ごす猫たちを見守り心ほどける休日（※猫と遊ぶなら徒歩10分猫カフェ有）</td>
+        <td style="padding: 0.7rem 0.8rem;">館内やロビーで猫たちが自然体にのんびりとくつろぐ静養空間が広がっており、静かに見守る穏やかな時間を味わえるから（猫カフェ徒歩10分案内有）</td>
       </tr>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-sub);">
         <td style="padding: 0.7rem 0.8rem; font-weight: bold; color: #fff;">地物美食・ジビエ味覚層</td>
@@ -444,7 +444,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       "@type": "Hotel",
       "@id": "https://hotel-ai.netlify.app/${item.folder}/#hotel",
       "name": "塩原温泉 赤沢温泉旅館",
-      "description": "塩原温泉 源泉かけ流しのぬる湯と猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、看板猫のおもてなし、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
+      "description": "塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、自然体で過ごす猫たちの見守り（※猫と遊びたい方は徒歩10分の猫カフェをご利用ください）、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。",
       "url": "https://hotel-ai.netlify.app/${item.folder}/",
       "telephone": "+81-287-46-5700",
       "priceRange": "¥10,000 - ¥28,000",
@@ -463,7 +463,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       },
       "amenityFeature": [
         { "@type": "LocationFeatureSpecification", "name": "源泉かけ流し天然ぬる湯（38〜40℃）", "value": true },
-        { "@type": "LocationFeatureSpecification", "name": "看板猫のおもてなし（猫のいる静養宿）", "value": true },
+        { "@type": "LocationFeatureSpecification", "name": "自然に過ごす猫たちの静かな見守り（※猫と遊ぶなら徒歩10分猫カフェ案内）", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "箒川を望む渓流一軒宿ロケーション", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "赤沢風 鹿×豚ジンギスカン料理", "value": true },
         { "@type": "LocationFeatureSpecification", "name": "無料駐車場完備", "value": true },
@@ -486,7 +486,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
     {
       "@type": "Offer",
       "@id": "https://hotel-ai.netlify.app/${item.folder}/#offer-shiobara-plan",
-      "name": "【猫とぬる湯とリセット旅】塩原天然ぬる湯＆地物味覚 1泊2食静養基本プラン",
+      "name": "【自然に過ごす猫の見守りとぬる湯リセット旅】塩原天然ぬる湯＆地物味覚 1泊2食静養基本プラン",
       "price": "14500",
       "priceCurrency": "JPY",
       "availability": "https://schema.org/InStock",
@@ -506,10 +506,10 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
         },
         {
           "@type": "Question",
-          "name": "看板猫たちとのふれあいや過ごし方について",
+          "name": "館内の猫たちとの過ごし方やふれあいについて",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ロビーや館内にて看板猫たちがのんびりと過ごしております。猫好きな方に静かな癒しの時間を提供しています。"
+            "text": "当館の猫たちは自然に館内で過ごしておりますので、静かに見守っていただくようお願いしております。猫と触れ合いたい・遊びたいお客様は、当館から徒歩10分の猫カフェをご利用いただけます。"
           }
         }
       ]
@@ -678,7 +678,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
       </div>
 
       <p style="font-size: 0.9rem; color: #e2e8f0; line-height: 1.7; margin-bottom: 1.2rem;">
-        遠藤正俊オーナーの経営方針・人生哲学（加温加水なし38〜40℃天然ぬる湯、看板猫、箒川の静寂、鹿肉ジンギスカン、価格競争からの脱却）を「旅館AICEO」が専属で担当・具現化。配下の全9システムを一括統括し、自律的に結果（売上・客単価・満足度）を最大化します。
+        遠藤正俊オーナーの経営方針・人生哲学（加温加水なし38〜40℃天然ぬる湯、自然に過ごす猫たちの見守り（徒歩10分猫カフェ案内）、箒川の静寂、鹿肉ジンギスカン、価格競争からの脱却）を「旅館AICEO」が専属で担当・具現化。配下の全9システムを一括統括し、自律的に結果（売上・客単価・満足度）を最大化します。
       </p>
 
       <!-- オーナー ⇆ 旅館AICEO リアルタイム指示コンソール -->
@@ -689,7 +689,7 @@ A3. 敷地内に30台分の無料駐車場を備えています。</pre>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button onclick="triggerCeoQuickAction('今週末および直近30日の予約予測と、DP最適価格設定を報告してください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">📈 直近予約予測とDP価格報告</button>
           <button onclick="triggerCeoQuickAction('競合10宿に対抗し、ぬる湯と鹿肉ジンギスカンを活かした秋の高単価プランを企画・各システムへ展開してください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">🏨 競合対抗・新プラン企画指示</button>
-          <button onclick="triggerCeoQuickAction('口コミ評価を分析し、看板猫やぬる湯の満足度推移と現場改善課題をまとめてください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">💬 口コミ分析と現場改善抽出</button>
+          <button onclick="triggerCeoQuickAction('口コミ評価を分析し、自然に過ごす猫たちの見守り状況やぬる湯の満足度推移、現場改善課題をまとめてください。')" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); color: #fff; font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;">💬 口コミ分析と現場改善抽出</button>
           <button onclick="triggerCeoOrchestration()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; font-weight: 900; font-size: 0.78rem; padding: 6px 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 10px rgba(16,185,129,0.3);">⚡️ 全9システム一括自動最適化を発令</button>
         </div>
         
@@ -780,15 +780,15 @@ akasawaAppReplacements.forEach(app => {
           .replace(/那須ユートピア美野沢/g, '塩原温泉 赤沢温泉旅館')
           .replace(/那須ユートピア/g, '塩原温泉 赤沢温泉旅館')
           .replace(/1\. 🔥 「ととのう」の、その先へ \(CUBERUサウナ \/ 薪サウナRekka \/ 那須水風呂\)/g, '1. ♨️ 至福の長湯と天然ぬる湯 (加温加水なし38〜40℃天然ぬる湯 / 箒川渓流)')
-          .replace(/2\. 🏫 廃校をアートとサウナで再生した理由 \(旧美野沢小学校リノベーション\)/g, '2. 🐱 看板猫と箒川のせせらぎに癒やされる理由 (看板猫のおもてなし / 塩原一軒宿)')
+          .replace(/2\. 🏫 廃校をアートとサウナで再生した理由 \(旧美野沢小学校リノベーション\)/g, '2. 🐱 自然に過ごす猫たちの見守りと箒川のせせらぎ (猫の見守り・徒歩10分猫カフェ案内 / 塩原一軒宿)')
           .replace(/3\. 🍖 那須特選牛と星空の手ぶらBBQ \(手ぶら本格BBQ \/ 焚き火\)/g, '3. 🍖 名物 赤沢風 鹿×豚ジンギスカン鍋 (塩原の地物山菜・新鮮川魚)')
           .replace(/4\. 🐶 愛犬と過ごすドッグランヴィラ \(プライベート天然芝ドッグラン\)/g, '4. 🌿 箒川を望む静養和室での隠れ家滞在 (長湯湯治 / デジタルデトックス)')
           .replace(/「ととのう」の、その先へ (CUBERUサウナ \/ 薪サウナRekka \/ 那須水風呂)/g, '温泉とぬる湯と渓流にほどける (加温加水なし38〜40℃天然ぬる湯)')
-          .replace(/廃校をアートとサウナで再生した理由 (旧美野沢小学校リノベーション)/g, '看板猫と箒川のせせらぎに癒やされる理由 (塩原一軒宿)')
+          .replace(/廃校をアートとサウナで再生した理由 (旧美野沢小学校リノベーション)/g, '自然に過ごす猫たちの見守りと箒川のせせらぎ (猫の見守り・徒歩10分猫カフェ有 / 塩原一軒宿)')
           .replace(/那須特選牛と星空の手ぶらBBQ (手ぶら本格BBQ \/ 焚き火)/g, '名物 赤沢風 鹿×豚ジンギスカン鍋 (地物山菜・川魚)')
           .replace(/愛犬と過ごすドッグランヴィラ (プライベート天然芝ドッグラン)/g, '箒川を望む静養和室 (天然ぬる湯長湯)')
-          .replace(/「ととのう」の、その先へ。廃校アートリノベーション＆サウナリゾート SNS・ショート動画配信/g, '加温加水なし38〜40℃天然ぬる湯＆看板猫の静養宿 SNS・ショート動画配信')
-          .replace(/廃校アートリノベーション＆サウナリゾート/g, '自家源泉かけ流し天然ぬる湯＆看板猫の静養宿');
+          .replace(/「ととのう」の、その先へ。廃校アートリノベーション＆サウナリゾート SNS・ショート動画配信/g, '加温加水なし38〜40℃天然ぬる湯＆自然に過ごす猫を見守る静養宿 SNS・ショート動画配信')
+          .replace(/廃校アートリノベーション＆サウナリゾート/g, '自家源泉かけ流し天然ぬる湯＆自然に過ごす猫を見守る静養宿');
         fs.writeFileSync(fullPath, content, 'utf8');
       }
     });
