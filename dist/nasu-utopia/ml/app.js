@@ -310,16 +310,146 @@ if (el.manageCsvBtn) {
   el.manageCsvBtn.addEventListener('click', manageCsv);
 }
 
-if (el.viewOptOutBtn) {
-  el.viewOptOutBtn.addEventListener('click', () => {
-    const optOuts = state.customers.filter(c => c.unsubscribed);
-    if (!optOuts.length) {
-      alert('現在、配信停止（オプトアウト）されているメールアドレスはありません。');
+// 配信停止モーダル機能
+function initOptOutModal() {
+  const modal = document.getElementById('optOutModal');
+  const closeBtn = document.getElementById('closeOptOutModalBtn');
+  const footerCloseBtn = document.getElementById('closeOptOutModalFooterBtn');
+  const tableBody = document.getElementById('optOutTableBody');
+
+  function closeModal() {
+    if (modal) modal.style.display = 'none';
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (footerCloseBtn) footerCloseBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  async function openModal() {
+    if (!modal || !tableBody) return;
+    modal.style.display = 'flex';
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">読み込み中...</td></tr>';
+
+    // Firestoreからオプトアウトリストを取得
+    let serverList = [];
+    try {
+      const res = await fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.optouts)) serverList = data.optouts;
+      }
+    } catch (e) {}
+
+    // ローカルの optouts とマージ
+    const localOptOuts = (state.customers || []).filter(c => c.unsubscribed);
+    const combinedMap = new Map();
+
+    localOptOuts.forEach(c => {
+      const key = (c.email || c.lineUserId || c.id).toLowerCase();
+      combinedMap.set(key, {
+        name: fullName(c),
+        contact: c.email || c.lineUserId || '-',
+        email: c.email || '',
+        cid: c.id || '',
+        reason: '配信停止設定済み'
+      });
+    });
+
+    serverList.forEach(s => {
+      const key = (s.email || s.cid || s.id).toLowerCase();
+      const existing = combinedMap.get(key);
+      if (existing) {
+        if (s.reason) existing.reason = s.reason;
+      } else {
+        combinedMap.set(key, {
+          name: 'お客様',
+          contact: s.email || s.cid || '-',
+          email: s.email || '',
+          cid: s.cid || '',
+          reason: s.reason || 'リンククリックによる配信停止'
+        });
+      }
+    });
+
+    const items = Array.from(combinedMap.values());
+
+    if (items.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--accent-2);">現在、配信停止（オプトアウト）されているメールアドレスはありません。</td></tr>';
       return;
     }
-    const list = optOuts.map(c => `・${fullName(c)}: ${c.email || c.lineUserId || '連絡先なし'}`).join('\n');
-    alert(`【配信停止（オプトアウト）アドレス一覧 (${optOuts.length}件)】\n※新しいCSVをインストールした際、下記のアドレスは全自動で除外・削除されます。\n\n${list}`);
-  });
+
+    tableBody.innerHTML = items.map((item, idx) => `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="text-align:center; color:var(--muted);">${idx + 1}</td>
+        <td style="font-weight:bold; color:#fff;">${escapeHtml(item.name)}</td>
+        <td style="font-family:monospace; color:var(--accent-2);">${escapeHtml(item.contact)}</td>
+        <td style="font-size:11px; color:#fca5a5;">${escapeHtml(item.reason)}</td>
+        <td style="text-align:center;">
+          <button type="button" class="ghost resubscribe-btn" data-email="${escapeHtml(item.email)}" data-cid="${escapeHtml(item.cid)}" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto; border: 1px solid var(--accent); color: var(--accent); cursor: pointer;">🔄 配信を復活</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  if (el.viewOptOutBtn) {
+    el.viewOptOutBtn.addEventListener('click', openModal);
+  }
+
+  // 復活ボタンのイベントデリゲーション
+  if (tableBody) {
+    tableBody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.resubscribe-btn');
+      if (!btn) return;
+      const targetEmail = btn.dataset.email || '';
+      const targetCid = btn.dataset.cid || '';
+      const contactLabel = targetEmail || targetCid;
+
+      if (!confirm(`【配信の復活】\n\n「${contactLabel}」の配信停止状態を解除し、通常通り配信できるように戻しますか？`)) return;
+
+      btn.disabled = true;
+      btn.textContent = '解除中...';
+
+      try {
+        // 1. API で Firestore から削除
+        await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'resubscribe', email: targetEmail, cid: targetCid })
+        });
+
+        // 2. ローカル state.customers の unsubscribed を false に
+        if (state.customers) {
+          state.customers.forEach(c => {
+            const matchesEmail = targetEmail && c.email && c.email.toLowerCase() === targetEmail.toLowerCase();
+            const matchesCid = targetCid && c.id === targetCid;
+            if (matchesEmail || matchesCid) {
+              c.unsubscribed = false;
+            }
+          });
+        }
+
+        persist();
+        render();
+        preview();
+        checkManualEmailStatus();
+
+        alert(`🎉 「${contactLabel}」の配信停止を解除しました！\n通常通りメルマガや一斉配信を受信できるようになりました。`);
+        openModal(); // 再描画
+      } catch (err) {
+        alert(`復活エラー: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = '🔄 配信を復活';
+      }
+    });
+  }
 }
 
 function deleteSelectedCsv(targetFileName) {
@@ -2112,6 +2242,7 @@ if (el.cancelScheduleBtn) {
 render();
 setMode('csv');
 initUnreachedFeature();
+initOptOutModal();
 checkScheduleStatus();
 preview();
 fetchCampaignStats();

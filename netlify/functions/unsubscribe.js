@@ -13,7 +13,6 @@ try {
 }
 
 exports.handler = async (event) => {
-  // CORSヘッダー
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -27,10 +26,62 @@ exports.handler = async (event) => {
 
   try {
     const body = event.httpMethod === 'POST' ? JSON.parse(event.body || '{}') : (event.queryStringParameters || {});
+    const action = body.action || 'unsubscribe'; // 'unsubscribe' | 'resubscribe' | 'list'
     const email = (body.email || '').trim().toLowerCase();
     const cid = (body.cid || '').trim();
     const reason = (body.reason || 'ユーザーによる配信停止リンククリック').trim();
 
+    let db = null;
+    try {
+      if (getDb) db = getDb();
+    } catch (e) {}
+
+    // === 1. 配信停止リスト取得 (action: 'list') ===
+    if (action === 'list') {
+      const list = [];
+      if (db) {
+        const snap = await db.collection('optouts').get();
+        snap.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+      }
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: true, optouts: list })
+      };
+    }
+
+    // === 2. 配信停止を解除・復活 (action: 'resubscribe') ===
+    if (action === 'resubscribe') {
+      if (!email && !cid) {
+        return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: 'email または cid が必要です' }) };
+      }
+
+      if (db) {
+        // emailまたはcidでドキュメントを検索・削除
+        const snap = await db.collection('optouts').get();
+        const deletePromises = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          const dEm = (d.email || '').trim().toLowerCase();
+          const dCid = (d.cid || '').trim();
+          if ((email && dEm === email) || (cid && dCid === cid)) {
+            deletePromises.push(doc.ref.delete());
+          }
+        });
+        await Promise.all(deletePromises);
+      }
+
+      console.log(`[unsubscribe] 配信復活完了: Email=${email}, CID=${cid}`);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: true, message: '配信停止を解除し、配信を復活させました', email, cid })
+      };
+    }
+
+    // === 3. 配信停止登録 (action: 'unsubscribe') ===
     if (!email && !cid) {
       return {
         statusCode: 400,
@@ -38,11 +89,6 @@ exports.handler = async (event) => {
         body: JSON.stringify({ ok: false, error: 'email または cid が必要です' })
       };
     }
-
-    let db = null;
-    try {
-      if (getDb) db = getDb();
-    } catch (e) {}
 
     const optOutRecord = {
       email: email || null,
