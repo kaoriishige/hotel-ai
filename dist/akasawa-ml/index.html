@@ -284,9 +284,26 @@
       <div class="top-gap inline-actions">
         <button id="previewBtn" class="ghost">プレビュー生成</button>
         <button id="clearPreviewBtn" class="ghost danger">プレビュー消去</button>
-        <button id="dispatchBtn" style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); font-weight: bold; font-size: 14px;">🚀 配信実行 (完了まで毎朝08:00自動配信)</button>
+        <button id="dispatchBtn" style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); font-weight: bold; font-size: 14px; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">🚀 配信実行</button>
       </div>
-      <p class="mini" style="margin-top: 6px; color: var(--muted);">※1日最大500件(Resend 5キー分散)を即時送信し、500件を超える場合は<strong>全件送信完了まで毎日朝08:00に自動で継続配信</strong>されます。</p>
+
+      <!-- 配信タイミングの明確な注意書きガイド -->
+      <div style="margin-top: 12px; padding: 12px 16px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 10px; font-size: 12px; line-height: 1.7;">
+        <div style="font-weight: bold; color: #60a5fa; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <span>💡</span> 配信タイミングについて
+        </div>
+        <div style="display: grid; gap: 6px; color: #cbd5e1;">
+          <div style="display: flex; gap: 8px; align-items: flex-start;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 1px 6px; border-radius: 4px; font-size: 11px; white-space: nowrap; font-weight: bold;">⚡ 即時送信</span>
+            <span><strong>個別手入力・500件以内の顧客リスト:</strong> 「配信実行」を押した瞬間に、その場ですぐに送信されます（朝08:00の待ちはありません）。</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: flex-start;">
+            <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 1px 6px; border-radius: 4px; font-size: 11px; white-space: nowrap; font-weight: bold;">⏰ 500件超のみ</span>
+            <span><strong>500件を超える大量リスト:</strong> 本日分500件（5キー分散）を即時送信し、<strong>残りの未送信分のみ</strong>全件送りきるまで毎朝08:00に自動で継続配信されます。</span>
+          </div>
+        </div>
+      </div>
+
       <div id="previewBox" class="preview hidden"></div>
     </section>
 
