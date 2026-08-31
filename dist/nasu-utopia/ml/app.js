@@ -1463,6 +1463,23 @@ function updateReportFilterOptions() {
   ).join('');
 }
 
+let remoteCampaignStats = null;
+
+async function fetchCampaignStats() {
+  try {
+    const res = await fetch('/api/get-campaign-stats');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.ok && data.stats) {
+        remoteCampaignStats = data.stats;
+        renderConversionDashboard();
+      }
+    }
+  } catch (err) {
+    console.warn('[fetchCampaignStats] 取得失敗:', err.message);
+  }
+}
+
 function renderConversionDashboard() {
   updateReportFilterOptions();
 
@@ -1476,7 +1493,6 @@ function renderConversionDashboard() {
   if (filterMode === 'latest' && state.logs.length > 0) {
     const latestLog = state.logs[0];
     totalSent = latestLog.totalCount || 1;
-    // 最新ログの配信日時以降、または該当顧客の予約
     if (latestLog.recipient) {
       bookedCustomers = bookedCustomers.filter(c => c.email === latestLog.recipient || c.lineUserId === latestLog.recipient);
     }
@@ -1494,22 +1510,28 @@ function renderConversionDashboard() {
     totalSent = state.logs.reduce((sum, l) => sum + (Number(l.totalCount) || 1), 0) || totalCustomers || 1;
   }
 
-  const totalBookings = bookedCustomers.length;
-  
-  // 開封数・クリック数の集計
+  // 開封数・クリック数の集計 (Firestoreリモート + ローカル)
   let totalOpens = 0;
   let totalClicks = 0;
+  let remoteBookings = 0;
+  let remoteRevenue = 0;
 
   if (filterMode === 'latest' && state.logs.length > 0) {
     const latestLog = state.logs[0];
-    totalOpens = latestLog.openCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 3, 1) : 0);
-    totalClicks = latestLog.clickCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 2, 1) : 0);
+    const logStat = (remoteCampaignStats && remoteCampaignStats.logsStats && remoteCampaignStats.logsStats[latestLog.id]) || {};
+    totalOpens = (latestLog.openCount || 0) + (logStat.opens || 0);
+    totalClicks = (latestLog.clickCount || 0) + (logStat.clicks || 0);
+    remoteBookings = logStat.bookings || 0;
+    remoteRevenue = logStat.revenue || 0;
   } else if (filterMode.startsWith('log_')) {
     const logId = filterMode.replace('log_', '');
     const targetLog = state.logs.find(l => l.id === logId);
+    const logStat = (remoteCampaignStats && remoteCampaignStats.logsStats && remoteCampaignStats.logsStats[logId]) || {};
     if (targetLog) {
-      totalOpens = targetLog.openCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 3, 1) : 0);
-      totalClicks = targetLog.clickCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 2, 1) : 0);
+      totalOpens = (targetLog.openCount || 0) + (logStat.opens || 0);
+      totalClicks = (targetLog.clickCount || 0) + (logStat.clicks || 0);
+      remoteBookings = logStat.bookings || 0;
+      remoteRevenue = logStat.revenue || 0;
     }
   } else {
     // 累計通算
@@ -1517,18 +1539,20 @@ function renderConversionDashboard() {
     const logsClicks = state.logs.reduce((sum, l) => sum + (Number(l.clickCount) || 0), 0);
     const custOpens = state.customers.filter(c => c.opened).length;
     const custClicks = state.customers.filter(c => c.clicked).length;
-    totalOpens = Math.max(logsOpens, custOpens, bookedCustomers.length > 0 ? bookedCustomers.length * 3 : 0);
-    totalClicks = Math.max(logsClicks, custClicks, bookedCustomers.length > 0 ? bookedCustomers.length * 2 : 0);
+    const rOpens = remoteCampaignStats ? (remoteCampaignStats.totalOpens || 0) : 0;
+    const rClicks = remoteCampaignStats ? (remoteCampaignStats.totalClicks || 0) : 0;
+    remoteBookings = remoteCampaignStats ? (remoteCampaignStats.totalBookings || 0) : 0;
+    remoteRevenue = remoteCampaignStats ? (remoteCampaignStats.totalRevenue || 0) : 0;
+
+    totalOpens = Math.max(logsOpens, custOpens, rOpens);
+    totalClicks = Math.max(logsClicks, custClicks, rClicks);
   }
+
+  const totalBookings = Math.max(bookedCustomers.length, remoteBookings);
+  const totalRevenue = Math.max(bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0), remoteRevenue);
 
   const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : '0.0';
   const ctr = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : '0.0';
-
-  // チャネル別集計 (メール vs LINE)
-  const emailBookings = bookedCustomers.filter(c => (c.bookedChannel || 'email') === 'email').length;
-  const lineBookings = bookedCustomers.filter(c => c.bookedChannel === 'line').length;
-  
-  const totalRevenue = bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0);
   const cvr = totalSent > 0 ? ((totalBookings / totalSent) * 100).toFixed(1) : '0.0';
 
   // DOM要素の更新
@@ -2076,4 +2100,6 @@ setMode('csv');
 initUnreachedFeature();
 checkScheduleStatus();
 preview();
+fetchCampaignStats();
+setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
 
