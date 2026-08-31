@@ -784,41 +784,28 @@ async function dispatchMessages() {
 }
 
 function getTargets() {
-  const manualEmailInput = document.getElementById('manualEmail');
-  const manualLineInput = document.getElementById('manualLineId');
-  const manualEmail = manualEmailInput ? manualEmailInput.value.trim() : '';
-  const manualLine = manualLineInput ? manualLineInput.value.trim() : '';
+  const manualEmail = (document.getElementById('manualEmail')?.value || '').trim();
+  const manualLine = (document.getElementById('manualLineId')?.value || '').trim();
+  const lastName = (document.querySelector('input[name="lastName"]')?.value || '').trim() || 'お客様';
+  const firstName = (document.querySelector('input[name="firstName"]')?.value || '').trim();
 
-  const mode = (typeof currentMode !== 'undefined') ? currentMode : 'csv';
-
-  // 手入力タブ選択中、または手入力フォームにメール/LINEが入っている場合
-  if (mode === 'manual' || (!document.querySelector('.row-select:checked') && (manualEmail || manualLine))) {
-    if (el.customerForm) {
-      const fd = new FormData(el.customerForm);
-      const customer = normalizeCustomer(Object.fromEntries(fd.entries()));
-      if (manualEmail && !customer.email) customer.email = manualEmail;
-      if (manualLine && !customer.lineUserId) customer.lineUserId = manualLine;
-      if (customer.email || customer.lineUserId) {
-        if (customer.unsubscribed) return [];
-        return [customer];
-      }
-    }
+  // 1. 手入力フォームにメールアドレスまたはLINE IDが入力されている場合は【最優先】で手入力配信
+  if (manualEmail || manualLine) {
+    return [{
+      id: 'manual_' + Date.now(),
+      lastName,
+      firstName,
+      email: manualEmail,
+      lineUserId: manualLine,
+      unsubscribed: false
+    }];
   }
 
-  // CSVモードで選択されている顧客
+  // 2. CSVモードでチェックボックスが選択されている顧客
   const selectedIds = [...document.querySelectorAll('.row-select:checked')].map(x => x.value);
   const selected = (state.customers || []).filter(c => selectedIds.includes(c.id) && !c.unsubscribed);
   if (selected.length > 0) {
     return selected;
-  }
-
-  // CSV未選択時の手入力フォールバック
-  if (manualEmail || manualLine) {
-    if (el.customerForm) {
-      const fd = new FormData(el.customerForm);
-      const customer = normalizeCustomer(Object.fromEntries(fd.entries()));
-      if (customer.email || customer.lineUserId) return [customer];
-    }
   }
 
   return [];
