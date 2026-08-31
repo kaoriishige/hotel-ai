@@ -119,7 +119,7 @@ async function sendLine(customer, message) {
 }
 
 function runtimeMode() {
-  return getResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  return getIndividualResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {
