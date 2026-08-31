@@ -23,13 +23,13 @@ exports.handler = async (event) => {
 
 function getIndividualResendApiKeys() {
   const keys = [];
-  // 個別配信専用キー: RESEND_API_KEYS6 を最優先
-  const key6 = process.env.RESEND_API_KEYS6 || process.env.RESEND_API_KEY_6;
-  if (key6 && key6.trim()) {
-    keys.push(key6.trim());
+  // 個別配信専用キー: RESEND_API_KEYS1 を最優先
+  const key1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
+  if (key1 && key1.trim()) {
+    keys.push(key1.trim());
   }
-  // バックアップ・フェイルオーバー用キー（1〜5）
-  for (let i = 1; i <= 5; i++) {
+  // バックアップ・フェイルオーバー用キー（2〜6）
+  for (let i = 2; i <= 6; i++) {
     const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
     if (k && k.trim()) keys.push(k.trim());
   }

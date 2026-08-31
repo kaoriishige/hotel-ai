@@ -14,10 +14,15 @@ try {
 
 function getResendApiKeys() {
   const keys = [];
-  // 一括配信・スケジュール配信は RESEND_API_KEYS1〜5 (5キー × 100件 = 500件/日) を使用
-  for (let i = 1; i <= 5; i++) {
+  // 一括配信・スケジュール配信は RESEND_API_KEYS2〜6 (5キー × 100件 = 500件/日) を使用
+  for (let i = 2; i <= 6; i++) {
     const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
     if (k && k.trim()) keys.push(k.trim());
+  }
+  // 万が一2〜6が未設定の場合はKey 1へフォールバック
+  if (keys.length === 0) {
+    const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
+    if (k1 && k1.trim()) keys.push(k1.trim());
   }
   return [...new Set(keys)];
 }
