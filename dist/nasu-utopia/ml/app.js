@@ -115,8 +115,19 @@ const templates = {
   }
 };
 
-const isSubdir = window.location.pathname.includes('/akasawa-ml');
-const SIGNATURE = `
+function getSignature(customer) {
+  const isSubdir = window.location.pathname.includes('/akasawa-ml');
+  const baseOrigin = window.location.origin.includes('localhost') ? window.location.origin : 'https://hotel-ai.netlify.app';
+  const cid = customer && customer.id ? customer.id : '';
+  const email = customer && customer.email ? customer.email : '';
+  const params = new URLSearchParams();
+  if (cid) params.set('cid', cid);
+  if (email) params.set('email', email);
+  const paramStr = params.toString() ? `?${params.toString()}` : '';
+
+  const unsubUrl = `${baseOrigin}/akasawa/ml/unsubscribe.html${paramStr}`;
+
+  return `
 ------------------------------
 那須ユートピア美野沢株式会社/那須ユートピア美野沢 支配人
 〒329-2921 栃木県那須那須町市那須町1149
@@ -124,7 +135,10 @@ TEL: 0287-46-5700　FAX：0287-46-5699
 公式サイト：https://akasawaonsen.com/
 ------------------------------
 ※メール配信の停止（もういらない）をご希望の方は、下記URLよりお手続きをお願いいたします。
-${window.location.origin}${isSubdir ? '/akasawa-ml' : ''}/unsubscribe.html`;
+${unsubUrl}`;
+}
+
+const SIGNATURE = getSignature({});
 
 const el = {
   tabCsv: document.getElementById('tabCsv'),
@@ -807,7 +821,7 @@ function buildMessage(customer, channelOverride) {
   // プランURLを自動追跡リンク（UTMパラメータ・チャネル・顧客識別キー付き）へ変換
   let trackedContent = attachTrackingParams(fullContent, customer, channelOverride);
 
-  const body = trackedContent + '\n' + SIGNATURE;
+  const body = trackedContent + '\n' + getSignature(customer);
   const subject = el.customSubject.value.trim() || tpl.emailSubject || '【那須ユートピア美野沢】ご案内';
   return { subject, body };
 }
