@@ -784,27 +784,44 @@ async function dispatchMessages() {
 }
 
 function getTargets() {
-  if (currentMode === 'manual') {
-    const fd = new FormData(el.customerForm);
-    const customer = normalizeCustomer(Object.fromEntries(fd.entries()));
-    if (!customer.email && !customer.lineUserId) return [];
-    if (customer.unsubscribed) return []; // 配信停止の場合は送信対象外
-    return [customer];
-  } else {
-    // 常にチェックボックスの状態（絞り込み時は絞り込まれた結果）を正とする
-    const selectedIds = [...document.querySelectorAll('.row-select:checked')].map(x => x.value);
-    const selected = state.customers.filter(c => selectedIds.includes(c.id) && !c.unsubscribed);
-    if (selected.length > 0) {
-      return selected;
+  const manualEmailInput = document.getElementById('manualEmail');
+  const manualLineInput = document.getElementById('manualLineId');
+  const manualEmail = manualEmailInput ? manualEmailInput.value.trim() : '';
+  const manualLine = manualLineInput ? manualLineInput.value.trim() : '';
+
+  const mode = (typeof currentMode !== 'undefined') ? currentMode : 'csv';
+
+  // 手入力タブ選択中、または手入力フォームにメール/LINEが入っている場合
+  if (mode === 'manual' || (!document.querySelector('.row-select:checked') && (manualEmail || manualLine))) {
+    if (el.customerForm) {
+      const fd = new FormData(el.customerForm);
+      const customer = normalizeCustomer(Object.fromEntries(fd.entries()));
+      if (manualEmail && !customer.email) customer.email = manualEmail;
+      if (manualLine && !customer.lineUserId) customer.lineUserId = manualLine;
+      if (customer.email || customer.lineUserId) {
+        if (customer.unsubscribed) return [];
+        return [customer];
+      }
     }
-    // CSVで選択されていない場合でも、手入力欄にメール/LINEが入っていれば手入力顧客として送信
-    const fd = new FormData(el.customerForm);
-    const manualCustomer = normalizeCustomer(Object.fromEntries(fd.entries()));
-    if (manualCustomer.email || manualCustomer.lineUserId) {
-      return [manualCustomer];
-    }
-    return [];
   }
+
+  // CSVモードで選択されている顧客
+  const selectedIds = [...document.querySelectorAll('.row-select:checked')].map(x => x.value);
+  const selected = (state.customers || []).filter(c => selectedIds.includes(c.id) && !c.unsubscribed);
+  if (selected.length > 0) {
+    return selected;
+  }
+
+  // CSV未選択時の手入力フォールバック
+  if (manualEmail || manualLine) {
+    if (el.customerForm) {
+      const fd = new FormData(el.customerForm);
+      const customer = normalizeCustomer(Object.fromEntries(fd.entries()));
+      if (customer.email || customer.lineUserId) return [customer];
+    }
+  }
+
+  return [];
 }
 
 // 赤沢温泉プランURLへの追跡パラメータ自動埋め込みエンジン
