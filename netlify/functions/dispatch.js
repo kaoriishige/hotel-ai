@@ -21,15 +21,17 @@ exports.handler = async (event) => {
   }
 };
 
-function getResendApiKeys() {
+function getIndividualResendApiKeys() {
   const keys = [];
-  for (let i = 1; i <= 10; i++) {
+  // 個別配信専用キー: RESEND_API_KEYS6 を最優先
+  const key6 = process.env.RESEND_API_KEYS6 || process.env.RESEND_API_KEY_6;
+  if (key6 && key6.trim()) {
+    keys.push(key6.trim());
+  }
+  // バックアップ・フェイルオーバー用キー（1〜5）
+  for (let i = 1; i <= 5; i++) {
     const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
     if (k && k.trim()) keys.push(k.trim());
-  }
-  if (process.env.RESEND_API_KEYS) {
-    const splitted = process.env.RESEND_API_KEYS.split(',').map(s => s.trim()).filter(Boolean);
-    keys.push(...splitted);
   }
   return [...new Set(keys)];
 }
@@ -37,7 +39,7 @@ function getResendApiKeys() {
 async function sendEmail(customer, subject, message) {
   if (!customer.email) return { type: 'email', status: 'skipped', reason: 'email missing' };
 
-  const apiKeys = getResendApiKeys();
+  const apiKeys = getIndividualResendApiKeys();
   const from = process.env.MAIL_FROM;
   if (apiKeys.length === 0 || !from) {
     return { type: 'email', status: 'mock', to: customer.email, subject, note: '環境変数(RESEND_API_KEYS / MAIL_FROM)未設定のためモック送信' };
