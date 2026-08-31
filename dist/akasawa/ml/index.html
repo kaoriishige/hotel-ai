@@ -50,9 +50,19 @@
 
     <!-- メール・LINE成果（コンバージョン）ダッシュボード -->
     <section class="card span-2" style="background: linear-gradient(135deg, rgba(20, 40, 75, 0.95), rgba(15, 25, 50, 0.98)); border: 1px solid rgba(106, 212, 255, 0.3);">
-      <div class="card-head">
-        <h2>🎉 メール・LINE経由 予約成果レポート（プラン別自動認識）</h2>
-        <span class="badge success">UTM自動追跡連携</span>
+      <div class="card-head" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h2>🎉 メール・LINE経由 予約成果レポート（プラン別自動認識）</h2>
+          <span class="badge success">UTM自動追跡連携</span>
+        </div>
+        <!-- 累計通算 vs 今回の配信 / 個別配信回 切り替えセレクター -->
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label style="margin: 0; font-size: 12px; color: var(--accent-2); font-weight: bold; white-space: nowrap;">📊 集計対象:</label>
+          <select id="reportPeriodFilter" style="padding: 4px 10px; font-size: 12px; background: #0c1430; border: 1px solid var(--accent); color: #fff; border-radius: 6px; cursor: pointer; min-width: 180px;">
+            <option value="all">🌟 全期間（累計通算データ）</option>
+            <option value="latest">📅 今回の直近配信</option>
+          </select>
+        </div>
       </div>
 
       <div class="cols-4" style="margin-top: 12px; text-align: center; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">

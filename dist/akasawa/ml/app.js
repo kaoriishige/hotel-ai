@@ -182,7 +182,8 @@ const el = {
   scheduleStatusCard: document.getElementById('scheduleStatusCard'),
   scheduleRemainingCount: document.getElementById('scheduleRemainingCount'),
   scheduleDetailsText: document.getElementById('scheduleDetailsText'),
-  cancelScheduleBtn: document.getElementById('cancelScheduleBtn')
+  cancelScheduleBtn: document.getElementById('cancelScheduleBtn'),
+  reportPeriodFilter: document.getElementById('reportPeriodFilter')
 };
 
 // タブ切り替え処理
@@ -1387,9 +1388,64 @@ function handleManualResubscribe() {
   alert('この連絡先の配信停止状態を解除し、配信を復活させました。');
 }
 
+function updateReportFilterOptions() {
+  if (!el.reportPeriodFilter) return;
+  const currentVal = el.reportPeriodFilter.value || 'all';
+
+  const options = [
+    { value: 'all', label: '🌟 全期間（累計通算データ）' },
+    { value: 'latest', label: '📅 今回の直近配信' }
+  ];
+
+  // 配信履歴から個別の配信回を選択肢に追加
+  if (state.logs && state.logs.length > 0) {
+    state.logs.forEach((log, idx) => {
+      const dateStr = log.createdAt ? new Date(log.createdAt).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const name = log.customerName ? log.customerName.replace(/【.+?】/, '').trim() : `配信#${idx + 1}`;
+      const countStr = log.totalCount ? `${log.totalCount}件` : '1件';
+      options.push({
+        value: `log_${log.id}`,
+        label: `📁 [${dateStr}] ${name} (${countStr})`
+      });
+    });
+  }
+
+  el.reportPeriodFilter.innerHTML = options.map(opt => 
+    `<option value="${opt.value}" ${opt.value === currentVal ? 'selected' : ''}>${escapeHtml(opt.label)}</option>`
+  ).join('');
+}
+
 function renderConversionDashboard() {
+  updateReportFilterOptions();
+
+  const filterMode = el.reportPeriodFilter ? el.reportPeriodFilter.value : 'all';
   const totalCustomers = state.customers.length;
-  const bookedCustomers = state.customers.filter(c => c.bookedPlanName);
+
+  let bookedCustomers = state.customers.filter(c => c.bookedPlanName);
+  let totalSent = state.logs.length || totalCustomers || 1;
+
+  // 個別配信回フィルターの適用
+  if (filterMode === 'latest' && state.logs.length > 0) {
+    const latestLog = state.logs[0];
+    totalSent = latestLog.totalCount || 1;
+    // 最新ログの配信日時以降、または該当顧客の予約
+    if (latestLog.recipient) {
+      bookedCustomers = bookedCustomers.filter(c => c.email === latestLog.recipient || c.lineUserId === latestLog.recipient);
+    }
+  } else if (filterMode.startsWith('log_')) {
+    const logId = filterMode.replace('log_', '');
+    const targetLog = state.logs.find(l => l.id === logId);
+    if (targetLog) {
+      totalSent = targetLog.totalCount || 1;
+      if (targetLog.recipient) {
+        bookedCustomers = bookedCustomers.filter(c => c.email === targetLog.recipient || c.lineUserId === targetLog.recipient);
+      }
+    }
+  } else {
+    // 全期間（累計通算）
+    totalSent = state.logs.reduce((sum, l) => sum + (Number(l.totalCount) || 1), 0) || totalCustomers || 1;
+  }
+
   const totalBookings = bookedCustomers.length;
   
   // チャネル別集計 (メール vs LINE)
@@ -1397,8 +1453,7 @@ function renderConversionDashboard() {
   const lineBookings = bookedCustomers.filter(c => c.bookedChannel === 'line').length;
   
   const totalRevenue = bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0);
-  const totalSent = state.logs.length || totalCustomers || 1;
-  const cvr = ((totalBookings / totalSent) * 100).toFixed(1);
+  const cvr = totalSent > 0 ? ((totalBookings / totalSent) * 100).toFixed(1) : '0.0';
 
   const elBookings = document.getElementById('statTotalBookings');
   const elCvr = document.getElementById('statCvr');
@@ -1468,6 +1523,10 @@ function renderConversionDashboard() {
   }
 
   updateUrlToolPreview();
+}
+
+if (el.reportPeriodFilter) {
+  el.reportPeriodFilter.addEventListener('change', renderConversionDashboard);
 }
 
 function simulateBooking(id) {
