@@ -201,19 +201,30 @@ el.customerForm.addEventListener('input', () => {
   }
 });
 
-document.querySelectorAll('.scenario').forEach(btn => {
+// シナリオ切り替えボタンのイベントリスナー設定
+const scenarioButtons = document.querySelectorAll('.scenario-btn, .scenario');
+scenarioButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    state.scenario = btn.dataset.scenario;
-    document.querySelectorAll('.scenario').forEach(x => x.classList.remove('active'));
+    state.scenario = btn.dataset.scenario || 'custom';
+    scenarioButtons.forEach(x => x.classList.remove('active'));
     btn.classList.add('active');
-    el.customSubject.value = templates[state.scenario].emailSubject;
+    const tpl = templates[state.scenario];
+    if (tpl && tpl.emailSubject !== undefined) {
+      el.customSubject.value = tpl.emailSubject;
+    }
     preview();
   });
 });
 
-document.querySelectorAll('.scenario').forEach(x => x.classList.remove('active'));
-document.querySelector(`[data-scenario="${state.scenario}"]`).classList.add('active');
-el.customSubject.value = templates[state.scenario].emailSubject;
+const currentScenarioBtn = document.querySelector(`[data-scenario="${state.scenario}"]`);
+if (currentScenarioBtn) {
+  scenarioButtons.forEach(x => x.classList.remove('active'));
+  currentScenarioBtn.classList.add('active');
+  const tpl = templates[state.scenario];
+  if (tpl && tpl.emailSubject) {
+    el.customSubject.value = tpl.emailSubject;
+  }
+}
 
 el.csvFile.addEventListener('change', async e => {
   const file = e.target.files[0];
@@ -342,9 +353,15 @@ el.toggleCustomerListBtn.addEventListener('click', () => {
   el.toggleCustomerListBtn.textContent = isHidden ? 'リストを確認' : 'リストを隠す';
 });
 
-el.previewBtn.addEventListener('click', preview);
+el.previewBtn.addEventListener('click', () => {
+  preview();
+  if (el.previewBox) {
+    el.previewBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+});
 el.clearPreviewBtn.addEventListener('click', () => {
   el.previewBox.classList.add('hidden');
+  el.previewBox.style.display = 'none';
   el.previewBox.textContent = '';
 });
 el.customSubject.addEventListener('input', preview);
@@ -422,20 +439,29 @@ el.logList.addEventListener('click', e => {
 
 function preview() {
   const targets = getTargets();
-  if (!targets.length) {
-    el.previewBox.classList.remove('hidden');
-    el.previewBox.textContent = '対象顧客がいません。手入力モードの場合はメールアドレスまたはLINE IDを入力してください。';
-    return;
-  }
-  const message = buildMessage(targets[0]);
+  const sampleCustomer = (targets && targets.length > 0) ? targets[0] : {
+    id: 'sample_guest',
+    lastName: '那須ユートピア',
+    firstName: '太郎',
+    email: 'guest@example.com'
+  };
+
+  const message = buildMessage(sampleCustomer);
+  if (!el.previewBox) return;
+
   el.previewBox.classList.remove('hidden');
+  el.previewBox.style.display = 'block';
   
   let spamWarning = '';
   if (/[！!]{3,}|[★☆]{3,}|激安|100%無料/i.test(message.subject + ' ' + message.body)) {
     spamWarning = '\n\n------------------------------\n💡 【メイントレイ到達のコツ】\n件名や本文に過度な記号（！！！、★★★）や強いセールスワードが含まれているため、Gmailの「プロモーション」タブに入りやすくなる可能性があります。';
   }
 
-  el.previewBox.textContent = `差出人: 那須ユートピア美野沢\n件名: ${message.subject}\n\n${message.body}${spamWarning}`;
+  const targetNotice = (targets && targets.length > 0) 
+    ? `【宛名プレビュー: ${fullName(targets[0])} 様（選択中顧客 1人目の表示例）】\n` 
+    : '【※ 顧客リスト未選択のため「那須ユートピア 太郎 様」のサンプル宛名・追跡パラメータでプレビュー表示中】\n';
+
+  el.previewBox.textContent = `${targetNotice}━━━━━━━━━━━━━━━━━━━━━━━━━━\n差出人: 那須ユートピア美野沢\n件名: ${message.subject}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${message.body}${spamWarning}`;
 }
 
 async function dispatchMessages() {
@@ -1859,4 +1885,5 @@ function initUnreachedFeature() {
 render();
 setMode('csv');
 initUnreachedFeature();
+preview();
 
