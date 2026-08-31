@@ -1699,6 +1699,10 @@ function renderConversionDashboard() {
   const ctr = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : '0.0';
   const cvr = totalSent > 0 ? ((totalBookings / totalSent) * 100).toFixed(1) : '0.0';
 
+  // チャネル別予約集計
+  const emailBookings = bookedCustomers.filter(c => (c.bookedChannel || 'email') === 'email').length;
+  const lineBookings = bookedCustomers.filter(c => c.bookedChannel === 'line').length;
+
   // DOM要素の更新
   const elOpens = document.getElementById('statTotalOpens');
   const elOpenRate = document.getElementById('statOpenRate');
