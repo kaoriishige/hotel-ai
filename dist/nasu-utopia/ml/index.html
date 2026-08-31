@@ -103,6 +103,21 @@
         </div>
       </div>
 
+      <!-- 成果シミュレーション・テストバー（常時表示） -->
+      <div style="margin-top: 14px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; padding: 10px 14px; border: 1px solid rgba(255, 255, 255, 0.15); display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 13px;">🧪</span>
+          <span style="font-size: 12px; font-weight: bold; color: #fff;">成果データ動作テスト:</span>
+          <span style="font-size: 11px; color: var(--muted);">（ボタンを押すと即座に数字が動きます）</span>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button type="button" id="quickTestOpenBtn" class="ghost" style="padding: 5px 12px; font-size: 11px; margin: 0; width: auto; border: 1px solid #60a5fa; color: #93c5fd; cursor: pointer; border-radius: 6px;">👁️ 開封 +1</button>
+          <button type="button" id="quickTestClickBtn" class="ghost" style="padding: 5px 12px; font-size: 11px; margin: 0; width: auto; border: 1px solid #38bdf8; color: #7dd3fc; cursor: pointer; border-radius: 6px;">🔗 クリック +1</button>
+          <button type="button" id="quickTestBookingBtn" class="ghost" style="padding: 5px 12px; font-size: 11px; margin: 0; width: auto; border: 1px solid #34d399; color: #6ee7b7; cursor: pointer; border-radius: 6px;">🎯 予約成約 +1 (¥18,000)</button>
+          <button type="button" id="quickResetStatsBtn" class="ghost danger" style="padding: 5px 10px; font-size: 11px; margin: 0; width: auto; cursor: pointer; border-radius: 6px;">🧹 リセット</button>
+        </div>
+      </div>
+
       <!-- プラン別内訳エリア -->
       <div id="planBreakdownContainer" style="margin-top: 14px; font-size: 13px; color: var(--muted); border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
         <!-- 動的にプラン内訳を表示 -->
@@ -431,6 +446,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=20260831_1342"></script>
+  <script src="./app.js?v=20260831_1555"></script>
 </body>
 </html>

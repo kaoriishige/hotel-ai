@@ -1932,6 +1932,119 @@ function initUrlToolEvents() {
       simulateBooking(firstCustomer.id);
     });
   }
+
+  // ダッシュボード直下のクイックテストボタン
+  const qOpenBtn = document.getElementById('quickTestOpenBtn');
+  const qClickBtn = document.getElementById('quickTestClickBtn');
+  const qBookingBtn = document.getElementById('quickTestBookingBtn');
+  const qResetBtn = document.getElementById('quickResetStatsBtn');
+
+  if (qOpenBtn) {
+    qOpenBtn.addEventListener('click', () => {
+      let target = state.customers.find(c => !c.unsubscribed && !c.opened) || state.customers[0];
+      if (!target && state.customers.length === 0) {
+        state.customers.push({
+          id: 'test_guest_1',
+          lastName: 'テスト',
+          firstName: '太郎',
+          email: 'test@example.com',
+          opened: true,
+          openedAt: new Date().toISOString()
+        });
+      } else if (target) {
+        target.opened = true;
+        target.openedAt = new Date().toISOString();
+      }
+      if (state.logs.length > 0) {
+        state.logs[0].openCount = (state.logs[0].openCount || 0) + 1;
+      }
+      persist();
+      render();
+      fetch('/api/track-open?cid=test_guest&campaign=summer_recommend').catch(() => {});
+    });
+  }
+
+  if (qClickBtn) {
+    qClickBtn.addEventListener('click', () => {
+      let target = state.customers.find(c => !c.unsubscribed && !c.clicked) || state.customers[0];
+      if (!target && state.customers.length === 0) {
+        state.customers.push({
+          id: 'test_guest_1',
+          lastName: 'テスト',
+          firstName: '太郎',
+          email: 'test@example.com',
+          opened: true,
+          clicked: true,
+          clickedAt: new Date().toISOString()
+        });
+      } else if (target) {
+        target.opened = true;
+        target.clicked = true;
+        target.clickedAt = new Date().toISOString();
+      }
+      if (state.logs.length > 0) {
+        state.logs[0].clickCount = (state.logs[0].clickCount || 0) + 1;
+        state.logs[0].openCount = Math.max(state.logs[0].openCount || 0, state.logs[0].clickCount);
+      }
+      persist();
+      render();
+      fetch('/api/track-click?cid=test_guest&campaign=summer_recommend&plan=normal&target=' + encodeURIComponent('https://x.gd/tnpmh')).catch(() => {});
+    });
+  }
+
+  if (qBookingBtn) {
+    qBookingBtn.addEventListener('click', () => {
+      if (state.customers.length === 0) {
+        state.customers.push({
+          id: 'test_guest_1',
+          lastName: 'テスト',
+          firstName: '太郎',
+          email: 'test@example.com',
+          opened: true,
+          clicked: true
+        });
+      }
+      const target = state.customers.find(c => !c.bookedPlanName) || state.customers[0];
+      const plans = [
+        { name: '【1泊2食付】通常プラン', amount: 18000 },
+        { name: '【1泊2食付】直前割プラン', amount: 15000 },
+        { name: '特製ジンギスカンコース', amount: 16500 }
+      ];
+      const p = plans[Math.floor(Math.random() * plans.length)];
+      target.opened = true;
+      target.clicked = true;
+      target.bookedPlanName = p.name;
+      target.bookedAmount = p.amount;
+      target.bookedDate = new Date().toISOString();
+      target.bookedChannel = Math.random() > 0.5 ? 'email' : 'line';
+
+      persist();
+      render();
+    });
+  }
+
+  if (qResetBtn) {
+    qResetBtn.addEventListener('click', () => {
+      if (!confirm('成果レポートのテスト集計データをリセットしますか？')) return;
+      state.customers.forEach(c => {
+        delete c.opened;
+        delete c.openedAt;
+        delete c.clicked;
+        delete c.clickedAt;
+        delete c.bookedPlanName;
+        delete c.bookedAmount;
+        delete c.bookedDate;
+        delete c.bookedChannel;
+      });
+      state.logs.forEach(l => {
+        l.openCount = 0;
+        l.clickCount = 0;
+      });
+      remoteCampaignStats = null;
+      persist();
+      render();
+    });
+  }
 }
 
 // =============================================================
