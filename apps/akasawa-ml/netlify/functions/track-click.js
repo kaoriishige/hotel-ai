@@ -14,9 +14,10 @@ try {
 
 exports.handler = async (event) => {
   const params = event.queryStringParameters || {};
-  const targetUrl = params.url ? decodeURIComponent(params.url) : 'https://akasawaonsen.com/';
+  const rawUrl = params.url || params.target;
+  const targetUrl = rawUrl ? decodeURIComponent(rawUrl) : 'https://akasawaonsen.com/';
   const cid = params.cid || 'anonymous';
-  const plan = params.plan || 'general';
+  const plan = params.plan || 'normal';
   const channel = params.channel || 'email';
   const logId = params.logId || '';
 

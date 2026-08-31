@@ -196,11 +196,25 @@ async function sendEmailBatch(payloads) {
   }
 
   const batchRequests = validPayloads.map(p => {
+    const cid = p.customerId || (p.email ? p.email.split('@')[0] : 'guest');
+    const trackingPixelUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=crm`;
+    const htmlBody = (p.message || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br/>')
+      .replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+        const trackingClickUrl = `https://hotel-ai.netlify.app/api/track-click?cid=${encodeURIComponent(cid)}&channel=email&url=${encodeURIComponent(url)}`;
+        return `<a href="${trackingClickUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;">${url}</a>`;
+      })
+      + `<br/><br/><img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
+
     const req = {
       from,
       to: p.email,
       subject: p.subject,
-      text: p.message
+      text: p.message,
+      html: htmlBody
     };
     if (process.env.REPLY_TO) {
       req.reply_to = process.env.REPLY_TO;

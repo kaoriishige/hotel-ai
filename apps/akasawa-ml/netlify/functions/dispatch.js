@@ -45,11 +45,27 @@ async function sendEmail(customer, subject, message) {
     return { type: 'email', status: 'mock', to: customer.email, subject, note: '環境変数(RESEND_API_KEYS / MAIL_FROM)未設定のためモック送信' };
   }
 
+  const cid = customer.customerId || customer.id || (customer.email ? customer.email.split('@')[0] : 'guest');
+  const trackingPixelUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=crm`;
+  
+  // 本文中のURLを自動的にクリック追跡URL（/api/track-click）に変換
+  const htmlBody = (message || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br/>')
+    .replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+      const trackingClickUrl = `https://hotel-ai.netlify.app/api/track-click?cid=${encodeURIComponent(cid)}&channel=email&url=${encodeURIComponent(url)}`;
+      return `<a href="${trackingClickUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;">${url}</a>`;
+    })
+    + `<br/><br/><img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
+
   const payload = {
     from,
     to: customer.email,
     subject,
-    text: message
+    text: message,
+    html: htmlBody
   };
 
   if (process.env.REPLY_TO) {
