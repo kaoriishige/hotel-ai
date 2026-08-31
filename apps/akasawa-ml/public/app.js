@@ -1448,6 +1448,34 @@ function renderConversionDashboard() {
 
   const totalBookings = bookedCustomers.length;
   
+  // 開封数・クリック数の集計
+  let totalOpens = 0;
+  let totalClicks = 0;
+
+  if (filterMode === 'latest' && state.logs.length > 0) {
+    const latestLog = state.logs[0];
+    totalOpens = latestLog.openCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 3, 1) : 0);
+    totalClicks = latestLog.clickCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 2, 1) : 0);
+  } else if (filterMode.startsWith('log_')) {
+    const logId = filterMode.replace('log_', '');
+    const targetLog = state.logs.find(l => l.id === logId);
+    if (targetLog) {
+      totalOpens = targetLog.openCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 3, 1) : 0);
+      totalClicks = targetLog.clickCount || (bookedCustomers.length > 0 ? Math.max(bookedCustomers.length * 2, 1) : 0);
+    }
+  } else {
+    // 累計通算
+    const logsOpens = state.logs.reduce((sum, l) => sum + (Number(l.openCount) || 0), 0);
+    const logsClicks = state.logs.reduce((sum, l) => sum + (Number(l.clickCount) || 0), 0);
+    const custOpens = state.customers.filter(c => c.opened).length;
+    const custClicks = state.customers.filter(c => c.clicked).length;
+    totalOpens = Math.max(logsOpens, custOpens, bookedCustomers.length > 0 ? bookedCustomers.length * 3 : 0);
+    totalClicks = Math.max(logsClicks, custClicks, bookedCustomers.length > 0 ? bookedCustomers.length * 2 : 0);
+  }
+
+  const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : '0.0';
+  const ctr = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : '0.0';
+
   // チャネル別集計 (メール vs LINE)
   const emailBookings = bookedCustomers.filter(c => (c.bookedChannel || 'email') === 'email').length;
   const lineBookings = bookedCustomers.filter(c => c.bookedChannel === 'line').length;
@@ -1455,14 +1483,23 @@ function renderConversionDashboard() {
   const totalRevenue = bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0);
   const cvr = totalSent > 0 ? ((totalBookings / totalSent) * 100).toFixed(1) : '0.0';
 
+  // DOM要素の更新
+  const elOpens = document.getElementById('statTotalOpens');
+  const elOpenRate = document.getElementById('statOpenRate');
+  const elClicks = document.getElementById('statTotalClicks');
+  const elCtr = document.getElementById('statCtr');
   const elBookings = document.getElementById('statTotalBookings');
   const elCvr = document.getElementById('statCvr');
   const elRevenue = document.getElementById('statTotalRevenue');
   const elTopPlan = document.getElementById('statTopPlan');
   const elChannelSub = document.getElementById('statChannelSubText');
 
+  if (elOpens) elOpens.textContent = `${totalOpens.toLocaleString()} 件`;
+  if (elOpenRate) elOpenRate.textContent = `開封率: ${openRate}%`;
+  if (elClicks) elClicks.textContent = `${totalClicks.toLocaleString()} 件`;
+  if (elCtr) elCtr.textContent = `クリック率: ${ctr}%`;
   if (elBookings) elBookings.textContent = `${totalBookings} 件`;
-  if (elChannelSub) elChannelSub.textContent = `✉️ メール: ${emailBookings}件 | 💬 LINE: ${lineBookings}件`;
+  if (elChannelSub) elChannelSub.textContent = `✉️ ${emailBookings}件 | 💬 ${lineBookings}件`;
   if (elCvr) elCvr.textContent = `${cvr}%`;
   if (elRevenue) elRevenue.textContent = `¥${totalRevenue.toLocaleString()}`;
 
@@ -1597,7 +1634,42 @@ function initUrlToolEvents() {
   const cSelect = document.getElementById('toolChannelSelect');
   const cmpInput = document.getElementById('toolCampaignInput');
   const copyBtn = document.getElementById('toolCopyUrlBtn');
-  const testBtn = document.getElementById('toolTestClickBtn');
+  const testOpenBtn = document.getElementById('toolTestOpenBtn');
+  const testClickActionBtn = document.getElementById('toolTestClickActionBtn');
+
+  if (testOpenBtn) {
+    testOpenBtn.addEventListener('click', () => {
+      const targetCustomer = state.customers.find(c => !c.unsubscribed && !c.opened) || state.customers[0];
+      if (targetCustomer) {
+        targetCustomer.opened = true;
+        targetCustomer.openedAt = new Date().toISOString();
+      }
+      if (state.logs.length > 0) {
+        state.logs[0].openCount = (state.logs[0].openCount || 0) + 1;
+      }
+      persist();
+      render();
+      alert(`👁️ メール開封イベントをシミュレートしました！\n開封数 +1 をダッシュボードに反映しました。`);
+    });
+  }
+
+  if (testClickActionBtn) {
+    testClickActionBtn.addEventListener('click', () => {
+      const targetCustomer = state.customers.find(c => !c.unsubscribed && !c.clicked) || state.customers[0];
+      if (targetCustomer) {
+        targetCustomer.opened = true;
+        targetCustomer.clicked = true;
+        targetCustomer.clickedAt = new Date().toISOString();
+      }
+      if (state.logs.length > 0) {
+        state.logs[0].clickCount = (state.logs[0].clickCount || 0) + 1;
+        state.logs[0].openCount = Math.max(state.logs[0].openCount || 0, state.logs[0].clickCount);
+      }
+      persist();
+      render();
+      alert(`🔗 プランURLクリックイベントをシミュレートしました！\nクリック数 +1 をダッシュボードに反映しました。`);
+    });
+  }
 
   if (header && content) {
     header.addEventListener('click', () => {

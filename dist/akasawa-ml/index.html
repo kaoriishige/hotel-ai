@@ -65,25 +65,41 @@
         </div>
       </div>
 
-      <div class="cols-4" style="margin-top: 12px; text-align: center; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+      <div class="cols-6" style="margin-top: 12px; text-align: center; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+        <!-- 1. メール開封 -->
         <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-          <div class="text-xs muted" style="margin-bottom: 4px;">全チャネル 総予約数</div>
-          <div id="statTotalBookings" style="font-size: 24px; font-weight: bold; color: var(--accent-2);">0 件</div>
-          <div id="statChannelSubText" style="font-size: 11px; color: #8dd7ff; margin-top: 4px;">✉️ メール: 0件 | 💬 LINE: 0件</div>
+          <div class="text-xs muted" style="margin-bottom: 4px;">👁️ メール開封数</div>
+          <div id="statTotalOpens" style="font-size: 22px; font-weight: bold; color: #60a5fa;">0 件</div>
+          <div id="statOpenRate" style="font-size: 11px; color: #93c5fd; margin-top: 4px;">開封率: 0.0%</div>
         </div>
+        <!-- 2. プランURLクリック -->
         <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-          <div class="text-xs muted" style="margin-bottom: 4px;">予約転換率 (CVR)</div>
-          <div id="statCvr" style="font-size: 24px; font-weight: bold; color: var(--accent);">0.0%</div>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">配信数あたりの予約到達率</div>
+          <div class="text-xs muted" style="margin-bottom: 4px;">🔗 プランクリック数</div>
+          <div id="statTotalClicks" style="font-size: 22px; font-weight: bold; color: #38bdf8;">0 件</div>
+          <div id="statCtr" style="font-size: 11px; color: #7dd3fc; margin-top: 4px;">クリック率(CTR): 0.0%</div>
         </div>
+        <!-- 3. 総予約数 -->
         <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-          <div class="text-xs muted" style="margin-bottom: 4px;">メール・LINE 獲得売上</div>
-          <div id="statTotalRevenue" style="font-size: 24px; font-weight: bold; color: #ffd700;">¥0</div>
-          <div style="font-size: 11px; color: #ffe680; margin-top: 4px;">プラン自動集計合計</div>
+          <div class="text-xs muted" style="margin-bottom: 4px;">🎉 総予約数</div>
+          <div id="statTotalBookings" style="font-size: 22px; font-weight: bold; color: var(--accent-2);">0 件</div>
+          <div id="statChannelSubText" style="font-size: 11px; color: #8dd7ff; margin-top: 4px;">✉️ 0件 | 💬 0件</div>
         </div>
+        <!-- 4. 予約転換率 CVR -->
         <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-          <div class="text-xs muted" style="margin-bottom: 4px;">一番人気のプラン</div>
-          <div id="statTopPlan" style="font-size: 13px; font-weight: bold; color: #fff; margin-top: 6px;">-</div>
+          <div class="text-xs muted" style="margin-bottom: 4px;">🎯 予約転換率 (CVR)</div>
+          <div id="statCvr" style="font-size: 22px; font-weight: bold; color: var(--accent);">0.0%</div>
+          <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">配信数比の予約率</div>
+        </div>
+        <!-- 5. 獲得売上 -->
+        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+          <div class="text-xs muted" style="margin-bottom: 4px;">💰 獲得売上</div>
+          <div id="statTotalRevenue" style="font-size: 22px; font-weight: bold; color: #ffd700;">¥0</div>
+          <div style="font-size: 11px; color: #ffe680; margin-top: 4px;">プラン自動集計</div>
+        </div>
+        <!-- 6. 一番人気のプラン -->
+        <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+          <div class="text-xs muted" style="margin-bottom: 4px;">🏆 一番人気のプラン</div>
+          <div id="statTopPlan" style="font-size: 12px; font-weight: bold; color: #fff; margin-top: 4px; word-break: break-all;">-</div>
         </div>
       </div>
 
@@ -121,12 +137,14 @@
               <input type="text" id="toolCampaignInput" value="summer_recommend" style="width: 100%; padding: 4px 8px; font-size: 12px;" placeholder="例: summer_recommend">
             </div>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="toolGeneratedUrl" readonly style="flex: 1; font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.4); color: var(--accent-2); border: 1px solid var(--line);" value="https://x.gd/tnpmh?utm_source=email&utm_medium=crm&utm_campaign=summer_recommend&utm_content=normal">
-            <button type="button" id="toolCopyUrlBtn" class="ghost" style="padding: 4px 12px; font-size: 11px; margin: 0; width: auto;">📋 コピー</button>
-            <button type="button" id="toolTestClickBtn" class="ghost" style="padding: 4px 12px; font-size: 11px; margin: 0; width: auto; border-color: var(--accent-2); color: var(--accent-2);">🎯 予約発生テスト</button>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="toolGeneratedUrl" readonly style="flex: 1; min-width: 200px; font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.4); color: var(--accent-2); border: 1px solid var(--line);" value="https://x.gd/tnpmh?utm_source=email&utm_medium=crm&utm_campaign=summer_recommend&utm_content=normal">
+            <button type="button" id="toolCopyUrlBtn" class="ghost" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto;">📋 コピー</button>
+            <button type="button" id="toolTestOpenBtn" class="ghost" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto; border-color: #60a5fa; color: #93c5fd;">👁️ 開封テスト</button>
+            <button type="button" id="toolTestClickActionBtn" class="ghost" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto; border-color: #38bdf8; color: #7dd3fc;">🔗 クリックテスト</button>
+            <button type="button" id="toolTestClickBtn" class="ghost" style="padding: 4px 10px; font-size: 11px; margin: 0; width: auto; border-color: var(--accent-2); color: var(--accent-2);">🎯 予約発生テスト</button>
           </div>
-          <div class="text-xs muted" style="margin-top: 4px;">※本文の配信時・プレビュー時には、本文中のすべてのプランURLへ上記の追跡パラメータが全自動埋め込みされます。</div>
+          <div class="text-xs muted" style="margin-top: 4px;">※メール送信時には透明トラッキングピクセル（開封検知）およびプランURL（クリック・予約検知）が自動埋め込みされます。</div>
         </div>
       </div>
     </section>
