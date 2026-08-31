@@ -485,10 +485,21 @@ function preview() {
 
 async function dispatchMessages() {
   const allTargets = getTargets();
-  if (!allTargets.length) return alert('対象顧客がいません。手入力の場合はメールアドレスまたはLINE IDが必須です。');
+  if (!allTargets.length) {
+    alert('【送信対象の顧客がありません】\n\n・CSV一括配信の場合: 顧客リストのチェックボックスを選択してください。\n・個別手入力の場合: 「個別手入力」タブを開き、メールアドレスまたはLINE IDを入力してください。');
+    return;
+  }
+
+  const targetDesc = allTargets.length === 1 
+    ? `${fullName(allTargets[0])} 様 (${allTargets[0].email || allTargets[0].lineUserId})`
+    : `選択された ${allTargets.length} 件の顧客`;
+
+  if (!confirm(`【配信の確認】\n\n${targetDesc} へメッセージを送信します。\nよろしいですか？`)) {
+    return;
+  }
 
   el.dispatchBtn.disabled = true;
-  el.dispatchBtn.textContent = '配信中...';
+  el.dispatchBtn.textContent = '🚀 送信処理中...';
 
   const channel = el.channelSelect.value;
 
@@ -772,7 +783,17 @@ function getTargets() {
   } else {
     // 常にチェックボックスの状態（絞り込み時は絞り込まれた結果）を正とする
     const selectedIds = [...document.querySelectorAll('.row-select:checked')].map(x => x.value);
-    return state.customers.filter(c => selectedIds.includes(c.id) && !c.unsubscribed);
+    const selected = state.customers.filter(c => selectedIds.includes(c.id) && !c.unsubscribed);
+    if (selected.length > 0) {
+      return selected;
+    }
+    // CSVで選択されていない場合でも、手入力欄にメール/LINEが入っていれば手入力顧客として送信
+    const fd = new FormData(el.customerForm);
+    const manualCustomer = normalizeCustomer(Object.fromEntries(fd.entries()));
+    if (manualCustomer.email || manualCustomer.lineUserId) {
+      return [manualCustomer];
+    }
+    return [];
   }
 }
 
