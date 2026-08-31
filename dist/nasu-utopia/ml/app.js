@@ -1,3 +1,5 @@
+let currentMode = 'csv';
+
 const STORAGE_KEYS = {
   customers: 'akasawa_demo_customers',
   logs: 'akasawa_demo_logs',
@@ -1678,6 +1680,7 @@ function initUrlToolEvents() {
   const copyBtn = document.getElementById('toolCopyUrlBtn');
   const testOpenBtn = document.getElementById('toolTestOpenBtn');
   const testClickActionBtn = document.getElementById('toolTestClickActionBtn');
+  const testBtn = document.getElementById('toolTestClickBtn');
 
   if (testOpenBtn) {
     testOpenBtn.addEventListener('click', () => {
