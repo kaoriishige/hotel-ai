@@ -10,13 +10,26 @@ if (!myFetch) {
   }
 }
 
+function getResendApiKeys() {
+  const keys = [];
+  for (let i = 1; i <= 10; i++) {
+    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
+    if (k && k.trim()) keys.push(k.trim());
+  }
+  if (process.env.RESEND_API_KEYS) {
+    const splitted = process.env.RESEND_API_KEYS.split(',').map(s => s.trim()).filter(Boolean);
+    keys.push(...splitted);
+  }
+  return [...new Set(keys)];
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'GET' && event.httpMethod !== 'POST') {
     return json(405, { ok: false, error: 'Method not allowed' });
   }
 
   try {
-    const apiKey = process.env.RESEND_API_KEY;
+    const apiKeys = getResendApiKeys();
     
     // 開発/デモ環境またはローカルに undelivered_raw.json がある場合のキャッシュ読み込み
     let cachedList = [];
@@ -27,12 +40,12 @@ exports.handler = async (event) => {
       } catch (e) {}
     }
 
-    if (!apiKey) {
+    if (apiKeys.length === 0) {
       // APIキーがない場合でもキャッシュがあれば返す
       if (cachedList.length > 0) {
         return json(200, { ok: true, source: 'cache', data: cachedList });
       }
-      return json(400, { ok: false, error: 'RESEND_API_KEY is not configured in .env' });
+      return json(400, { ok: false, error: 'RESEND_API_KEYS1〜5 is not configured in .env' });
     }
 
     // Resend API から直近のメールログを取得
@@ -44,47 +57,61 @@ exports.handler = async (event) => {
     }
 
     let emails = [];
-    let hasMore = true;
-    let after = null;
-    let page = 1;
-    const maxEmails = 7500;
+    for (const key of apiKeys) {
+      let hasMore = true;
+      let after = null;
+      const maxEmailsPerKey = 1000;
+      let keyEmailsCount = 0;
 
-    while (hasMore && emails.length < maxEmails) {
-      let url = 'https://api.resend.com/emails?limit=100';
-      if (after) {
-        url += `&after=${after}`;
-      }
-
-      const res = await myFetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+      while (hasMore && keyEmailsCount < maxEmailsPerKey) {
+        let url = 'https://api.resend.com/emails?limit=100';
+        if (after) {
+          url += `&after=${after}`;
         }
-      });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Resend API Error (${res.status}): ${text}`);
-      }
+        try {
+          const res = await myFetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${key}`,
+              'Content-Type': 'application/json'
+            }
+          });
 
-      const result = await res.json();
-      if (!result.data || !Array.isArray(result.data)) {
-        break;
-      }
+          if (!res.ok) {
+            console.warn(`Resend API fetch failed for a key: ${res.status}`);
+            break;
+          }
 
-      emails = emails.concat(result.data);
-      hasMore = result.has_more;
+          const result = await res.json();
+          if (!result.data || !Array.isArray(result.data)) {
+            break;
+          }
 
-      if (hasMore && result.data.length > 0) {
-        after = result.data[result.data.length - 1].id;
-        page++;
-        // Rate limit 対策
-        await new Promise(r => setTimeout(r, 100));
-      } else {
-        break;
+          emails = emails.concat(result.data);
+          keyEmailsCount += result.data.length;
+          hasMore = result.has_more;
+
+          if (hasMore && result.data.length > 0) {
+            after = result.data[result.data.length - 1].id;
+            await new Promise(r => setTimeout(r, 100));
+          } else {
+            break;
+          }
+        } catch (fetchErr) {
+          console.warn('Resend log fetch error:', fetchErr.message);
+          break;
+        }
       }
     }
+
+    // 重複IDの排除
+    const seenLogIds = new Set();
+    emails = emails.filter(item => {
+      if (seenLogIds.has(item.id)) return false;
+      seenLogIds.add(item.id);
+      return true;
+    });
 
     // 未到着（bounced / suppressed / failed / last_event != delivered）の抽出
     const undeliveredList = [];

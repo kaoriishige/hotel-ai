@@ -21,12 +21,25 @@ exports.handler = async (event) => {
   }
 };
 
+function getResendApiKeys() {
+  const keys = [];
+  for (let i = 1; i <= 10; i++) {
+    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
+    if (k && k.trim()) keys.push(k.trim());
+  }
+  if (process.env.RESEND_API_KEYS) {
+    const splitted = process.env.RESEND_API_KEYS.split(',').map(s => s.trim()).filter(Boolean);
+    keys.push(...splitted);
+  }
+  return [...new Set(keys)];
+}
+
 async function sendEmail(customer, subject, message) {
   if (!customer.email) return { type: 'email', status: 'skipped', reason: 'email missing' };
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKeys = getResendApiKeys();
   const from = process.env.MAIL_FROM;
-  if (!apiKey || !from) {
+  if (apiKeys.length === 0 || !from) {
     return { type: 'email', status: 'mock', to: customer.email, subject };
   }
 
@@ -41,18 +54,31 @@ async function sendEmail(customer, subject, message) {
     payload.reply_to = process.env.REPLY_TO;
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  let lastError = null;
+  for (let i = 0; i < apiKeys.length; i++) {
+    const currentKey = apiKeys[i];
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${currentKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(`Email send failed: ${JSON.stringify(data)}`);
-  return { type: 'email', status: 'sent', to: customer.email, provider: 'resend', data };
+      const data = await res.json();
+      if (!res.ok) {
+        lastError = new Error(`Email send failed on key #${i + 1}: ${JSON.stringify(data)}`);
+        continue; // 次のキーで再試行
+      }
+      return { type: 'email', status: 'sent', to: customer.email, provider: 'resend', keyNum: i + 1, data };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('Email send failed on all available Resend API keys');
 }
 
 async function sendLine(customer, message) {
@@ -83,7 +109,7 @@ async function sendLine(customer, message) {
 }
 
 function runtimeMode() {
-  return process.env.RESEND_API_KEY || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  return getResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {

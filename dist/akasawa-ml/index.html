@@ -31,7 +31,10 @@
     <section class="card span-2">
       <div class="card-head">
         <h2>接続イメージ</h2>
-        <span class="badge">デモ</span>
+        <div style="display: flex; gap: 6px;">
+          <span class="badge success">🔑 Resend 5キー分散 (1日最大500件)</span>
+          <span class="badge">デモ/実送信対応</span>
+        </div>
       </div>
       <div class="flow">
         <div class="node">staysee / ねっぱん / CSV</div>
@@ -40,9 +43,9 @@
         <div class="arrow">→</div>
         <div class="node">配信シナリオ</div>
         <div class="arrow">→</div>
-        <div class="node">メール / LINE</div>
+        <div class="node">メール (5キー自動分散) / LINE</div>
       </div>
-      <p class="muted">本デモは、顧客台帳・テンプレート・配信履歴をブラウザ保存。Netlify Functions に環境変数を入れると実送信、未設定ならモック送信になります。</p>
+      <p class="muted">本システムは、Resend無料枠（1キー1日100件）× 5キー（<code>RESEND_API_KEYS1〜5</code>）の自動ローテーションにより、<strong>1日最大500件まで無料枠で安全に分散送信</strong>します。500件超の顧客リストも送信済みが自動除外され、全件送信完了まで継続して管理できます。</p>
     </section>
 
     <!-- メール・LINE成果（コンバージョン）ダッシュボード -->

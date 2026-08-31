@@ -47,12 +47,12 @@ exports.handler = async (event) => {
 
     // === 事前バリデーション (予測可能なエラーがある場合は、Resend送信を含め1件も送信せずに手前で即時エラー終了する) ===
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const apiKey = process.env.RESEND_API_KEY;
+    const apiKeys = getResendApiKeys();
     const from = process.env.MAIL_FROM;
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
-    if ((channel === 'email' || channel === 'both') && (!apiKey || !from)) {
-      return json(400, { ok: false, error: 'メール配信用APIキー(RESEND_API_KEY)または送信元アドレス(MAIL_FROM)が設定されていません。送信処理は一切開始されていません。' });
+    if ((channel === 'email' || channel === 'both') && (apiKeys.length === 0 || !from)) {
+      return json(400, { ok: false, error: 'メール配信用APIキー(RESEND_API_KEYS1〜5)または送信元アドレス(MAIL_FROM)が設定されていません。送信処理は一切開始されていません。' });
     }
     if ((channel === 'line' || channel === 'both') && !lineToken) {
       return json(400, { ok: false, error: 'LINE配信用のアクセストークン(LINE_CHANNEL_ACCESS_TOKEN)が設定されていません。送信処理は一切開始されていません。' });
@@ -139,6 +139,19 @@ exports.handler = async (event) => {
   }
 };
 
+function getResendApiKeys() {
+  const keys = [];
+  for (let i = 1; i <= 10; i++) {
+    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
+    if (k && k.trim()) keys.push(k.trim());
+  }
+  if (process.env.RESEND_API_KEYS) {
+    const splitted = process.env.RESEND_API_KEYS.split(',').map(s => s.trim()).filter(Boolean);
+    keys.push(...splitted);
+  }
+  return [...new Set(keys)];
+}
+
 async function sendEmailBatch(payloads) {
   // 英数字・主要記号のみを許可する厳格なメールアドレス正規表現
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -165,16 +178,12 @@ async function sendEmailBatch(payloads) {
     return `${p.customerName || '宛名なし'} (無効またはRFC違反アドレス: ${p.email || '空欄'})`;
   });
 
-  // サーバーログに実際に送信されるアドレスをデバッグ出力
-  console.log(`[sendEmailBatch] 送信要求: ${payloads.length}件, 有効: ${validPayloads.length}件, スキップ: ${skippedNames.length}件`);
-  if (validPayloads.length > 0) {
-    console.log(`[sendEmailBatch] 送信先サンプル:`, validPayloads.slice(0, 5).map(p => p.email));
-  }
-
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKeys = getResendApiKeys();
   const from = process.env.MAIL_FROM;
 
-  if (!apiKey || !from) {
+  console.log(`[sendEmailBatch] 送信要求: ${payloads.length}件, 有効: ${validPayloads.length}件, 利用可能APIキー数: ${apiKeys.length}個`);
+
+  if (apiKeys.length === 0 || !from) {
     return { 
       type: 'email', 
       status: 'mock', 
@@ -201,26 +210,77 @@ async function sendEmailBatch(payloads) {
     return { type: 'email', status: 'skipped', reason: 'no valid emails in payload', skippedNames };
   }
 
-  const res = await fetch('https://api.resend.com/emails/batch', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(batchRequests)
-  });
+  // 1つのAPIキーにつき100件まで送信。APIキー数×100件（5キーなら500件）を順次ローテーション送信
+  const keyCapacity = 100;
+  let keyIndex = 0;
+  let sentCount = 0;
+  const failedNames = [];
+  const responsesData = [];
+  const usedKeysSummary = [];
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(`Email batch send failed: ${JSON.stringify(data)}`);
+  for (let i = 0; i < batchRequests.length; i += keyCapacity) {
+    if (keyIndex >= apiKeys.length) {
+      // 利用可能なすべてのAPIキーの枠を使い切った場合
+      const remainingUnsent = batchRequests.slice(i);
+      remainingUnsent.forEach(r => {
+        const matchingP = validPayloads.find(p => p.email === r.to);
+        const name = matchingP ? (matchingP.customerName || r.to) : r.to;
+        failedNames.push(`${name} (全APIキーの本日枠上限到達・次回送信対象)`);
+      });
+      break;
+    }
+
+    const currentKey = apiKeys[keyIndex];
+    const chunkRequests = batchRequests.slice(i, i + keyCapacity);
+    console.log(`[sendEmailBatch] APIキー #${keyIndex + 1} (${currentKey.substring(0, 8)}...) で ${chunkRequests.length} 件送信開始`);
+
+    try {
+      const res = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${currentKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(chunkRequests)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error(`[sendEmailBatch] APIキー #${keyIndex + 1} 送信失敗:`, data);
+        // レートリミット等の場合は次のキーで再試行
+        keyIndex++;
+        if (keyIndex < apiKeys.length) {
+          i -= keyCapacity; // 同じチャンクを次のキーで再試行
+          continue;
+        } else {
+          throw new Error(`Resend Batch API Error: ${JSON.stringify(data)}`);
+        }
+      }
+
+      sentCount += chunkRequests.length;
+      responsesData.push(data);
+      usedKeysSummary.push({ keyNum: keyIndex + 1, count: chunkRequests.length });
+      keyIndex++; // 次のチャンクは次のキーを使用
+    } catch (err) {
+      console.error(`[sendEmailBatch] APIキー #${keyIndex + 1} 例外発生:`, err.message);
+      keyIndex++;
+      if (keyIndex < apiKeys.length) {
+        i -= keyCapacity; // 次のキーで再試行
+      } else {
+        throw err;
+      }
+    }
+  }
   
   return { 
     type: 'email', 
-    status: 'sent', 
-    provider: 'resend-batch', 
-    count: batchRequests.length,
-    data,
+    status: failedNames.length > 0 && sentCount === 0 ? 'failed' : 'sent', 
+    provider: 'resend-multi-keys', 
+    count: sentCount,
+    usedKeys: usedKeysSummary,
+    data: responsesData,
     skippedNames,
-    failedNames: [] // Resend Batch API doesn't return per-item failures reliably here, so mock it for now
+    failedNames
   };
 }
 
@@ -280,7 +340,7 @@ async function sendLineBatch(payloads) {
 }
 
 function runtimeMode() {
-  return process.env.RESEND_API_KEY || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  return getResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {

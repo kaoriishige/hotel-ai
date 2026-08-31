@@ -643,12 +643,12 @@ async function dispatchMessages() {
             chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: メール送信エラー (${em.error || 'サーバー応答なし'})`));
             chunkUnreached += chunk.length;
           } else {
-            if (em.failedNames) {
-              em.failedNames.forEach(n => failedNamesList.push(`・${n}: メール送信エラー`));
+            if (em.failedNames && em.failedNames.length > 0) {
+              em.failedNames.forEach(n => failedNamesList.push(`・${n}: 送信保留/上限到達`));
               chunkUnreached += em.failedNames.length;
             }
             if (em.skippedNames && em.skippedNames.length > 0) {
-              skippedNamesList.push(`・メール送信スキップ (オプトアウト等) ${em.skippedNames.length} 件`);
+              skippedNamesList.push(`・メール送信スキップ (オプトアウト/無効アドレス等) ${em.skippedNames.length} 件`);
               chunkUnreached += em.skippedNames.length;
             }
           }
@@ -660,7 +660,7 @@ async function dispatchMessages() {
             chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: LINE送信エラー (${ln.error || 'サーバー応答なし'})`));
             chunkUnreached += chunk.length;
           } else {
-            if (ln.failedNames) {
+            if (ln.failedNames && ln.failedNames.length > 0) {
               ln.failedNames.forEach(n => failedNamesList.push(`・${n}: LINE送信エラー`));
               chunkUnreached += ln.failedNames.length;
             }
@@ -682,7 +682,7 @@ async function dispatchMessages() {
           renderLogs();
         }
 
-        // 配信処理が実行された顧客は即座に選択解除する（再試行保護）
+        // 配信処理が実行された顧客は即座に選択解除する（次回未送信継続用）
         chunk.forEach(c => {
           removeFromSelected(c.id);
         });
@@ -699,7 +699,16 @@ async function dispatchMessages() {
         renderLogs();
       }
 
-      alert(`${targets.length}件の配信処理が完了しました。\n送信成功: ${targets.length - totalUnreached} 件\n未送信/未到達: ${totalUnreached} 件`);
+      const remainingCustomers = state.customers.filter(c => !c.unsubscribed && state.selectedCustomerIds.includes(c.id));
+      const remainingCount = remainingCustomers.length;
+
+      let completionMsg = `✨ 配信処理が完了しました（Resend 5キー自動分散）。\n・送信成功: ${targets.length - totalUnreached} 件\n・未送信/エラー: ${totalUnreached} 件`;
+      if (remainingCount > 0) {
+        completionMsg += `\n\n📌 残り未送信のお客様が【${remainingCount}件】あります。\n次回（明日等）そのまま「配信実行」を押すことで、続きから全件送信を継続できます。`;
+      } else {
+        completionMsg += `\n\n🎉 選択されたすべての対象顧客への送信が完了しました！`;
+      }
+      alert(completionMsg);
     } else {
       // Manual Mode
       const customer = targets[0];
