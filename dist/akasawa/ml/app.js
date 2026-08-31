@@ -720,17 +720,22 @@ async function dispatchMessages() {
       const unreachedCount = isSuccess ? 0 : 1;
       const unreachedDetails = isSuccess ? '' : `・${fullName(customer)}: ${failedDetails.join(' / ') || '配信失敗'}`;
 
+      const emailResult = results.email || {};
+      const statusNote = emailResult.status === 'mock' ? ' (※テスト/モック送信)' : '';
+
       state.logs.unshift({
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
-        customerName: `【個別配信】${fullName(customer)} 様`,
+        customerName: `【個別配信】${fullName(customer)} 様${statusNote}`,
         scenario: state.scenario,
         channel,
         status: isSuccess ? 'success' : 'error',
         totalCount: 1,
         unreachedCount,
         unreachedDetails,
-        message: `【件名】${message.subject || '(件名なし)'}`
+        recipient: customer.email || customer.lineUserId || '-',
+        subject: message.subject,
+        message: `【宛先】${customer.email || customer.lineUserId || '-'}\n【件名】${message.subject || '(件名なし)'}\n\n【送信本文】\n${message.body}`
       });
       
       // 個別配信の場合も、対象から除外（チェック解除）
@@ -739,7 +744,12 @@ async function dispatchMessages() {
       persist();
       renderCustomers();
       renderLogs();
-      alert(`個別手入力での配信が完了しました`);
+      
+      if (emailResult.status === 'mock') {
+        alert(`⚠️ 個別配信（モック/テスト）が完了しました。\n※Netlify環境変数に「RESEND_API_KEYS1〜5」が設定されていないため、実際のメール送信は行われていません。Netlifyの環境変数の設定をご確認ください。`);
+      } else {
+        alert(`🎉 ${fullName(customer)} 様（${customer.email || 'LINE'}）への個別送信が完了しました！`);
+      }
       el.customerForm.reset();
       preview(); // reset preview
     }
@@ -940,8 +950,10 @@ function renderLogs() {
       // 送信リクエスト完了
       detailsBoxHtml = `
         <details style="margin-top: 8px; background: rgba(106, 210, 255, 0.08); border: 1px solid rgba(106, 210, 255, 0.3); border-radius: 8px; padding: 10px;">
-          <summary style="cursor: pointer; font-weight: bold; color: var(--accent); font-size: 13px;">📤 送信リクエスト完了 (${total.toLocaleString()} 件) - クリックで詳細</summary>
-          <div style="white-space: pre-wrap; font-size: 12px; color: var(--text); max-height: 200px; overflow-y: auto; margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(106, 210, 255, 0.3);">${escapeHtml(msg)}</div>
+          <summary style="cursor: pointer; font-weight: bold; color: var(--accent); font-size: 13px;">📤 送信完了 (${total.toLocaleString()} 件) - クリックで送信内容を展開</summary>
+          <div style="font-size: 12px; color: var(--text); margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(106, 210, 255, 0.3);">
+            <div style="white-space: pre-wrap; line-height: 1.6; background: rgba(0,0,0,0.35); padding: 10px 12px; border-radius: 6px; max-height: 350px; overflow-y: auto;">${escapeHtml(msg)}</div>
+          </div>
         </details>
       `;
     }

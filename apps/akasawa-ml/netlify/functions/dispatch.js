@@ -40,7 +40,7 @@ async function sendEmail(customer, subject, message) {
   const apiKeys = getResendApiKeys();
   const from = process.env.MAIL_FROM;
   if (apiKeys.length === 0 || !from) {
-    return { type: 'email', status: 'mock', to: customer.email, subject };
+    return { type: 'email', status: 'mock', to: customer.email, subject, note: '環境変数(RESEND_API_KEYS / MAIL_FROM)未設定のためモック送信' };
   }
 
   const payload = {
@@ -69,16 +69,24 @@ async function sendEmail(customer, subject, message) {
 
       const data = await res.json();
       if (!res.ok) {
-        lastError = new Error(`Email send failed on key #${i + 1}: ${JSON.stringify(data)}`);
+        lastError = new Error(`Resend APIエラー (Key #${i + 1}): ${data.message || JSON.stringify(data)}`);
         continue; // 次のキーで再試行
       }
-      return { type: 'email', status: 'sent', to: customer.email, provider: 'resend', keyNum: i + 1, data };
+      return { 
+        type: 'email', 
+        status: 'sent', 
+        to: customer.email, 
+        provider: 'resend', 
+        keyNum: i + 1, 
+        emailId: data.id, 
+        data 
+      };
     } catch (err) {
       lastError = err;
     }
   }
 
-  throw lastError || new Error('Email send failed on all available Resend API keys');
+  throw lastError || new Error('すべてのResend APIキーで送信に失敗しました');
 }
 
 async function sendLine(customer, message) {
