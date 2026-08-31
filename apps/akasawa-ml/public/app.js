@@ -477,10 +477,18 @@ function preview() {
   }
 
   const targetNotice = (targets && targets.length > 0) 
-    ? `【宛名プレビュー: ${fullName(targets[0])} 様（選択中顧客 1人目の表示例）】\n` 
+    ? `【宛名プレビュー: ${fullName(targets[0])} 様（選択中顧客の表示例）】\n` 
     : '【※ 顧客リスト未選択のため「赤沢 太郎 様」のサンプル宛名・追跡パラメータでプレビュー表示中】\n';
 
   el.previewBox.textContent = `${targetNotice}━━━━━━━━━━━━━━━━━━━━━━━━━━\n差出人: 赤沢温泉旅館\n件名: ${message.subject}\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${message.body}${spamWarning}`;
+}
+
+const refreshBtn = document.getElementById('refreshPreviewBtn');
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', preview);
+}
+if (el.channelSelect) {
+  el.channelSelect.addEventListener('change', preview);
 }
 
 async function dispatchMessages() {
@@ -802,11 +810,14 @@ function attachTrackingParams(text, customer, channelOverride) {
   if (!text) return '';
   const channel = channelOverride || (el.channelSelect ? el.channelSelect.value : 'email');
   const scenario = state.scenario || 'custom';
-  const cid = customer && customer.id ? customer.id : 'demo';
+  const cid = (customer && customer.id) ? customer.id : ((customer && customer.email) ? customer.email.split('@')[0] : 'guest');
 
-  // 本文中のURLを正規表現で走査し、プランURLに追跡用UTMパラメータを全自動付与
-  return text.replace(/(https?:\/\/[^\s\n\r　]+)/g, (url) => {
-    let cleanUrl = url.trim();
+  // 本文中のURL（http/https、および x.gd/〜）を正規表現で走査し、追跡用UTMパラメータを全自動付与
+  return text.replace(/(https?:\/\/[^\s\n\r　]+|x\.gd\/[a-zA-Z0-9]+)/g, (rawUrl) => {
+    let cleanUrl = rawUrl.trim();
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+      cleanUrl = 'https://' + cleanUrl;
+    }
 
     // 末尾の日本語記号（。、」）！？など）を分離保護
     let suffix = '';
@@ -816,24 +827,34 @@ function attachTrackingParams(text, customer, channelOverride) {
       cleanUrl = cleanUrl.substring(0, cleanUrl.length - suffix.length);
     }
 
-    // すでにutmパラメータが付与されている場合はそのまま返す
-    if (cleanUrl.includes('utm_source=')) return cleanUrl + suffix;
+    // すでにパラメータがついている場合はベースURLとクエリを分解
+    let baseUrl = cleanUrl;
+    let existingParams = new URLSearchParams();
+    if (cleanUrl.includes('?')) {
+      const parts = cleanUrl.split('?');
+      baseUrl = parts[0];
+      existingParams = new URLSearchParams(parts[1]);
+    }
 
-    // 赤沢温泉旅館の対象プラン・公式URLかをチェック
+    // 赤沢温泉旅館の対象プランを判定
     let matchedPlanKey = '';
     for (const [key, plan] of Object.entries(PLANS)) {
-      if (cleanUrl.includes(plan.url) || plan.url.includes(cleanUrl)) {
+      if (baseUrl.includes(plan.url) || plan.url.includes(baseUrl)) {
         matchedPlanKey = key;
         break;
       }
     }
 
-    // すべてのhttp/https URL、または赤沢関連URLに追跡パラメータを自動合成
-    const sep = cleanUrl.includes('?') ? '&' : '?';
-    const planContentParam = matchedPlanKey ? `&utm_content=${matchedPlanKey}` : '';
-    const trackingParams = `utm_source=${encodeURIComponent(channel)}&utm_medium=crm&utm_campaign=${encodeURIComponent(scenario)}${planContentParam}&cid=${encodeURIComponent(cid)}`;
-    
-    return `${cleanUrl}${sep}${trackingParams}${suffix}`;
+    // UTMパラメータとCIDを合成
+    existingParams.set('utm_source', channel);
+    existingParams.set('utm_medium', 'crm');
+    existingParams.set('utm_campaign', scenario);
+    if (matchedPlanKey) {
+      existingParams.set('utm_content', matchedPlanKey);
+    }
+    existingParams.set('cid', cid);
+
+    return `${baseUrl}?${existingParams.toString()}${suffix}`;
   });
 }
 
@@ -843,10 +864,10 @@ function buildMessage(customer, channelOverride) {
   const customerWithFullName = {
     ...customer,
     name,
-    greeting: name === '赤沢温泉旅館ご利用者様' ? '赤沢温泉旅館ご利用者様' : `${name} 様`
+    greeting: (name === '赤沢温泉旅館ご利用者様' || name === '未登録 様') ? '赤沢温泉旅館ご利用者様' : `${name} 様`
   };
   let tplMsg = tpl.message ? tpl.message(customerWithFullName) : '';
-  let customMsg = el.customMessage.value;
+  let customMsg = el.customMessage ? el.customMessage.value : '';
 
   let fullContent = [tplMsg, customMsg].filter(Boolean).join('\n\n');
 
@@ -854,7 +875,7 @@ function buildMessage(customer, channelOverride) {
   let trackedContent = attachTrackingParams(fullContent, customer, channelOverride);
 
   const body = trackedContent + '\n' + getSignature(customer);
-  const subject = el.customSubject.value.trim() || tpl.emailSubject || '【赤沢温泉旅館】ご案内';
+  const subject = (el.customSubject && el.customSubject.value.trim()) || tpl.emailSubject || '【赤沢温泉旅館】ご案内';
   return { subject, body };
 }
 

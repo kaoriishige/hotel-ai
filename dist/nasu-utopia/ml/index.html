@@ -332,7 +332,16 @@
         </div>
       </div>
 
-      <div id="previewBox" class="preview hidden"></div>
+      <!-- 配信プレビュー表示領域 (リアルタイム自動連動) -->
+      <div style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 13px; font-weight: bold; color: var(--accent-2); display: flex; align-items: center; gap: 6px;">
+            <span>👁️</span> 配信プレビュー（URL追跡・宛名自動変換・リアルタイム反映）
+          </div>
+          <button type="button" id="refreshPreviewBtn" class="ghost" style="padding: 2px 8px; font-size: 11px; margin: 0; width: auto; border: 1px solid var(--accent); color: var(--accent);">🔄 プレビュー更新</button>
+        </div>
+        <div id="previewBox" class="preview" style="display: block; min-height: 180px; max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(106,212,255,0.4); border-radius: 10px; padding: 14px; white-space: pre-wrap; font-family: monospace; font-size: 12px; line-height: 1.6; color: #e2e8f0;"></div>
+      </div>
     </section>
 
     <section class="card span-2" style="grid-column: span 2;">
