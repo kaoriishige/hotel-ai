@@ -35,12 +35,14 @@ exports.handler = async (event) => {
     const channelStats = { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } };
     const logsStats = {};
 
+    const allEvents = [];
     if (db) {
       // 1. mail_events コレクションから開封・クリック・予約履歴を全件取得
       const eventsSnap = await db.collection('mail_events').limit(1000).get();
 
       eventsSnap.forEach(doc => {
         const data = doc.data();
+        allEvents.push({ id: doc.id, ...data });
         const type = data.type; // 'open' or 'click' or 'booking'
         const channel = data.channel || 'email';
         const plan = data.plan || 'normal';
@@ -91,7 +93,8 @@ exports.handler = async (event) => {
           planRevenues,
           channelStats,
           logsStats
-        }
+        },
+        debugEvents: allEvents
       })
     };
   } catch (err) {
