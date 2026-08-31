@@ -164,7 +164,11 @@ const el = {
   deleteSelectedCsvBtn: document.getElementById('deleteSelectedCsvBtn'),
   manageCsvBtn: document.getElementById('manageCsvBtn'),
   viewOptOutBtn: document.getElementById('viewOptOutBtn'),
-  logItemTemplate: document.getElementById('logItemTemplate')
+  logItemTemplate: document.getElementById('logItemTemplate'),
+  scheduleStatusCard: document.getElementById('scheduleStatusCard'),
+  scheduleRemainingCount: document.getElementById('scheduleRemainingCount'),
+  scheduleDetailsText: document.getElementById('scheduleDetailsText'),
+  cancelScheduleBtn: document.getElementById('cancelScheduleBtn')
 };
 
 // タブ切り替え処理
@@ -570,15 +574,10 @@ async function dispatchMessages() {
 
   try {
     if (currentMode === 'csv') {
-      let totalUnreached = 0;
-      const failedNamesList = [];
-      const skippedNamesList = [];
-
-      // 配信処理全体を表すログレコードを1つだけ作成して追加
       const logId = crypto.randomUUID();
       const firstCustomer = targets[0];
-      const importName = (firstCustomer && firstCustomer.importFileName) ? firstCustomer.importFileName : '自由入力';
-      const logTitle = `【CSV配信】${importName} (${targets.length}件)`;
+      const importName = (firstCustomer && firstCustomer.importFileName) ? firstCustomer.importFileName : 'CSVリスト';
+      const logTitle = `【メール配信】${importName} (${targets.length}件)`;
 
       const overallLog = {
         id: logId,
@@ -586,7 +585,7 @@ async function dispatchMessages() {
         customerName: logTitle,
         scenario: state.scenario,
         channel,
-        status: 'sending', // 送信中
+        status: 'sending',
         totalCount: targets.length,
         unreachedCount: 0,
         unreachedDetails: '',
@@ -596,145 +595,75 @@ async function dispatchMessages() {
       persist();
       renderLogs();
 
-      const chunkSize = 100;
-      for (let i = 0; i < targets.length; i += chunkSize) {
-        const chunk = targets.slice(i, i + chunkSize);
-        el.dispatchBtn.textContent = `一括配信中... (${i + 1}〜${Math.min(i + chunkSize, targets.length)} / ${targets.length})`;
-        
-        const payloads = chunk.map(customer => {
-          const msg = buildMessage(customer);
-          return {
-            email: customer.email,
-            lineUserId: customer.lineUserId,
-            subject: msg.subject,
-            message: msg.body,
-            customerName: fullName(customer)
-          };
-        });
+      el.dispatchBtn.textContent = '🚀 配信中・自動スケジュール登録中...';
 
-        let res;
-        let result;
-        try {
-          res = await fetch('/api/dispatch-batch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              payloads,
-              scenario: state.scenario,
-              channel
-            })
-          });
-          result = await res.json();
-        } catch (fetchErr) {
-          // 通信・サーバー障害発生時：残りの全件を未到達として追加更新
-          const remainingCount = targets.length - i;
-          totalUnreached += remainingCount;
-          chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: 送信エラー (ネットワーク障害: ${fetchErr.message})`));
-          
-          const foundLog = state.logs.find(l => l.id === logId);
-          if (foundLog) {
-            foundLog.status = 'error';
-            foundLog.unreachedCount = totalUnreached;
-            foundLog.unreachedDetails = [...failedNamesList, ...skippedNamesList].join('\n');
-            persist();
-            renderLogs();
-          }
-          throw fetchErr;
-        }
+      // 全対象顧客のペイロードを生成
+      const allPayloads = targets.map(customer => {
+        const msg = buildMessage(customer);
+        return {
+          email: customer.email,
+          lineUserId: customer.lineUserId,
+          subject: msg.subject,
+          message: msg.body,
+          customerName: fullName(customer)
+        };
+      });
 
-        if (!res.ok || !result.ok) {
-          const errMsg = result.error || JSON.stringify(result);
-          const remainingCount = targets.length - i;
-          totalUnreached += remainingCount;
-          chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: 送信エラー (${errMsg})`));
-          
-          const foundLog = state.logs.find(l => l.id === logId);
-          if (foundLog) {
-            foundLog.status = 'error';
-            foundLog.unreachedCount = totalUnreached;
-            foundLog.unreachedDetails = [...failedNamesList, ...skippedNamesList].join('\n');
-            persist();
-            renderLogs();
-          }
-          throw new Error(errMsg);
-        }
+      // /api/schedule-dispatch へ送信 (本日500件即時送信 + 残り毎朝08:00自動配信キュー登録)
+      const res = await fetch('/api/schedule-dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payloads: allPayloads,
+          channel,
+          scenario: state.scenario,
+          customSubject: el.customSubject.value.trim(),
+          customMessage: el.customMessage.value.trim(),
+          scheduleTitle: logTitle
+        })
+      });
 
-        // 送信完了結果の合算と蓄積
-        const results = result.results || {};
-        let chunkUnreached = 0;
-
-        if (results.email) {
-          const em = results.email;
-          if (em.status === 'failed') {
-            chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: メール送信エラー (${em.error || 'サーバー応答なし'})`));
-            chunkUnreached += chunk.length;
-          } else {
-            if (em.failedNames && em.failedNames.length > 0) {
-              em.failedNames.forEach(n => failedNamesList.push(`・${n}: 送信保留/上限到達`));
-              chunkUnreached += em.failedNames.length;
-            }
-            if (em.skippedNames && em.skippedNames.length > 0) {
-              skippedNamesList.push(`・メール送信スキップ (オプトアウト/無効アドレス等) ${em.skippedNames.length} 件`);
-              chunkUnreached += em.skippedNames.length;
-            }
-          }
-        }
-
-        if (results.line) {
-          const ln = results.line;
-          if (ln.status === 'failed') {
-            chunk.forEach(c => failedNamesList.push(`・${fullName(c)}: LINE送信エラー (${ln.error || 'サーバー応答なし'})`));
-            chunkUnreached += chunk.length;
-          } else {
-            if (ln.failedNames && ln.failedNames.length > 0) {
-              ln.failedNames.forEach(n => failedNamesList.push(`・${n}: LINE送信エラー`));
-              chunkUnreached += ln.failedNames.length;
-            }
-            if (ln.skippedNames && ln.skippedNames.length > 0) {
-              skippedNamesList.push(`・LINE送信スキップ (ID未登録等) ${ln.skippedNames.length} 件`);
-              chunkUnreached += ln.skippedNames.length;
-            }
-          }
-        }
-
-        totalUnreached += chunkUnreached;
-
-        // 進行中のログの中間更新
+      const result = await res.json();
+      if (!res.ok || !result.ok) {
+        const errMsg = result.error || JSON.stringify(result);
         const foundLog = state.logs.find(l => l.id === logId);
         if (foundLog) {
-          foundLog.unreachedCount = totalUnreached;
-          foundLog.unreachedDetails = [...failedNamesList, ...skippedNamesList].join('\n');
+          foundLog.status = 'error';
+          foundLog.unreachedDetails = `送信エラー: ${errMsg}`;
           persist();
           renderLogs();
         }
-
-        // 配信処理が実行された顧客は即座に選択解除する（次回未送信継続用）
-        chunk.forEach(c => {
-          removeFromSelected(c.id);
-        });
-
-        persist();
-        renderCustomers();
+        throw new Error(errMsg);
       }
 
-      // すべてのチャンクが正常完了した後の最終ステータス更新
+      const todaySent = result.todaySentCount || 0;
+      const todayFailed = result.todayFailedCount || 0;
+      const remaining = result.remainingCount || 0;
+
+      // 本日送信が完了した顧客を選択から解除
+      const sentTargets = targets.slice(0, todaySent + todayFailed);
+      sentTargets.forEach(c => removeFromSelected(c.id));
+
       const foundLog = state.logs.find(l => l.id === logId);
       if (foundLog) {
-        foundLog.status = totalUnreached > 0 ? 'error' : 'success';
+        foundLog.status = remaining > 0 ? 'scheduled' : (todayFailed > 0 ? 'error' : 'success');
+        foundLog.unreachedCount = todayFailed;
+        foundLog.unreachedDetails = remaining > 0 
+          ? `本日送信済: ${todaySent}件 / 残り毎朝08:00自動配信: ${remaining}件`
+          : (todayFailed > 0 ? `失敗: ${todayFailed}件` : '全件送信完了');
         persist();
         renderLogs();
       }
 
-      const remainingCustomers = state.customers.filter(c => !c.unsubscribed && state.selectedCustomerIds.includes(c.id));
-      const remainingCount = remainingCustomers.length;
+      persist();
+      renderCustomers();
+      checkScheduleStatus();
 
-      let completionMsg = `✨ 配信処理が完了しました（Resend 5キー自動分散）。\n・送信成功: ${targets.length - totalUnreached} 件\n・未送信/エラー: ${totalUnreached} 件`;
-      if (remainingCount > 0) {
-        completionMsg += `\n\n📌 残り未送信のお客様が【${remainingCount}件】あります。\n次回（明日等）そのまま「配信実行」を押すことで、続きから全件送信を継続できます。`;
+      if (remaining > 0) {
+        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、すべて送りきるまで【毎朝08:00】に自動で分散配信（1日最大500件）されます。\n（このまま画面を閉じても自動配信は継続されます）`);
       } else {
-        completionMsg += `\n\n🎉 選択されたすべての対象顧客への送信が完了しました！`;
+        alert(`🎉 全【${todaySent}件】のメール配信が完了いたしました！\n（本日分で全件送信完了しました）`);
       }
-      alert(completionMsg);
     } else {
       // Manual Mode
       const customer = targets[0];
@@ -1882,8 +1811,63 @@ function initUnreachedFeature() {
   }
 }
 
+// 毎朝08:00 自動スケジュール配信の稼働状況取得・更新
+let currentActiveScheduleId = null;
+
+async function checkScheduleStatus() {
+  if (!el.scheduleStatusCard) return;
+  try {
+    const res = await fetch('/api/get-schedule-status');
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.schedules)) {
+      const activeSched = data.schedules.find(s => s.status === 'active' && s.remainingCount > 0);
+      if (activeSched) {
+        currentActiveScheduleId = activeSched.id;
+        el.scheduleStatusCard.style.display = 'block';
+        if (el.scheduleRemainingCount) el.scheduleRemainingCount.textContent = activeSched.remainingCount;
+        if (el.scheduleDetailsText) {
+          el.scheduleDetailsText.innerHTML = `「${escapeHtml(activeSched.title)}」: 本日分送信済。残り <strong style="color:#ffd700;">${activeSched.remainingCount}</strong> 件を、全件完了するまで<strong>毎朝 08:00</strong>に自動分散配信します。`;
+        }
+        return;
+      }
+    }
+    el.scheduleStatusCard.style.display = 'none';
+  } catch (e) {
+    console.warn('Failed to check schedule status:', e);
+  }
+}
+
+if (el.cancelScheduleBtn) {
+  el.cancelScheduleBtn.addEventListener('click', async () => {
+    if (!currentActiveScheduleId) return;
+    if (!confirm('現在予約中の「毎朝08:00 自動配信スケジュール」を停止しますか？\n（停止した後は自動配信されなくなります）')) return;
+
+    try {
+      el.cancelScheduleBtn.disabled = true;
+      el.cancelScheduleBtn.textContent = '停止中...';
+      const res = await fetch('/api/get-schedule-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel', scheduleId: currentActiveScheduleId })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || '停止に失敗しました');
+
+      alert('毎朝08:00の自動配信スケジュールを停止しました。');
+      el.scheduleStatusCard.style.display = 'none';
+      currentActiveScheduleId = null;
+    } catch (err) {
+      alert(`停止エラー: ${err.message}`);
+    } finally {
+      el.cancelScheduleBtn.disabled = false;
+      el.cancelScheduleBtn.textContent = '⏹️ 自動配信を停止';
+    }
+  });
+}
+
 render();
 setMode('csv');
 initUnreachedFeature();
+checkScheduleStatus();
 preview();
 

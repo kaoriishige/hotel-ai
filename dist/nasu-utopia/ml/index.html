@@ -266,11 +266,27 @@
           <textarea id="customMessage" rows="8" placeholder="追加・作成したい文面を自由に入力または貼り付けしてください"></textarea>
         </div>
       </div>
+      <!-- 毎朝08:00 自動スケジュール配信稼働ステータス (アクティブ時のみ動的表示) -->
+      <div id="scheduleStatusCard" style="display: none; margin-top: 14px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.25)); border: 1px solid #10b981; border-radius: 12px; padding: 12px 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-size: 13px; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 6px;">
+              <span>⏰</span> 毎朝 08:00 自動メール配信スケジュールが稼働中
+            </div>
+            <div id="scheduleDetailsText" style="font-size: 12px; color: #e2e8f0; margin-top: 4px;">
+              本日分(500件)送信完了。残り <strong id="scheduleRemainingCount" style="color: #ffd700;">0</strong> 件を、全件完了するまで毎日朝08:00に自動配信します。
+            </div>
+          </div>
+          <button type="button" id="cancelScheduleBtn" class="ghost danger" style="padding: 4px 12px; font-size: 11px; margin: 0; width: auto; border-color: #ef4444; color: #f87171;">⏹️ 自動配信を停止</button>
+        </div>
+      </div>
+
       <div class="top-gap inline-actions">
         <button id="previewBtn" class="ghost">プレビュー生成</button>
         <button id="clearPreviewBtn" class="ghost danger">プレビュー消去</button>
-        <button id="dispatchBtn">配信実行</button>
+        <button id="dispatchBtn" style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); font-weight: bold; font-size: 14px;">🚀 配信実行 (完了まで毎朝08:00自動配信)</button>
       </div>
+      <p class="mini" style="margin-top: 6px; color: var(--muted);">※1日最大500件(Resend 5キー分散)を即時送信し、500件を超える場合は<strong>全件送信完了まで毎日朝08:00に自動で継続配信</strong>されます。</p>
       <div id="previewBox" class="preview hidden"></div>
     </section>
 
