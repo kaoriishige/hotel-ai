@@ -1356,25 +1356,39 @@ async function dispatchSingleMessage(id) {
 }
 
 function checkManualEmailStatus() {
-  const email = el.manualEmail.value.trim();
-  const lineUserId = el.manualLineId.value.trim();
+  if (!el.manualEmail) return;
+  const email = (el.manualEmail.value || '').trim().toLowerCase();
+  const lineUserId = (el.manualLineId?.value || '').trim();
   
   if (!email && !lineUserId) {
-    el.manualUnsubAlert.style.display = 'none';
+    if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'none';
     return;
   }
   
-  const isAlreadyUnsubscribed = state.customers.some(c => 
+  const isAlreadyUnsubscribed = (state.customers || []).some(c => 
     c.unsubscribed && 
-    ((email && c.email === email) || (lineUserId && c.lineUserId === lineUserId))
+    ((email && String(c.email || '').trim().toLowerCase() === email) || 
+     (lineUserId && String(c.lineUserId || '').trim() === lineUserId))
   );
   
   if (isAlreadyUnsubscribed) {
-    el.manualUnsubscribed.checked = true;
-    el.manualUnsubAlert.style.display = 'flex';
+    if (el.manualUnsubscribed) el.manualUnsubscribed.checked = true;
+    if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'flex';
   } else {
-    el.manualUnsubAlert.style.display = 'none';
+    if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'none';
   }
+}
+
+// 手入力フィールドの直接イベントバインド（即座に警告判定）
+if (el.manualEmail) {
+  ['input', 'keyup', 'paste', 'change', 'blur'].forEach(evt => {
+    el.manualEmail.addEventListener(evt, checkManualEmailStatus);
+  });
+}
+if (el.manualLineId) {
+  ['input', 'keyup', 'paste', 'change', 'blur'].forEach(evt => {
+    el.manualLineId.addEventListener(evt, checkManualEmailStatus);
+  });
 }
 
 function syncManualOptOutStatus() {
