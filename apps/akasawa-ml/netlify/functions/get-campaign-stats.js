@@ -36,10 +36,8 @@ exports.handler = async (event) => {
     const logsStats = {};
 
     if (db) {
-      // 1. mail_events コレクションから開封・クリック履歴を取得
-      const eventsSnap = await db.collection('mail_events').orderBy('openedAt', 'desc').limit(500).get().catch(async () => {
-        return await db.collection('mail_events').limit(500).get();
-      });
+      // 1. mail_events コレクションから開封・クリック・予約履歴を全件取得
+      const eventsSnap = await db.collection('mail_events').limit(1000).get();
 
       eventsSnap.forEach(doc => {
         const data = doc.data();

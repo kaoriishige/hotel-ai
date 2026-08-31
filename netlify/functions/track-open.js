@@ -34,9 +34,8 @@ exports.handler = async (event) => {
         cid,
         campaign,
         logId,
-        openedAt: admin.firestore.FieldValue.serverTimestamp(),
-        userAgent: event.headers['user-agent'] || '',
-        ip: event.headers['client-ip'] || event.headers['x-forwarded-for'] || ''
+        createdAt: new Date().toISOString(),
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
       });
     }
     console.log(`[track-open] メール開封検知: cid=${cid}, campaign=${campaign}, logId=${logId}`);

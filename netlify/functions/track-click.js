@@ -36,9 +36,8 @@ exports.handler = async (event) => {
         channel,
         targetUrl,
         logId,
-        clickedAt: admin.firestore.FieldValue.serverTimestamp(),
-        userAgent: event.headers['user-agent'] || '',
-        ip: event.headers['client-ip'] || event.headers['x-forwarded-for'] || ''
+        createdAt: new Date().toISOString(),
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
       });
     }
     console.log(`[track-click] プランURLクリック検知: cid=${cid}, plan=${plan}, target=${targetUrl}`);
