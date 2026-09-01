@@ -17,9 +17,9 @@ const TRANSPARENT_GIF = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAA
 
 exports.handler = async (event) => {
   const params = event.queryStringParameters || {};
-  const cid = params.cid || 'anonymous';
-  const campaign = params.campaign || 'default';
-  const logId = params.logId || '';
+  const cid = (params.cid || 'anonymous').trim().toLowerCase();
+  const campaign = (params.campaign || 'crm').trim();
+  const logId = (params.logId || '').trim();
 
   try {
     let db = null;
@@ -28,7 +28,10 @@ exports.handler = async (event) => {
     } catch (e) {}
 
     if (db && admin) {
-      const openDocId = `open_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const safeCid = encodeURIComponent(cid).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safeCamp = encodeURIComponent(campaign).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const openDocId = `open_${safeCid}_${safeCamp}`;
+
       await db.collection('mail_events').doc(openDocId).set({
         type: 'open',
         cid,
@@ -36,9 +39,9 @@ exports.handler = async (event) => {
         logId,
         createdAt: new Date().toISOString(),
         timestamp: admin.firestore.FieldValue.serverTimestamp()
-      });
+      }, { merge: true });
     }
-    console.log(`[track-open] メール開封検知: cid=${cid}, campaign=${campaign}, logId=${logId}`);
+    console.log(`[track-open] メール開封検知(ユニーク記録): cid=${cid}, campaign=${campaign}`);
   } catch (err) {
     console.warn('[track-open] 開封記録エラー:', err.message);
   }

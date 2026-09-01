@@ -65,43 +65,53 @@ exports.handler = async (event) => {
       };
     }
 
-    let totalOpens = 0;
-    let totalClicks = 0;
-    let totalBookings = 0;
-    let totalRevenue = 0;
+    // 重複を排除したユニーク集計用Set
+    const uniqueOpenedCids = new Set();
+    const uniqueClickedCids = new Set();
+    const uniqueBookedCids = new Set();
+
+    const channelStats = {
+      email: { opens: new Set(), clicks: new Set(), bookings: 0 },
+      line: { opens: new Set(), clicks: new Set(), bookings: 0 }
+    };
+    const logsStats = {};
     const planCounts = {};
     const planRevenues = {};
-    const channelStats = { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } };
-    const logsStats = {};
+    let totalRevenue = 0;
 
     const allEvents = [];
     if (db) {
-      // 1. mail_events コレクションから開封・クリック・予約履歴を全件取得
       const eventsSnap = await db.collection('mail_events').limit(1000).get();
 
       eventsSnap.forEach(doc => {
         const data = doc.data();
         allEvents.push({ id: doc.id, ...data });
-        const type = data.type; // 'open' or 'click' or 'booking'
-        const channel = data.channel || 'email';
+        const type = data.type; // 'open' | 'click' | 'booking'
+        const cid = (data.cid || 'anonymous').trim().toLowerCase();
+        const channel = data.channel === 'line' ? 'line' : 'email';
         const plan = data.plan || 'normal';
         const logId = data.logId || 'default';
 
         if (!logsStats[logId]) {
-          logsStats[logId] = { opens: 0, clicks: 0, bookings: 0, revenue: 0 };
+          logsStats[logId] = {
+            opensSet: new Set(),
+            clicksSet: new Set(),
+            bookings: 0,
+            revenue: 0
+          };
         }
 
         if (type === 'open') {
-          totalOpens++;
-          if (channelStats[channel]) channelStats[channel].opens++;
-          logsStats[logId].opens++;
+          uniqueOpenedCids.add(cid);
+          channelStats[channel].opens.add(cid);
+          logsStats[logId].opensSet.add(cid);
         } else if (type === 'click') {
-          totalClicks++;
-          if (channelStats[channel]) channelStats[channel].clicks++;
-          logsStats[logId].clicks++;
+          uniqueClickedCids.add(cid);
+          channelStats[channel].clicks.add(cid);
+          logsStats[logId].clicksSet.add(cid);
         } else if (type === 'booking') {
-          totalBookings++;
-          if (channelStats[channel]) channelStats[channel].bookings++;
+          uniqueBookedCids.add(cid);
+          channelStats[channel].bookings++;
           logsStats[logId].bookings++;
 
           const pInfo = PLANS[plan] || PLANS.normal;
@@ -115,6 +125,30 @@ exports.handler = async (event) => {
       });
     }
 
+    // ログ別サマリーのSetを数値に変換
+    const formattedLogsStats = {};
+    Object.keys(logsStats).forEach(lId => {
+      formattedLogsStats[lId] = {
+        opens: logsStats[lId].opensSet.size,
+        clicks: logsStats[lId].clicksSet.size,
+        bookings: logsStats[lId].bookings,
+        revenue: logsStats[lId].revenue
+      };
+    });
+
+    const formattedChannelStats = {
+      email: {
+        opens: channelStats.email.opens.size,
+        clicks: channelStats.email.clicks.size,
+        bookings: channelStats.email.bookings
+      },
+      line: {
+        opens: channelStats.line.opens.size,
+        clicks: channelStats.line.clicks.size,
+        bookings: channelStats.line.bookings
+      }
+    };
+
     return {
       statusCode: 200,
       headers: {
@@ -124,14 +158,14 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         ok: true,
         stats: {
-          totalOpens,
-          totalClicks,
-          totalBookings,
+          totalOpens: uniqueOpenedCids.size,
+          totalClicks: uniqueClickedCids.size,
+          totalBookings: uniqueBookedCids.size,
           totalRevenue,
           planCounts,
           planRevenues,
-          channelStats,
-          logsStats
+          channelStats: formattedChannelStats,
+          logsStats: formattedLogsStats
         },
         debugEvents: allEvents
       })

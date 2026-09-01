@@ -1695,9 +1695,9 @@ function renderConversionDashboard() {
   const totalBookings = Math.max(bookedCustomers.length, remoteBookings);
   const totalRevenue = Math.max(bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0), remoteRevenue);
 
-  const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : '0.0';
-  const ctr = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : '0.0';
-  const cvr = totalSent > 0 ? ((totalBookings / totalSent) * 100).toFixed(1) : '0.0';
+  const openRate = totalSent > 0 ? (Math.min(100, (totalOpens / totalSent) * 100)).toFixed(1) : '0.0';
+  const ctr = totalSent > 0 ? (Math.min(100, (totalClicks / totalSent) * 100)).toFixed(1) : '0.0';
+  const cvr = totalSent > 0 ? (Math.min(100, (totalBookings / totalSent) * 100)).toFixed(1) : '0.0';
 
   // チャネル別予約集計
   const emailBookings = bookedCustomers.filter(c => (c.bookedChannel || 'email') === 'email').length;

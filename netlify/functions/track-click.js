@@ -16,10 +16,10 @@ exports.handler = async (event) => {
   const params = event.queryStringParameters || {};
   const rawUrl = params.url || params.target;
   const targetUrl = rawUrl ? decodeURIComponent(rawUrl) : 'https://akasawaonsen.com/';
-  const cid = params.cid || 'anonymous';
-  const plan = params.plan || 'normal';
-  const channel = params.channel || 'email';
-  const logId = params.logId || '';
+  const cid = (params.cid || 'anonymous').trim().toLowerCase();
+  const plan = (params.plan || 'normal').trim();
+  const channel = (params.channel || 'email').trim();
+  const logId = (params.logId || '').trim();
 
   try {
     let db = null;
@@ -28,7 +28,10 @@ exports.handler = async (event) => {
     } catch (e) {}
 
     if (db && admin) {
-      const clickDocId = `click_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const safeCid = encodeURIComponent(cid).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safePlan = encodeURIComponent(plan).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const clickDocId = `click_${safeCid}_${safePlan}`;
+
       await db.collection('mail_events').doc(clickDocId).set({
         type: 'click',
         cid,
@@ -38,9 +41,9 @@ exports.handler = async (event) => {
         logId,
         createdAt: new Date().toISOString(),
         timestamp: admin.firestore.FieldValue.serverTimestamp()
-      });
+      }, { merge: true });
     }
-    console.log(`[track-click] プランURLクリック検知: cid=${cid}, plan=${plan}, target=${targetUrl}`);
+    console.log(`[track-click] プランURLクリック検知(ユニーク記録): cid=${cid}, plan=${plan}`);
   } catch (err) {
     console.warn('[track-click] クリック記録エラー:', err.message);
   }
