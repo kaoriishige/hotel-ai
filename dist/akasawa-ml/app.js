@@ -1711,6 +1711,13 @@ function renderConversionDashboard() {
   const totalBookings = Math.max(bookedCustomers.length, remoteBookings);
   const totalRevenue = Math.max(bookedCustomers.reduce((sum, c) => sum + (Number(c.bookedAmount) || 0), 0), remoteRevenue);
 
+  const actualLogsSent = state.logs.reduce((sum, l) => sum + (Number(l.totalCount) || 1), 0);
+  if (filterMode === 'all' && actualLogsSent > 0) {
+    totalSent = actualLogsSent;
+  } else if (filterMode === 'all' && actualLogsSent === 0) {
+    totalSent = Math.max(totalOpens, totalClicks, totalBookings, 1);
+  }
+
   const openRate = totalSent > 0 ? (Math.min(100, (totalOpens / totalSent) * 100)).toFixed(1) : '0.0';
   const ctr = totalSent > 0 ? (Math.min(100, (totalClicks / totalSent) * 100)).toFixed(1) : '0.0';
   const cvr = totalSent > 0 ? (Math.min(100, (totalBookings / totalSent) * 100)).toFixed(1) : '0.0';
