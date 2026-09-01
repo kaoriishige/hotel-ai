@@ -7,12 +7,12 @@ exports.handler = async (event) => {
     const { customer, scenario, channel, subject, message } = JSON.parse(event.body || '{}');
     if (!customer) return json(400, { ok: false, error: 'customer is required' });
 
-    const results = [];
+    const results = {};
     if (channel === 'email' || channel === 'both') {
-      results.push(await sendEmail(customer, subject, message));
+      results.email = await sendEmail(customer, subject, message);
     }
     if (channel === 'line' || channel === 'both') {
-      results.push(await sendLine(customer, message));
+      results.line = await sendLine(customer, message);
     }
 
     return json(200, { ok: true, scenario, channel, results, mode: runtimeMode() });

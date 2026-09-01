@@ -855,11 +855,17 @@ async function dispatchMessages() {
         message: message.body
       };
       
+      const manualController = new AbortController();
+      const manualTimeoutId = setTimeout(() => manualController.abort(), 15000);
+
       const res = await fetch('/api/dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: manualController.signal,
         body: JSON.stringify(payload)
       });
+      clearTimeout(manualTimeoutId);
+
       const result = await res.json();
       if (!res.ok || !result.ok) {
         throw new Error(result.error || JSON.stringify(result));
