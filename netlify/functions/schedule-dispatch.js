@@ -81,7 +81,10 @@ exports.handler = async (event) => {
     const todaySuccessCount = todaySendResult.count || 0;
     const todayFailedCount = (todaySendResult.failedNames || []).length;
 
-    // 2. 残りがある場合は Firestore にスケジュールキューを保存
+    // 2. 実際に送信成功した件数以降の全顧客を確実に残りキューへ保存（失敗分を絶対に欠落させない）
+    const actualRemainingTargets = targetList.slice(todaySuccessCount);
+    const remainingCount = actualRemainingTargets.length;
+
     let scheduleId = null;
     let db = null;
     try {
@@ -90,11 +93,11 @@ exports.handler = async (event) => {
       console.warn('Firestore not configured or error:', e.message);
     }
 
-    if (remainingTargets.length > 0 && db && admin) {
+    if (actualRemainingTargets.length > 0 && db && admin) {
       scheduleId = 'sched_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
       
       // 軽量な顧客情報のみ保存（email, name, lineUserId）
-      const cleanRemaining = remainingTargets.slice(0, 3000).map(t => ({
+      const cleanRemaining = actualRemainingTargets.slice(0, 4500).map(t => ({
         email: t.email || '',
         name: t.customerName || t.name || '',
         lineUserId: t.lineUserId || ''
@@ -110,7 +113,7 @@ exports.handler = async (event) => {
         totalInitialCount: targetList.length,
         dailyLimit,
         sentCountSoFar: todaySuccessCount,
-        remainingCount: remainingTargets.length,
+        remainingCount,
         remainingCustomers: cleanRemaining,
         status: 'active',
         nextRunTimeJST: '翌朝 08:00 (JST)',
@@ -125,7 +128,7 @@ exports.handler = async (event) => {
 
       try {
         await db.collection('dispatch_schedules').doc(scheduleId).set(scheduleDoc);
-        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 残り=${remainingTargets.length}件`);
+        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 実際に残った宛先=${remainingCount}件`);
       } catch (dbErr) {
         console.warn('[schedule-dispatch] DB保存エラー:', dbErr.message);
       }
@@ -135,7 +138,7 @@ exports.handler = async (event) => {
       ok: true,
       todaySentCount: todaySuccessCount,
       todayFailedCount: todayFailedCount,
-      remainingCount: remainingTargets.length,
+      remainingCount,
       scheduleId,
       details: todaySendResult
     });

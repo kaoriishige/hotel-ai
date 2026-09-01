@@ -863,8 +863,8 @@ async function dispatchMessages() {
       const todayFailed = result.todayFailedCount || 0;
       const remaining = result.remainingCount || 0;
 
-      // 本日送信が完了した顧客を選択から解除
-      const sentTargets = targets.slice(0, todaySent + todayFailed);
+      // 実際に本日送信成功した顧客のみを選択解除（失敗分は次回以降に繰り越し）
+      const sentTargets = targets.slice(0, todaySent);
       sentTargets.forEach(c => removeFromSelected(c.id));
 
       const foundLog = state.logs.find(l => l.id === logId);
@@ -872,7 +872,7 @@ async function dispatchMessages() {
         foundLog.status = remaining > 0 ? 'scheduled' : (todayFailed > 0 ? 'error' : 'success');
         foundLog.unreachedCount = todayFailed;
         foundLog.unreachedDetails = remaining > 0 
-          ? `本日送信済: ${todaySent}件 / 残り毎朝08:00自動配信: ${remaining}件`
+          ? `本日送信成功: ${todaySent}件 / 残り毎朝08:00自動配信キュー: ${remaining}件`
           : (todayFailed > 0 ? `失敗: ${todayFailed}件` : '全件送信完了');
         persist();
         renderLogs();
@@ -883,7 +883,7 @@ async function dispatchMessages() {
       checkScheduleStatus();
 
       if (remaining > 0) {
-        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、すべて送りきるまで【毎朝08:00】に自動で分散配信（1日最大500件）されます。\n（このまま画面を閉じても自動配信は継続されます）`);
+        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、すべて送りきるまで【毎朝08:00】に自動で分散配信されます。\n（このまま画面を閉じてもサーバー側で自動配信が継続されます）`);
       } else {
         alert(`🎉 全【${todaySent}件】のメール配信が完了いたしました！\n（本日分で全件送信完了しました）`);
       }
