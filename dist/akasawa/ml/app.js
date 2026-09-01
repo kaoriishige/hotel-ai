@@ -799,38 +799,54 @@ async function dispatchMessages() {
 
       el.dispatchBtn.textContent = '🚀 配信中・自動スケジュール登録中...';
 
-      // 全対象顧客のペイロードを生成
-      const allPayloads = targets.map(customer => {
-        const msg = buildMessage(customer);
-        return {
-          email: customer.email,
-          lineUserId: customer.lineUserId,
-          subject: msg.subject,
-          message: msg.body,
-          customerName: fullName(customer)
-        };
-      });
+      // 全対象顧客の軽量リスト（email, name, lineUserId のみ）を生成（通信容量97%削減）
+      const lightweightCustomers = targets.map(customer => ({
+        email: customer.email,
+        name: fullName(customer),
+        lineUserId: customer.lineUserId
+      }));
+
+      // 代表メッセージからテンプレート件名・本文を取得
+      const sampleMsg = buildMessage(targets[0]);
+      const templateSubject = el.customSubject.value.trim() || sampleMsg.subject;
+      const templateMessage = el.customMessage.value.trim() || sampleMsg.body;
 
       // /api/schedule-dispatch へ送信 (本日即時送信 + 残り毎朝08:00自動配信キュー登録)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const res = await fetch('/api/schedule-dispatch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          payloads: allPayloads,
-          channel,
-          scenario: state.scenario,
-          customSubject: el.customSubject.value.trim(),
-          customMessage: el.customMessage.value.trim(),
-          scheduleTitle: logTitle
-        })
-      });
+      let res;
+      try {
+        res = await fetch('/api/schedule-dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            customers: lightweightCustomers,
+            channel,
+            scenario: state.scenario,
+            customSubject: templateSubject,
+            customMessage: templateMessage,
+            scheduleTitle: logTitle
+          })
+        });
+      } catch (fetchErr) {
+        clearTimeout(timeoutId);
+        if (fetchErr.name === 'AbortError') {
+          throw new Error('一括配信リクエストがタイムアウトしました（30秒）。ネットワーク状態をご確認ください。');
+        }
+        throw new Error(`通信エラー: ${fetchErr.message}`);
+      }
       clearTimeout(timeoutId);
 
-      const result = await res.json();
+      const rawText = await res.text();
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseErr) {
+        throw new Error(`サーバーから無効な応答が返りました（HTTP ${res.status}）。Netlifyログをご確認ください。`);
+      }
+
       if (!res.ok || !result.ok) {
         const errMsg = result.error || JSON.stringify(result);
         const foundLog = state.logs.find(l => l.id === logId);

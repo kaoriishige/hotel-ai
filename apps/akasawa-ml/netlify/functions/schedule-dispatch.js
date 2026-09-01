@@ -34,10 +34,16 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { payloads, channel, scenario, customSubject, customMessage, scheduleTitle } = body;
+    const { payloads, customers, channel, scenario, customSubject, customMessage, scheduleTitle } = body;
 
-    if (!payloads || !Array.isArray(payloads) || payloads.length === 0) {
-      return json(400, { ok: false, error: 'payloads array is required' });
+    // 軽量形式(customers: [{email, name, lineUserId}]) または 従来形式(payloads) の両方に対応
+    let targetList = [];
+    if (Array.isArray(customers) && customers.length > 0) {
+      targetList = customers;
+    } else if (Array.isArray(payloads) && payloads.length > 0) {
+      targetList = payloads;
+    } else {
+      return json(400, { ok: false, error: 'customers or payloads array is required' });
     }
 
     const apiKeys = getResendApiKeys();
@@ -48,14 +54,27 @@ exports.handler = async (event) => {
 
     // 初回本日分（利用可能なキー数 × 100件）の抽出
     const dailyLimit = Math.max(apiKeys.length * 100, 100);
-    const todayPayloads = payloads.slice(0, dailyLimit);
-    const remainingPayloads = payloads.slice(dailyLimit);
+    const todayTargets = targetList.slice(0, dailyLimit);
+    const remainingTargets = targetList.slice(dailyLimit);
 
-    console.log(`[schedule-dispatch] 受付総数: ${payloads.length}件, 本日即時送信: ${todayPayloads.length}件, 明日以降自動配信: ${remainingPayloads.length}件`);
+    console.log(`[schedule-dispatch] 受付総数: ${targetList.length}件, 本日即時送信: ${todayTargets.length}件, 明日以降自動配信: ${remainingTargets.length}件`);
 
-    // 1. 本日分の即時並列送信
+    // 1. 本日分の即時並列送信（メッセージ本文を展開）
+    const todayPayloads = todayTargets.map(t => {
+      const name = t.customerName || t.name || 'お客様';
+      const subj = t.subject || customSubject || '赤沢温泉旅館からのお知らせ';
+      let msg = t.message || customMessage || '';
+      msg = msg.replace(/{customer_name}/g, name);
+      return {
+        email: t.email,
+        lineUserId: t.lineUserId,
+        subject: subj,
+        message: msg,
+        customerName: name
+      };
+    });
+
     let todaySendResult = { count: 0, failedNames: [] };
-
     if (channel === 'email' || channel === 'both') {
       todaySendResult = await sendEmailMultiKeyBatchParallel(todayPayloads, apiKeys, from, scenario);
     }
@@ -72,20 +91,28 @@ exports.handler = async (event) => {
       console.warn('Firestore not configured or error:', e.message);
     }
 
-    if (remainingPayloads.length > 0 && db && admin) {
+    if (remainingTargets.length > 0 && db && admin) {
       scheduleId = 'sched_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+      
+      // 軽量な顧客情報のみ保存（email, name, lineUserId）
+      const cleanRemaining = remainingTargets.slice(0, 3000).map(t => ({
+        email: t.email || '',
+        name: t.customerName || t.name || '',
+        lineUserId: t.lineUserId || ''
+      }));
+
       const scheduleDoc = {
         scheduleId,
-        title: scheduleTitle || `赤沢温泉旅館 自動配信 (${payloads.length}件)`,
+        title: scheduleTitle || `赤沢温泉旅館 自動配信 (${targetList.length}件)`,
         scenario: scenario || 'custom',
         channel: channel || 'email',
         customSubject: customSubject || '',
         customMessage: customMessage || '',
-        totalInitialCount: payloads.length,
+        totalInitialCount: targetList.length,
         dailyLimit,
         sentCountSoFar: todaySuccessCount,
-        remainingCount: remainingPayloads.length,
-        remainingPayloads: remainingPayloads.slice(0, 1500), // Firestore上限考慮
+        remainingCount: remainingTargets.length,
+        remainingCustomers: cleanRemaining,
         status: 'active',
         nextRunTimeJST: '翌朝 08:00 (JST)',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -99,7 +126,7 @@ exports.handler = async (event) => {
 
       try {
         await db.collection('dispatch_schedules').doc(scheduleId).set(scheduleDoc);
-        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 残り=${remainingPayloads.length}件`);
+        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 残り=${remainingTargets.length}件`);
       } catch (dbErr) {
         console.warn('[schedule-dispatch] DB保存エラー:', dbErr.message);
       }
