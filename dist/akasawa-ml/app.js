@@ -783,10 +783,14 @@ async function dispatchMessages() {
         };
       });
 
-      // /api/schedule-dispatch へ送信 (本日500件即時送信 + 残り毎朝08:00自動配信キュー登録)
+      // /api/schedule-dispatch へ送信 (本日即時送信 + 残り毎朝08:00自動配信キュー登録)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
       const res = await fetch('/api/schedule-dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           payloads: allPayloads,
           channel,
@@ -796,6 +800,7 @@ async function dispatchMessages() {
           scheduleTitle: logTitle
         })
       });
+      clearTimeout(timeoutId);
 
       const result = await res.json();
       if (!res.ok || !result.ok) {

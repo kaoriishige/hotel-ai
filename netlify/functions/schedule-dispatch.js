@@ -41,43 +41,38 @@ exports.handler = async (event) => {
     }
 
     const apiKeys = getResendApiKeys();
-    const from = process.env.MAIL_FROM;
-    if ((channel === 'email' || channel === 'both') && (apiKeys.length === 0 || !from)) {
-      return json(400, { ok: false, error: 'RESEND_API_KEYS1〜5またはMAIL_FROMが設定されていません。' });
+    const from = process.env.MAIL_FROM || '赤沢温泉旅館 <onboarding@resend.dev>';
+    if ((channel === 'email' || channel === 'both') && apiKeys.length === 0) {
+      return json(400, { ok: false, error: 'RESEND_API_KEYS が設定されていません。' });
     }
 
-    // 初回本日分（最大500件）の抽出
-    const dailyLimit = apiKeys.length * 100; // 5キー × 100件 = 500件
+    // 初回本日分（利用可能なキー数 × 100件）の抽出
+    const dailyLimit = Math.max(apiKeys.length * 100, 100);
     const todayPayloads = payloads.slice(0, dailyLimit);
     const remainingPayloads = payloads.slice(dailyLimit);
 
     console.log(`[schedule-dispatch] 受付総数: ${payloads.length}件, 本日即時送信: ${todayPayloads.length}件, 明日以降自動配信: ${remainingPayloads.length}件`);
 
-    // 1. 本日分の即時送信
-    let todaySendResult = null;
-    let todaySuccessCount = 0;
-    let todayFailedCount = 0;
-    const failedNames = [];
+    // 1. 本日分の即時並列送信
+    let todaySendResult = { count: 0, failedNames: [] };
 
     if (channel === 'email' || channel === 'both') {
-      todaySendResult = await sendEmailMultiKeyBatch(todayPayloads, apiKeys, from);
-      todaySuccessCount = todaySendResult.count || 0;
-      if (todaySendResult.failedNames && todaySendResult.failedNames.length > 0) {
-        failedNames.push(...todaySendResult.failedNames);
-        todayFailedCount += todaySendResult.failedNames.length;
-      }
+      todaySendResult = await sendEmailMultiKeyBatchParallel(todayPayloads, apiKeys, from, scenario);
     }
+
+    const todaySuccessCount = todaySendResult.count || 0;
+    const todayFailedCount = (todaySendResult.failedNames || []).length;
 
     // 2. 残りがある場合は Firestore にスケジュールキューを保存
     let scheduleId = null;
     let db = null;
     try {
-      db = getDb();
+      if (getDb) db = getDb();
     } catch (e) {
       console.warn('Firestore not configured or error:', e.message);
     }
 
-    if (remainingPayloads.length > 0 && db) {
+    if (remainingPayloads.length > 0 && db && admin) {
       scheduleId = 'sched_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
       const scheduleDoc = {
         scheduleId,
@@ -90,33 +85,33 @@ exports.handler = async (event) => {
         dailyLimit,
         sentCountSoFar: todaySuccessCount,
         remainingCount: remainingPayloads.length,
-        remainingPayloads: remainingPayloads,
-        status: 'active', // active, paused, completed, cancelled
+        remainingPayloads: remainingPayloads.slice(0, 1500), // Firestore上限考慮
+        status: 'active',
         nextRunTimeJST: '翌朝 08:00 (JST)',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
         history: [{
           runAt: new Date().toISOString(),
           sentCount: todaySuccessCount,
-          failedCount: todayFailedCount,
-          usedKeys: todaySendResult ? todaySendResult.usedKeys : []
+          failedCount: todayFailedCount
         }]
       };
 
-      await db.collection('mail_schedules').doc(scheduleId).set(scheduleDoc);
-      console.log(`[schedule-dispatch] Firestore にスケジュールキュー保存完了: ID=${scheduleId}, 残り=${remainingPayloads.length}件`);
+      try {
+        await db.collection('dispatch_schedules').doc(scheduleId).set(scheduleDoc);
+        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 残り=${remainingPayloads.length}件`);
+      } catch (dbErr) {
+        console.warn('[schedule-dispatch] DB保存エラー:', dbErr.message);
+      }
     }
 
     return json(200, {
       ok: true,
       todaySentCount: todaySuccessCount,
-      todayFailedCount,
+      todayFailedCount: todayFailedCount,
       remainingCount: remainingPayloads.length,
       scheduleId,
-      status: remainingPayloads.length > 0 ? 'scheduled' : 'completed',
-      message: remainingPayloads.length > 0
-        ? `本日分 ${todaySuccessCount} 件の送信が完了しました。残り ${remainingPayloads.length} 件は【毎朝08:00】に自動で分散配信されます。`
-        : `全 ${todaySuccessCount} 件の配信が完了しました！`
+      details: todaySendResult
     });
   } catch (err) {
     console.error('[schedule-dispatch] エラー:', err);
@@ -124,42 +119,67 @@ exports.handler = async (event) => {
   }
 };
 
-async function sendEmailMultiKeyBatch(payloads, apiKeys, from) {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// URLクリック追跡の自動ラッピング
+function wrapLinksWithTracking(text, cid, scenario) {
+  if (!text) return text;
+  const baseUrl = 'https://hotel-ai.netlify.app/api/track-click';
+  const urlRegex = /(https?:\/\/[^\s\n\r<>"']+)/g;
+
+  return text.replace(urlRegex, (matchUrl) => {
+    if (matchUrl.includes('/api/track-click') || matchUrl.includes('/api/track-open') || matchUrl.includes('/api/unsubscribe')) {
+      return matchUrl;
+    }
+    let detectedPlan = 'normal';
+    const lUrl = matchUrl.toLowerCase();
+    if (lUrl.includes('lastminute') || lUrl.includes('chokuzen')) detectedPlan = 'lastminute';
+    else if (lUrl.includes('bbq') || lUrl.includes('course')) detectedPlan = 'bbq';
+    else if (lUrl.includes('hp') || lUrl.includes('official') || lUrl.includes('basic')) detectedPlan = 'hp';
+
+    return `${baseUrl}?cid=${encodeURIComponent(cid || 'guest')}&campaign=${encodeURIComponent(scenario || 'crm')}&plan=${detectedPlan}&channel=email&url=${encodeURIComponent(matchUrl)}`;
+  });
+}
+
+// 複数APIキーへの並列チャンク送信（超高速化）
+async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validPayloads = payloads.filter(p => {
     if (!p.email) return false;
     const cleanEmail = String(p.email).trim();
-    return emailRegex.test(cleanEmail) && !cleanEmail.includes('..') && !cleanEmail.includes('.@');
+    return emailRegex.test(cleanEmail) && !cleanEmail.includes('..') && !cleanEmail.includes('.@') && !cleanEmail.includes('@.') && !cleanEmail.startsWith('.');
   });
 
-  const batchRequests = validPayloads.map(p => {
-    const req = {
-      from,
-      to: p.email,
-      subject: p.subject,
-      text: p.message
-    };
-    if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
-    return req;
-  });
-
-  if (batchRequests.length === 0) return { type: 'email', status: 'skipped', count: 0 };
+  if (validPayloads.length === 0) return { type: 'email', count: 0, failedNames: [] };
 
   const keyCapacity = 100;
-  let keyIndex = 0;
-  let sentCount = 0;
+  const chunks = [];
+  for (let i = 0; i < validPayloads.length; i += keyCapacity) {
+    chunks.push(validPayloads.slice(i, i + keyCapacity));
+  }
+
+  let totalSent = 0;
   const failedNames = [];
   const usedKeysSummary = [];
 
-  for (let i = 0; i < batchRequests.length; i += keyCapacity) {
-    if (keyIndex >= apiKeys.length) {
-      const remainingUnsent = batchRequests.slice(i);
-      remainingUnsent.forEach(r => failedNames.push(`${r.to} (本日枠上限到達)`));
-      break;
+  // 各APIキーへ並列送信
+  const sendPromises = chunks.map(async (chunk, chunkIdx) => {
+    if (chunkIdx >= apiKeys.length) {
+      chunk.forEach(p => failedNames.push(`${p.email} (本日枠上限到達)`));
+      return;
     }
 
-    const currentKey = apiKeys[keyIndex];
-    const chunkRequests = batchRequests.slice(i, i + keyCapacity);
+    const currentKey = apiKeys[chunkIdx];
+    const chunkRequests = chunk.map(p => {
+      const cid = (p.email || 'guest').trim().toLowerCase();
+      const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
+      const req = {
+        from,
+        to: p.email,
+        subject: p.subject,
+        text: wrappedMessage
+      };
+      if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
+      return req;
+    });
 
     try {
       const res = await fetch('https://api.resend.com/emails/batch', {
@@ -172,30 +192,22 @@ async function sendEmailMultiKeyBatch(payloads, apiKeys, from) {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        keyIndex++;
-        if (keyIndex < apiKeys.length) {
-          i -= keyCapacity;
-          continue;
-        } else {
-          throw new Error(`Resend Batch API Error: ${JSON.stringify(data)}`);
-        }
-      }
-
-      sentCount += chunkRequests.length;
-      usedKeysSummary.push({ keyNum: keyIndex + 1, count: chunkRequests.length });
-      keyIndex++;
-    } catch (err) {
-      keyIndex++;
-      if (keyIndex < apiKeys.length) {
-        i -= keyCapacity;
+      if (res.ok) {
+        totalSent += chunkRequests.length;
+        usedKeysSummary.push({ keyNum: chunkIdx + 1, count: chunkRequests.length });
       } else {
-        throw err;
+        console.warn(`[schedule-dispatch] Resend Key ${chunkIdx + 1} batch error:`, data);
+        chunk.forEach(p => failedNames.push(`${p.email} (${data.message || '送信失敗'})`));
       }
+    } catch (err) {
+      console.warn(`[schedule-dispatch] Key ${chunkIdx + 1} fetch error:`, err.message);
+      chunk.forEach(p => failedNames.push(`${p.email} (${err.message})`));
     }
-  }
+  });
 
-  return { type: 'email', count: sentCount, usedKeys: usedKeysSummary, failedNames };
+  await Promise.all(sendPromises);
+
+  return { type: 'email', count: totalSent, usedKeys: usedKeysSummary, failedNames };
 }
 
 function json(statusCode, body) {
