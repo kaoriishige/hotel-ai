@@ -649,7 +649,7 @@ async function dispatchMessages() {
   // === 宛先の重複排除 (同一メールアドレスまたはLINE IDへの多重送信を物理的に防ぐ) ===
   const seenEmails = new Set();
   const seenLineUsers = new Set();
-  const targets = [];
+  let targets = [];
 
   allTargets.forEach(customer => {
     let isDuplicate = false;
@@ -743,7 +743,7 @@ async function dispatchMessages() {
     console.warn(`[ML-Dispatch] 不正・無効アドレス ${skippedInvalidList.length} 件を自動スキップし、正常な ${validTargets.length} 件へ配信を開始します。`, skippedInvalidList);
   }
 
-  targets = validTargets; // 有効な宛先のみで配信実行
+  targets = validTargets; // ✅ 有効な宛先のみで配信実行（let宣言のため再代入可能）
 
   try {
     if (currentMode === 'csv') {
