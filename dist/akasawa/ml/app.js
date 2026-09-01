@@ -856,17 +856,34 @@ async function dispatchMessages() {
       };
       
       const manualController = new AbortController();
-      const manualTimeoutId = setTimeout(() => manualController.abort(), 15000);
+      const manualTimeoutId = setTimeout(() => manualController.abort(), 25000);
 
-      const res = await fetch('/api/dispatch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: manualController.signal,
-        body: JSON.stringify(payload)
-      });
+      let res;
+      try {
+        res = await fetch('/api/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: manualController.signal,
+          body: JSON.stringify(payload)
+        });
+      } catch (fetchErr) {
+        clearTimeout(manualTimeoutId);
+        if (fetchErr.name === 'AbortError') {
+          throw new Error('サーバーの応答がタイムアウトしました（25秒）。しばらくしてから再度お試しください。');
+        }
+        throw new Error(`通信エラー: ${fetchErr.message}`);
+      }
       clearTimeout(manualTimeoutId);
 
-      const result = await res.json();
+      // 空レスポンス・JSON parseエラーに安全に対応
+      const rawText = await res.text();
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseErr) {
+        throw new Error(`サーバーから無効なレスポンスが返りました（HTTP ${res.status}）。Netlify Functionsのログをご確認ください。`);
+      }
+
       if (!res.ok || !result.ok) {
         throw new Error(result.error || JSON.stringify(result));
       }

@@ -76,14 +76,18 @@ async function sendEmail(customer, subject, message) {
   for (let i = 0; i < apiKeys.length; i++) {
     const currentKey = apiKeys[i];
     try {
+      const resendController = new AbortController();
+      const resendTimeout = setTimeout(() => resendController.abort(), 8000);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${currentKey}`,
           'Content-Type': 'application/json'
         },
+        signal: resendController.signal,
         body: JSON.stringify(payload)
       });
+      clearTimeout(resendTimeout);
 
       const data = await res.json();
       if (!res.ok) {
