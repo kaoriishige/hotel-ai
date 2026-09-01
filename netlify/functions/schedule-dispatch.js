@@ -136,7 +136,7 @@ exports.handler = async (event) => {
       ok: true,
       todaySentCount: todaySuccessCount,
       todayFailedCount: todayFailedCount,
-      remainingCount: remainingPayloads.length,
+      remainingCount: remainingTargets.length,
       scheduleId,
       details: todaySendResult
     });
