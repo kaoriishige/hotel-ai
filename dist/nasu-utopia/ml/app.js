@@ -2021,18 +2021,13 @@ function initUrlToolEvents() {
         });
       }
       const target = state.customers.find(c => !c.bookedPlanName) || state.customers[0];
-      const plans = [
-        { name: '【1泊2食付】通常プラン', amount: 18000 },
-        { name: '【1泊2食付】直前割プラン', amount: 15000 },
-        { name: '特製ジンギスカンコース', amount: 16500 }
-      ];
-      const p = plans[Math.floor(Math.random() * plans.length)];
+      const p = { name: '【1泊2食付】通常プラン', amount: 18000 };
       target.opened = true;
       target.clicked = true;
       target.bookedPlanName = p.name;
       target.bookedAmount = p.amount;
       target.bookedDate = new Date().toISOString();
-      target.bookedChannel = Math.random() > 0.5 ? 'email' : 'line';
+      target.bookedChannel = 'email';
 
       persist();
       render();
