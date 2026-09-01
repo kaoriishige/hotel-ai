@@ -168,6 +168,17 @@ function wrapLinksWithTracking(text, cid, scenario) {
   });
 }
 
+function getFromAddressForKey(keyNum, defaultFrom) {
+  if (keyNum === 1) {
+    return defaultFrom || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
+  }
+  // mail.akasawaonsen.com を mail2.akasawaonsen.com などに自動置換
+  if (defaultFrom && defaultFrom.includes('@mail.')) {
+    return defaultFrom.replace(/@mail\./g, `@mail${keyNum}.`);
+  }
+  return `赤沢温泉旅館 <info@mail${keyNum}.akasawaonsen.com>`;
+}
+
 // 複数APIキーへの並列チャンク送信（超高速化）
 async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -196,12 +207,15 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
       return;
     }
 
+    const keyNum = chunkIdx + 1;
     const currentKey = apiKeys[chunkIdx];
+    const keyFrom = getFromAddressForKey(keyNum, from);
+
     const chunkRequests = chunk.map(p => {
       const cid = (p.email || 'guest').trim().toLowerCase();
       const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
       const req = {
-        from,
+        from: keyFrom,
         to: p.email,
         subject: p.subject,
         text: wrappedMessage
@@ -222,36 +236,15 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
 
       let data = await res.json();
       
-      // 未認証ドメインエラーの場合は onboarding@resend.dev へ自動フォールバックして再送
-      if (!res.ok && data.message && (data.message.includes('not verified') || data.message.includes('domain'))) {
-        console.warn(`[schedule-dispatch] Key ${chunkIdx + 1}: ドメイン未認証のため onboarding@resend.dev へ自動フォールバック再試行`);
-        const fallbackRequests = chunkRequests.map(r => ({ ...r, from: '赤沢温泉旅館 <onboarding@resend.dev>' }));
-        const retryRes = await fetch('https://api.resend.com/emails/batch', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${currentKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(fallbackRequests)
-        });
-        if (retryRes.ok) {
-          totalSent += fallbackRequests.length;
-          usedKeysSummary.push({ keyNum: chunkIdx + 1, count: fallbackRequests.length, fallback: true });
-          return;
-        } else {
-          data = await retryRes.json();
-        }
-      }
-
       if (res.ok) {
         totalSent += chunkRequests.length;
-        usedKeysSummary.push({ keyNum: chunkIdx + 1, count: chunkRequests.length });
+        usedKeysSummary.push({ keyNum, count: chunkRequests.length, from: keyFrom });
       } else {
-        console.warn(`[schedule-dispatch] Resend Key ${chunkIdx + 1} batch error:`, data);
+        console.warn(`[schedule-dispatch] Resend Key ${keyNum} (${keyFrom}) batch error:`, data);
         chunk.forEach(p => failedNames.push(`${p.email} (${data.message || '送信失敗'})`));
       }
     } catch (err) {
-      console.warn(`[schedule-dispatch] Key ${chunkIdx + 1} fetch error:`, err.message);
+      console.warn(`[schedule-dispatch] Key ${keyNum} fetch error:`, err.message);
       chunk.forEach(p => failedNames.push(`${p.email} (${err.message})`));
     }
   });
