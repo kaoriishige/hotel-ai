@@ -14,15 +14,14 @@ try {
 
 function getResendApiKeys() {
   const keys = [];
-  // 一括配信・スケジュール配信は RESEND_API_KEYS2〜 (各キー100件/日) を使用
+  // 1. 本番ドメイン認証済みキー RESEND_API_KEYS1 を最優先で追加
+  const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
+  if (k1 && k1.trim()) keys.push(k1.trim());
+
+  // 2. 追加の分散キー RESEND_API_KEYS2〜10 を追加
   for (let i = 2; i <= 10; i++) {
     const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
     if (k && k.trim()) keys.push(k.trim());
-  }
-  // 万が一2以降が未設定の場合はKey 1へフォールバック
-  if (keys.length === 0) {
-    const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
-    if (k1 && k1.trim()) keys.push(k1.trim());
   }
   return [...new Set(keys)];
 }
