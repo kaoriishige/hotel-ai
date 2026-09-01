@@ -63,56 +63,71 @@ exports.handler = async (event) => {
     const invalidMessages = [];
     const invalidSubjects = [];
 
+    const validPayloads = [];
+    const skippedInvalidPayloads = [];
+
     payloads.forEach((p, idx) => {
       const name = p.customerName || `No.${idx + 1}`;
+      let isInvalid = false;
+      let reason = '';
 
       // メッセージ本文の検証
       if (!p.message || String(p.message).trim() === '') {
-        invalidMessages.push(`・${name}: メッセージ本文が空欄です`);
+        isInvalid = true;
+        reason = '本文が空欄';
       }
 
       if (channel === 'email' || channel === 'both') {
-        // メール件名の検証
         if (!p.subject || String(p.subject).trim() === '') {
-          invalidSubjects.push(`・${name}: メールの件名が空欄です`);
+          isInvalid = true;
+          reason = '件名が空欄';
         }
-        if (!p.email) {
-          invalidEmails.push(`・${name}: メールアドレスが空欄です`);
+        if (!p.email || String(p.email).trim() === '') {
+          isInvalid = true;
+          reason = 'メールアドレスが空欄';
         } else {
           const cleanEmail = String(p.email).trim();
           const isFormatValid = emailRegex.test(cleanEmail);
-          const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@');
+          const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@') || cleanEmail.includes('@.') || cleanEmail.startsWith('.');
           if (!isFormatValid || hasRfcViolation) {
-            invalidEmails.push(`・${name}: ${p.email} (無効またはRFC規格違反)`);
+            isInvalid = true;
+            reason = `${p.email} (無効またはRFC規格違反)`;
           }
         }
       }
       if (channel === 'line' || channel === 'both') {
         if (!p.lineUserId) {
-          invalidLineUsers.push(`・${name}: LINE IDが設定されていません`);
+          isInvalid = true;
+          reason = 'LINE ID未設定';
         }
+      }
+
+      if (isInvalid) {
+        skippedInvalidPayloads.push(`・${name}: ${reason}`);
+      } else {
+        validPayloads.push(p);
       }
     });
 
-    if (invalidEmails.length > 0 || invalidLineUsers.length > 0 || invalidMessages.length > 0 || invalidSubjects.length > 0) {
-      const errors = [...invalidEmails, ...invalidLineUsers, ...invalidMessages, ...invalidSubjects];
+    if (validPayloads.length === 0) {
       return json(400, { 
         ok: false, 
-        error: '送信先リストまたはメッセージ内容に不備があるため、送信処理を一切行わずに中断しました。該当箇所を修正してください。',
-        details: errors.join('\n')
+        error: '有効な送信先（メールアドレス）が1件もありませんでした。',
+        details: skippedInvalidPayloads.join('\n')
       });
     }
-    // === 事前バリデーション終了 ===
 
     const results = {};
     let hasErrors = false;
 
     if (channel === 'email' || channel === 'both') {
       try {
-        const emailRes = await sendEmailBatch(payloads);
+        const emailRes = await sendEmailBatch(validPayloads);
         results.email = emailRes;
-        if (emailRes.failedNames && emailRes.failedNames.length > 0) {
-          hasErrors = true;
+        if (skippedInvalidPayloads.length > 0) {
+          results.email.failedCount = (results.email.failedCount || 0) + skippedInvalidPayloads.length;
+          results.email.failedNames = [...(results.email.failedNames || []), ...skippedInvalidPayloads];
+        }
         }
       } catch (err) {
         results.email = { status: 'failed', error: err.message };

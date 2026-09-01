@@ -687,59 +687,63 @@ async function dispatchMessages() {
   const invalidEmails = [];
   const invalidLineUsers = [];
   const invalidMessages = [];
-  const invalidSubjects = [];
+  const validTargets = [];
+  const skippedInvalidList = [];
 
   targets.forEach((customer, idx) => {
     const name = fullName(customer) || `No.${idx + 1}`;
     const msg = buildMessage(customer);
 
+    let isInvalid = false;
+    let invalidReason = '';
+
     // 本文の検証
     if (!msg.body || String(msg.body).trim() === '') {
-      invalidMessages.push(`・${name}: 本文が空欄です`);
+      isInvalid = true;
+      invalidReason = '本文が空欄';
     }
 
     if (channel === 'email' || channel === 'both') {
-      // 件名の検証
-      if (!msg.subject || String(msg.subject).trim() === '') {
-        invalidSubjects.push(`・${name}: 件名が空欄です`);
-      }
-      if (!customer.email) {
-        invalidEmails.push(`・${name}: メールアドレスが空欄です`);
-        return;
-      }
-      const cleanEmail = String(customer.email).trim();
-      const isFormatValid = emailRegex.test(cleanEmail);
-      const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@');
-      
-      if (!isFormatValid || hasRfcViolation) {
-        invalidEmails.push(`・${name}: ${customer.email} (無効またはRFC規格違反)`);
+      if (!customer.email || String(customer.email).trim() === '') {
+        isInvalid = true;
+        invalidReason = 'メールアドレスが空欄';
+      } else {
+        const cleanEmail = String(customer.email).trim();
+        const isFormatValid = emailRegex.test(cleanEmail);
+        const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@') || cleanEmail.includes('@.') || cleanEmail.startsWith('.');
+        if (!isFormatValid || hasRfcViolation) {
+          isInvalid = true;
+          invalidReason = `${customer.email} (無効またはRFC規格違反)`;
+        }
       }
     }
 
     if (channel === 'line' || channel === 'both') {
       if (!customer.lineUserId) {
-        invalidLineUsers.push(`・${name}: LINE IDが登録されていません`);
+        isInvalid = true;
+        invalidReason = 'LINE ID未登録';
       }
+    }
+
+    if (isInvalid) {
+      skippedInvalidList.push({ name, email: customer.email, reason: invalidReason });
+    } else {
+      validTargets.push(customer);
     }
   });
 
-  const allErrors = [...invalidEmails, ...invalidLineUsers, ...invalidMessages, ...invalidSubjects];
-  if (allErrors.length > 0) {
-    alert([
-      '【配信エラー：送信は1通も開始されていません】',
-      '送信先リストまたはメッセージ内容に不備が検出されました。',
-      '安全のため、送信を一切行わずに処理を中止しました。該当箇所を修正してください。',
-      '--------------------------------',
-      allErrors.slice(0, 10).join('\n'),
-      allErrors.length > 10 ? `...他 ${allErrors.length - 10} 件` : ''
-    ].join('\n'));
-    
+  if (validTargets.length === 0) {
+    alert('【配信エラー】\n有効な送信先（メールアドレス）が1件もありませんでした。アドレスをご確認ください。');
     el.dispatchBtn.disabled = false;
     el.dispatchBtn.textContent = '配信実行';
-    // 重複排除による選択解除を反映
-    renderCustomers();
     return;
   }
+
+  if (skippedInvalidList.length > 0) {
+    console.warn(`[ML-Dispatch] 不正・無効アドレス ${skippedInvalidList.length} 件を自動スキップし、正常な ${validTargets.length} 件へ配信を開始します。`, skippedInvalidList);
+  }
+
+  targets = validTargets; // 有効な宛先のみで配信実行
 
   try {
     if (currentMode === 'csv') {
@@ -748,6 +752,7 @@ async function dispatchMessages() {
       const importName = (firstCustomer && firstCustomer.importFileName) ? firstCustomer.importFileName : 'CSVリスト';
       const logTitle = `【メール配信】${importName} (${targets.length}件)`;
 
+      const skippedInfo = skippedInvalidList.map(s => `・${s.name}: ${s.reason}`).join('\n');
       const overallLog = {
         id: logId,
         createdAt: new Date().toISOString(),
@@ -756,8 +761,8 @@ async function dispatchMessages() {
         channel,
         status: 'sending',
         totalCount: targets.length,
-        unreachedCount: 0,
-        unreachedDetails: '',
+        unreachedCount: skippedInvalidList.length,
+        unreachedDetails: skippedInfo ? `【自動スキップされた無効アドレス (${skippedInvalidList.length}件)】\n${skippedInfo}` : '',
         message: `【件名】${buildMessage(targets[0]).subject || '(件名なし)'}`
       };
       state.logs.unshift(overallLog);
