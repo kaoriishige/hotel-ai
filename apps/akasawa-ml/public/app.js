@@ -1505,10 +1505,10 @@ function checkManualEmailStatus() {
   );
   
   if (isAlreadyUnsubscribed) {
-    if (el.manualUnsubscribed) el.manualUnsubscribed.checked = true;
     if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'flex';
   } else {
     if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'none';
+    if (el.manualUnsubscribed) el.manualUnsubscribed.checked = false;
   }
 }
 
@@ -2388,6 +2388,41 @@ if (el.cancelScheduleBtn) {
   });
 }
 
+async function syncServerOptOuts() {
+  try {
+    const res = await fetch('/api/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'list' })
+    });
+    const data = await res.json();
+    if (data.ok && Array.isArray(data.optouts)) {
+      const serverOptOutEmails = new Set(data.optouts.map(o => (o.email || '').trim().toLowerCase()).filter(Boolean));
+      const serverOptOutCids = new Set(data.optouts.map(o => (o.cid || '').trim()).filter(Boolean));
+
+      let changed = false;
+      state.customers.forEach(c => {
+        const cEm = (c.email || '').trim().toLowerCase();
+        const cId = (c.id || '').trim();
+        const shouldBeUnsub = (cEm && serverOptOutEmails.has(cEm)) || (cId && serverOptOutCids.has(cId));
+
+        if (c.unsubscribed !== shouldBeUnsub) {
+          c.unsubscribed = shouldBeUnsub;
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        persist();
+        render();
+        preview();
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to sync server optouts:', e);
+  }
+}
+
 render();
 setMode('csv');
 initUnreachedFeature();
@@ -2395,5 +2430,7 @@ initOptOutModal();
 checkScheduleStatus();
 preview();
 fetchCampaignStats();
+syncServerOptOuts();
 setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
+setInterval(syncServerOptOuts, 30000);   // 30秒ごとに最新のオプトアウト台帳と自動同期
 
