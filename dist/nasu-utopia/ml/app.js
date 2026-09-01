@@ -741,7 +741,35 @@ async function dispatchMessages() {
 
   if (skippedInvalidList.length > 0) {
     console.warn(`[ML-Dispatch] 不正・無効アドレス ${skippedInvalidList.length} 件を自動スキップし、正常な ${validTargets.length} 件へ配信を開始します。`, skippedInvalidList);
+    
+    // ✅ 自動スキップされた無効アドレスを「未到着リスト（バウンス）」へ自動登録
+    if (!Array.isArray(state.unreached)) state.unreached = [];
+    const now = new Date().toISOString();
+    skippedInvalidList.forEach(s => {
+      // メールアドレスとして認識できる文字列を抽出（名前フィールドにメールが入っているケースにも対応）
+      const emailRegexExtract = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+      const emailsFromName = (s.name || '').match(emailRegexExtract) || [];
+      const emailsFromEmail = (s.email || '').match(emailRegexExtract) || [];
+      const allEmails = [...new Set([...emailsFromEmail, ...emailsFromName])];
+      
+      allEmails.forEach(addr => {
+        // 重複登録を防ぐ
+        const alreadyExists = state.unreached.some(u => (u.to || '').toLowerCase() === addr.toLowerCase());
+        if (!alreadyExists) {
+          state.unreached.push({
+            to: addr,
+            status: 'suppressed',
+            reason: s.reason || '無効またはRFC規格違反',
+            name: s.name || '',
+            detectedAt: now,
+            source: 'auto-skip'
+          });
+        }
+      });
+    });
+    persist();
   }
+
 
   targets = validTargets; // ✅ 有効な宛先のみで配信実行（let宣言のため再代入可能）
 
