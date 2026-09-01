@@ -1110,8 +1110,10 @@ function renderLogs() {
     let unreachedCount = typeof log.unreachedCount === 'number' && log.unreachedCount > 0 ? log.unreachedCount : 0;
     let unreachedDetails = log.unreachedDetails || '';
 
-    // 全未到着データが存在する場合は、最新のリアルタイム照合結果を適用
-    if (unreachedEmails.length > 0 && (!unreachedCount || unreachedCount === 0)) {
+    // 全未到着データが存在する場合は、CSVの一括配信ログのみに適用する
+    // ※個別配信ログ（【個別配信】で始まるもの）には絶対に適用しない
+    const isManualLog = (log.customerName || '').startsWith('【個別配信】');
+    if (!isManualLog && unreachedEmails.length > 0 && (!unreachedCount || unreachedCount === 0)) {
       unreachedCount = unreachedEmails.length;
       if (!unreachedDetails) {
         unreachedDetails = unreachedEmails.map(u => `・${u.to} (${u.status === 'bounced' ? 'バウンス' : '配信抑制'})`).join('\n');
