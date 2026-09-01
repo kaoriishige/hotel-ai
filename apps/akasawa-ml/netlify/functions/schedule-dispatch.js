@@ -218,7 +218,29 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
         body: JSON.stringify(chunkRequests)
       });
 
-      const data = await res.json();
+      let data = await res.json();
+      
+      // 未認証ドメインエラーの場合は onboarding@resend.dev へ自動フォールバックして再送
+      if (!res.ok && data.message && (data.message.includes('not verified') || data.message.includes('domain'))) {
+        console.warn(`[schedule-dispatch] Key ${chunkIdx + 1}: ドメイン未認証のため onboarding@resend.dev へ自動フォールバック再試行`);
+        const fallbackRequests = chunkRequests.map(r => ({ ...r, from: '赤沢温泉旅館 <onboarding@resend.dev>' }));
+        const retryRes = await fetch('https://api.resend.com/emails/batch', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${currentKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(fallbackRequests)
+        });
+        if (retryRes.ok) {
+          totalSent += fallbackRequests.length;
+          usedKeysSummary.push({ keyNum: chunkIdx + 1, count: fallbackRequests.length, fallback: true });
+          return;
+        } else {
+          data = await retryRes.json();
+        }
+      }
+
       if (res.ok) {
         totalSent += chunkRequests.length;
         usedKeysSummary.push({ keyNum: chunkIdx + 1, count: chunkRequests.length });
