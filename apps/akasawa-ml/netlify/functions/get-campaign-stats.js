@@ -26,6 +26,45 @@ exports.handler = async (event) => {
       if (getDb) db = getDb();
     } catch (e) {}
 
+    const params = event.queryStringParameters || {};
+    let body = {};
+    try {
+      if (event.body) body = JSON.parse(event.body);
+    } catch (e) {}
+    const action = params.action || body.action;
+
+    // === リセット要求の場合: mail_events を全件削除 ===
+    if (action === 'reset') {
+      if (db) {
+        const snap = await db.collection('mail_events').limit(1000).get();
+        const deletePromises = [];
+        snap.forEach(doc => deletePromises.push(doc.ref.delete()));
+        await Promise.all(deletePromises);
+        console.log(`[get-campaign-stats] mail_events 全 ${deletePromises.length} 件をリセット（削除）しました`);
+      }
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store, no-cache, must-revalidate'
+        },
+        body: JSON.stringify({
+          ok: true,
+          message: '成果レポートのイベントデータを全て0に初期化しました',
+          stats: {
+            totalOpens: 0,
+            totalClicks: 0,
+            totalBookings: 0,
+            totalRevenue: 0,
+            planCounts: {},
+            planRevenues: {},
+            channelStats: { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } },
+            logsStats: {}
+          }
+        })
+      };
+    }
+
     let totalOpens = 0;
     let totalClicks = 0;
     let totalBookings = 0;

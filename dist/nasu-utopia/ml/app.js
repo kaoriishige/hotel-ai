@@ -2024,8 +2024,17 @@ function initUrlToolEvents() {
   }
 
   if (qResetBtn) {
-    qResetBtn.addEventListener('click', () => {
-      if (!confirm('成果レポートのテスト集計データをリセットしますか？')) return;
+    qResetBtn.addEventListener('click', async () => {
+      if (!confirm('成果レポートの集計データをすべてリセット（0件に初期化）しますか？\n（サーバーの履歴データおよびローカルデータがすべてリセットされます）')) return;
+      qResetBtn.disabled = true;
+      qResetBtn.textContent = 'リセット中...';
+
+      try {
+        await fetch('/api/get-campaign-stats?action=reset', { method: 'POST' });
+      } catch (e) {
+        console.warn('Reset server stats error:', e);
+      }
+
       state.customers.forEach(c => {
         delete c.opened;
         delete c.openedAt;
@@ -2040,9 +2049,21 @@ function initUrlToolEvents() {
         l.openCount = 0;
         l.clickCount = 0;
       });
-      remoteCampaignStats = null;
+      remoteCampaignStats = {
+        totalOpens: 0,
+        totalClicks: 0,
+        totalBookings: 0,
+        totalRevenue: 0,
+        planCounts: {},
+        planRevenues: {},
+        channelStats: { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } },
+        logsStats: {}
+      };
       persist();
       render();
+      alert('🎉 成果レポートのデータをすべて「0件」に初期化しました！\n最初から正確に計測を開始できます。');
+      qResetBtn.disabled = false;
+      qResetBtn.textContent = '🧹 リセット';
     });
   }
 }
