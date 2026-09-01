@@ -436,6 +436,9 @@ function initOptOutModal() {
           });
         }
 
+        if (el.manualUnsubscribed) el.manualUnsubscribed.checked = false;
+        if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'none';
+
         persist();
         render();
         preview();
@@ -1556,16 +1559,29 @@ function syncManualOptOutStatus() {
   preview();
 }
 
-function handleManualResubscribe() {
-  const email = el.manualEmail.value.trim();
-  const lineUserId = el.manualLineId.value.trim();
+async function handleManualResubscribe() {
+  const email = (el.manualEmail?.value || '').trim().toLowerCase();
+  const lineUserId = (el.manualLineId?.value || '').trim();
   
   if (!email && !lineUserId) return;
+
+  // 1. サーバー側の配信停止台帳から削除
+  try {
+    await fetch('/api/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resubscribe', email, cid: lineUserId })
+    });
+  } catch (e) {
+    console.warn('Server resubscribe warning:', e);
+  }
   
-  // 同一の連絡先を持つ全ての既存顧客を復活させる
+  // 2. ローカルの全顧客レコードで同一連絡先を復活
   state.customers.forEach(c => {
-    const matchesEmail = email && c.email === email;
-    const matchesLine = lineUserId && c.lineUserId === lineUserId;
+    const cEm = (c.email || '').trim().toLowerCase();
+    const cLine = (c.lineUserId || '').trim();
+    const matchesEmail = email && cEm === email;
+    const matchesLine = lineUserId && cLine === lineUserId;
     if (matchesEmail || matchesLine) {
       c.unsubscribed = false;
     }
@@ -1574,10 +1590,10 @@ function handleManualResubscribe() {
   persist();
   render();
   
-  el.manualUnsubscribed.checked = false;
-  el.manualUnsubAlert.style.display = 'none';
+  if (el.manualUnsubscribed) el.manualUnsubscribed.checked = false;
+  if (el.manualUnsubAlert) el.manualUnsubAlert.style.display = 'none';
   preview();
-  alert('この連絡先の配信停止状態を解除し、配信を復活させました。');
+  alert(`🎉 「${email || lineUserId}」の配信停止を解除し、通常通り配信できるように戻しました！`);
 }
 
 function updateReportFilterOptions() {
