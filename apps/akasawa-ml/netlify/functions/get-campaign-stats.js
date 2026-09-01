@@ -139,21 +139,9 @@ exports.handler = async (event) => {
   } catch (err) {
     console.error('[get-campaign-stats] エラー:', err);
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ok: true,
-        stats: {
-          totalOpens: 0,
-          totalClicks: 0,
-          totalBookings: 0,
-          totalRevenue: 0,
-          planCounts: {},
-          planRevenues: {},
-          channelStats: { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } },
-          logsStats: {}
-        }
-      })
+      body: JSON.stringify({ ok: false, error: err.message })
     };
   }
 };
