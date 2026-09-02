@@ -123,11 +123,19 @@ async function sendEmailMultiKeyBatch(payloads, apiKeys, from) {
   });
 
   const batchRequests = validPayloads.map(p => {
+    const cid = (p.email || 'guest').trim().toLowerCase();
+    const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=daily-crm&channel=email`;
+    const htmlBody = `
+      <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${p.message}</div>
+      <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
+    `;
+
     const req = {
       from,
       to: p.email,
       subject: p.subject,
-      text: p.message
+      text: p.message,
+      html: htmlBody
     };
     if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
     return req;

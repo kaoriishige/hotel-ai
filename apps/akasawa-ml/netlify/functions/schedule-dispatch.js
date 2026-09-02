@@ -211,14 +211,24 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
     const currentKey = apiKeys[chunkIdx];
     const keyFrom = getFromAddressForKey(keyNum, from);
 
-    const chunkRequests = chunk.map(p => {
       const cid = (p.email || 'guest').trim().toLowerCase();
       const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
+      
+      // 開封追跡用ピクセルURLの生成
+      const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
+      
+      // 本文の改行をHTMLの<br>に変換し、末尾に開封追跡用透明画像を埋め込む
+      const htmlBody = `
+        <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
+        <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
+      `;
+
       const req = {
         from: keyFrom,
         to: p.email,
         subject: p.subject,
-        text: wrappedMessage
+        text: wrappedMessage,
+        html: htmlBody
       };
       if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
       return req;

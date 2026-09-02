@@ -31,7 +31,9 @@ exports.handler = async (event) => {
       const safeCid = encodeURIComponent(cid).replace(/[^a-zA-Z0-9_-]/g, '_');
       const safePlan = encodeURIComponent(plan).replace(/[^a-zA-Z0-9_-]/g, '_');
       const clickDocId = `click_${safeCid}_${safePlan}`;
+      const openDocId = `open_${safeCid}`;
 
+      // クリック記録
       await db.collection('mail_events').doc(clickDocId).set({
         type: 'click',
         cid,
@@ -42,8 +44,18 @@ exports.handler = async (event) => {
         createdAt: new Date().toISOString(),
         timestamp: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
+
+      // クリックした＝100%開封しているため、開封イベントも自動で確実に記録（補正）
+      await db.collection('mail_events').doc(openDocId).set({
+        type: 'open',
+        cid,
+        campaign: plan || 'custom',
+        channel,
+        createdAt: new Date().toISOString(),
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
     }
-    console.log(`[track-click] プランURLクリック検知(ユニーク記録): cid=${cid}, plan=${plan}`);
+    console.log(`[track-click] プランURLクリック＆開封連動検知: cid=${cid}, plan=${plan}`);
   } catch (err) {
     console.warn('[track-click] クリック記録エラー:', err.message);
   }
