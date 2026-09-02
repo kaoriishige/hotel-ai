@@ -871,6 +871,12 @@ async function dispatchMessages() {
       if (foundLog) {
         foundLog.status = remaining > 0 ? 'scheduled' : (todayFailed > 0 ? 'error' : 'success');
         foundLog.unreachedCount = todayFailed;
+        foundLog.todaySentCount = todaySent;
+        foundLog.sentRecipients = sentTargets.map(c => ({
+          name: fullName(c),
+          email: c.email || '',
+          lineUserId: c.lineUserId || ''
+        }));
         foundLog.unreachedDetails = remaining > 0 
           ? `本日送信成功: ${todaySent}件 / 残り毎朝08:00自動配信キュー: ${remaining}件`
           : (todayFailed > 0 ? `失敗: ${todayFailed}件` : '全件送信完了');
@@ -1219,6 +1225,21 @@ function renderLogs() {
       `;
     }
 
+    // 送信済みの宛先一覧HTML
+    let sentListHtml = '';
+    const sentList = log.sentRecipients || (log.todaySentCount ? state.customers.slice(0, log.todaySentCount) : []);
+    if (sentList.length > 0) {
+      const sentRows = sentList.map((c, idx) => `・${idx + 1}. ${c.name || 'お客様'}: ${c.email || c.lineUserId || '-'}`).join('\n');
+      sentListHtml = `
+        <details style="margin-top: 8px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 8px; padding: 10px;">
+          <summary style="cursor: pointer; font-weight: bold; color: #34d399; font-size: 13px;">✅ 本日送信成功した宛先一覧 (${sentList.length} 件) - クリックで展開表示</summary>
+          <div style="font-size: 12px; color: var(--text); margin-top: 8px;">
+            <div style="white-space: pre-wrap; font-size: 11px; color: #a7f3d0; background: rgba(0,0,0,0.35); padding: 8px 10px; border-radius: 6px; max-height: 250px; overflow-y: auto; font-family: monospace;">${escapeHtml(sentRows)}</div>
+          </div>
+        </details>
+      `;
+    }
+
     return `
       <div class="log-item" style="margin-bottom: 12px; background: rgba(18,26,49,0.85); border: 1px solid var(--line); border-radius: 12px; padding: 14px;">
         <div class="log-head" style="display:flex; justify-content:space-between; align-items:center;">
@@ -1227,6 +1248,7 @@ function renderLogs() {
         </div>
         <div class="log-meta" style="font-size: 11px; color: var(--muted); margin: 4px 0 8px;">${new Date(log.createdAt).toLocaleString('ja-JP')}</div>
         ${detailsBoxHtml}
+        ${sentListHtml}
       </div>
     `;
   }).join('');
