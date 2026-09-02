@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI OTA最適化エンジン | 那須ユートピア美野沢</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="glass-bg"></div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:0.8rem 1.5rem 0;position:relative;z-index:1;">
+    <a href="../index.html" style="color:#d4af37;text-decoration:none;font-size:0.85rem;font-weight:600;">← ダッシュボードに戻る</a>
+  </div>
+
+  <div class="dashboard-container">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h2>AI OTA最適化</h2>
+          <span class="brand-sub">Nasu Utopia Revenue Engine</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="rakuten">
+          <span class="nav-icon">🔴</span> 楽天トラベル改善
+        </button>
+        <button class="nav-item" data-tab="jalan">
+          <span class="nav-icon">🔵</span> じゃらんnet改善
+        </button>
+        <button class="nav-item" data-tab="booking">
+          <span class="nav-icon">🟢</span> Booking.com改善
+        </button>
+        <button class="nav-item" data-tab="review">
+          <span class="nav-icon">💬</span> クチコミ・現場改善
+        </button>
+        <button class="nav-item" data-tab="photo">
+          <span class="nav-icon">📷</span> 写真・ビジュアル改善
+        </button>
+        <button class="nav-item" data-tab="plan">
+          <span class="nav-icon">🏷️</span> 宿泊プラン改善
+        </button>
+        <button class="nav-item" data-tab="rank_ad">
+          <span class="nav-icon">📊</span> 順位・広告・クーポン
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>那須町サウナ・水風呂 那須ユートピア美野沢</p>
+        <span class="version">v1.2.0 (Direct Optimizer)</span>
+      </div>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <div class="grid-layout">
+        <!-- 入力エリア -->
+        <section class="card input-card">
+          <div class="card-header-row">
+            <h2 id="active-tab-title">楽天トラベル改善</h2>
+            <button id="load-demo-btn" class="demo-btn">💡 サンプルデータをロード</button>
+          </div>
+
+          <form id="ota-form">
+            <!-- 1. 楽天トラベル用フォーム -->
+            <div class="form-container" id="form-rakuten">
+              <div class="input-group">
+                <label class="form-label">現在のキャッチコピー・タイトル</label>
+                <input name="catchCopy" id="rakuten-catch" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在の施設紹介文 (抜粋)</label>
+                <textarea name="description" id="rakuten-desc"></textarea>
+              </div>
+              <div class="input-group">
+                <label class="form-label">販売中の主要価格帯・プラン設定</label>
+                <input name="plans" id="rakuten-plans" />
+              </div>
+            </div>
+
+            <!-- 2. じゃらん用フォーム -->
+            <div class="form-container hidden" id="form-jalan">
+              <div class="input-group">
+                <label class="form-label">現在のじゃらんキャッチコピー</label>
+                <input name="catchCopy" id="jalan-catch" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在のじゃらん用施設紹介文</label>
+                <textarea name="description" id="jalan-desc"></textarea>
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在のクーポン・ポイント設定状況</label>
+                <input name="points" id="jalan-points" />
+              </div>
+            </div>
+
+            <!-- 3. Booking.com用フォーム -->
+            <div class="form-container hidden" id="form-booking">
+              <div class="input-group">
+                <label class="form-label">現在のBooking.com施設概要（英語または日本語）</label>
+                <textarea name="description" id="booking-desc"></textarea>
+              </div>
+              <div class="input-group">
+                <label class="form-label">インバウンド比率・集客の課題</label>
+                <input name="inboundInfo" id="booking-inbound" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在のGeniusプログラム等の連携有無</label>
+                <input name="policy" id="booking-policy" />
+              </div>
+            </div>
+
+            <!-- 4. 口コミ用フォーム -->
+            <div class="form-container hidden" id="form-review">
+              <div class="input-group">
+                <label class="form-label">分析したい実際のクチコミ（複数貼り付け）</label>
+                <textarea name="reviews" id="review-reviews" placeholder="クチコミを貼り付けてください..."></textarea>
+              </div>
+            </div>
+
+            <!-- 5. 写真用フォーム (画像アップロード機能付き) -->
+            <div class="form-container hidden" id="form-photo">
+              <div class="input-group">
+                <label class="form-label">📸 現在掲載している写真をアップロード（AIが視覚スキャンします）</label>
+                <div class="image-upload-zone" id="image-upload-zone">
+                  <div class="upload-icon">📤</div>
+                  <p>ここに現在の写真（サウナ・水風呂、客室、外観など）をドラッグ＆ドロップ<br>または <span>ファイルを選択</span></p>
+                  <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+                </div>
+                <div class="image-preview-container hidden" id="image-preview-container">
+                  <img id="image-preview" src="" alt="アップロード写真">
+                  <button type="button" class="remove-image-btn" id="remove-image-btn">✕ 削除</button>
+                </div>
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在の掲載写真リスト・シチュエーション解説 (テキスト入力も可)</label>
+                <textarea name="photoList" id="photo-list" placeholder="例: ロビーの少し暗めの写真、コンクリートサウナCUBERU＆薪サウナRekkaの曇った内湯の写真..."></textarea>
+              </div>
+            </div>
+
+            <!-- 6. プラン用フォーム -->
+            <div class="form-container hidden" id="form-plan">
+              <div class="input-group">
+                <label class="form-label">現在のプラン名</label>
+                <input name="planName" id="plan-name-val" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">プランの現在の説明文</label>
+                <textarea name="description" id="plan-desc-val"></textarea>
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在設定している価格・特典</label>
+                <input name="details" id="plan-details-val" />
+              </div>
+            </div>
+
+            <!-- 7. 順位・広告用フォーム -->
+            <div class="form-container hidden" id="form-rank_ad">
+              <div class="input-group">
+                <label class="form-label">主要検索キーワードでの現在の露出・表示順位</label>
+                <input name="rankings" id="rank-rankings" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在の月間有料広告費（楽天ITC・じゃらん販促など）</label>
+                <input name="adSpend" id="rank-adspend" />
+              </div>
+              <div class="input-group">
+                <label class="form-label">現在のクーポン原資・値引きの設定額</label>
+                <input name="couponSpend" id="rank-couponspend" />
+              </div>
+            </div>
+
+            <button type="submit" id="analyze-btn" class="primary-btn">
+              <span class="btn-text">⚡ AI 最適化分析を実行</span>
+              <div class="loader" id="loader" style="display: none;"></div>
+            </button>
+          </form>
+        </section>
+
+        <!-- 出力エリア -->
+        <section class="card output-card">
+          <div class="output-header-row">
+            <h2>改善提案レポート</h2>
+            <span class="badge" id="report-status">未分析</span>
+          </div>
+
+          <div class="placeholder-view" id="placeholder-view">
+            <div class="placeholder-icon">🏨</div>
+            <p>左側で「サンプルデータをロード」し、「AI 最適化分析を実行」を押してください。<br>OTA管理画面に即座にコピペ入稿できる対比レポートが作成されます。</p>
+          </div>
+
+          <div class="report-content hidden" id="report-content">
+            <!-- 課題のまとめ -->
+            <div class="report-panel warning-theme">
+              <div class="panel-head">
+                <h3>⚠️ 現在の掲載における主なボトルネック</h3>
+              </div>
+              <div class="panel-body text-block" id="report-issues"></div>
+            </div>
+
+            <!-- Before / After 対比 -->
+            <div class="before-after-container">
+              <!-- Before -->
+              <div class="report-panel before-panel">
+                <div class="panel-head">
+                  <h3>現状の設定 (Before)</h3>
+                </div>
+                <div class="panel-body text-block" id="report-before"></div>
+              </div>
+
+              <!-- After -->
+              <div class="report-panel after-panel">
+                <div class="panel-head">
+                  <h3>AIによる改善設定 (After)</h3>
+                  <button class="copy-btn" id="copy-after-btn" data-target="report-after">コピペ原稿をコピー</button>
+                </div>
+                <div class="panel-body">
+                  <div class="markdown-preview" id="report-after"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 管理画面入稿マニュアル -->
+            <div class="report-panel manual-panel">
+              <div class="panel-head">
+                <h3>⚙️ OTA管理画面 入稿マニュアル (操作手順)</h3>
+                <button class="copy-btn" id="copy-manual-btn" data-target="report-manual">手順をコピー</button>
+              </div>
+              <div class="panel-body text-block" id="report-manual"></div>
+            </div>
+
+            <!-- クーポン・プロモーションパラメータ表 -->
+            <div class="report-panel promo-panel">
+              <div class="panel-head">
+                <h3 id="promo-panel-title">🎁 クーポン・プロモーション最適化パラメータ設定値</h3>
+                <button class="copy-btn" id="copy-promo-btn" data-target="report-promotion">設定値をコピー</button>
+              </div>
+              <div class="panel-body">
+                <div class="markdown-preview" id="report-promotion"></div>
+              </div>
+            </div>
+
+            <!-- 優先アクションチェックリスト -->
+            <div class="report-panel">
+              <div class="panel-head">
+                <h3>🚀 本日の即時タスク（アクションリスト）</h3>
+              </div>
+              <div class="panel-body">
+                <ul class="action-list" id="report-actions">
+                  <!-- JSで動的に追加 -->
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

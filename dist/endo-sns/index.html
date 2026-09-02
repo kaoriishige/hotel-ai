@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>遠藤正俊オーナー 個人動画＆SNS自動配信システム</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <div style="max-width:1200px;margin:0 auto;padding:0.8rem 1.5rem 0;">
+      <a href="../index.html" style="color:#d4af37;text-decoration:none;font-size:0.85rem;font-weight:600;">← ダッシュボードに戻る</a>
+    </div>
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div>
+          <h1 style="margin: 0; font-size: 24px;">遠藤正俊オーナー 個人動画＆SNS自動配信システム</h1>
+          <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px;">🌿 遠藤正俊オーナーの思想・「買う理由」価値発信＆ショート動画自動配信</p>
+        </div>
+        <button id="refreshBtn" class="primary-btn" style="padding: 8px 16px; font-size: 13px; background-color: var(--brand); border-radius: 8px;">🔄 画面更新</button>
+      </div>
+    </header>
+
+    <main style="max-width: 1200px; margin: 20px auto; padding: 0 16px;">
+      <div class="steps-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+        
+        <!-- STEP 1: 台本完全AI出力欄 -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">1</span>
+            <h2>🤖 台本完全AI出力欄</h2>
+          </div>
+          <div class="card-body stack-gap">
+            
+            <!-- 台本テーマの選択/入力 -->
+            <div>
+              <label class="form-label-bold" style="color: var(--accent); margin-bottom: 6px; font-size: 13px;">✍️ 投稿テーマの選択 (または自由入力):</label>
+              <select id="simpleTag" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: #0f172a; color: white;">
+                <option value="安定を捨てて生き方を変えた理由">1. 🌲 安定を捨てて、50代で自分の生き方に舵を切った決断と思考法</option>
+                <option value="他人の価値観で生きるのをやめる">2. ⏳ 「他人の価値観」で生きるのをやめ、人生の軸を取り戻す技術</option>
+                <option value="世界中で大自然を見て気づいた人間社会のバグ">3. 🌍 世界中で大自然を見て気づいた、現代人が疲弊していく本当の原因</option>
+                <option value="価格競争・数字の競争から抜け出す思考">4. 💡 なぜ価格競争や数字の比較に巻き込まれると不幸になるのか？</option>
+                <option value="余白と休息を意識的に作るマインドセット">5. 🌿 「何もしない時間」を意図的に作れない現代人が余白を取り戻す方法</option>
+                <option value="custom">✍️ 新しいテーマを直接入力する</option>
+              </select>
+            </div>
+            
+            <div id="customThemeContainer" style="display: none;">
+              <input type="text" id="customThemeInput" placeholder="テーマを自由に入力（例：夜の深呼吸、スマホから離れる時間）" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: #0f172a; color: white;" />
+            </div>
+
+            <button type="button" id="generateRagBtn" class="primary-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); width: 100%; font-size: 14px; font-weight: bold; padding: 12px; margin-top: 4px;">
+              🤖 選択したテーマで台本を完全AI出力する ➔
+            </button>
+          </div>
+        </section>
+
+        <!-- STEP 2: 台本入力欄（本人制作・AI編集） -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">2</span>
+            <h2>✍️ 台本入力欄（本人制作・編集）</h2>
+          </div>
+          <div class="card-body stack-gap">
+            <div>
+              <label for="hookText" style="font-weight: bold; color: var(--accent);">🎣 冒頭3秒フック (任意・惹きつけ文)</label>
+              <textarea id="hookText" placeholder="例：「頑張りすぎている、あなたへ。」「『完璧じゃなくていい』って、知ってる？」" style="min-height: 60px;"></textarea>
+            </div>
+            <div>
+              <label for="ownerComment" style="font-weight: bold; color: var(--brand);">動画台本本文 (必須)</label>
+              <textarea id="ownerComment" required placeholder="ここに本人の台本を入力するか、「🤖 台本完全AI出力」を押すと自動入力されます。" style="min-height: 140px;"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 3: 画像入力欄（AIアバター用画像） -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">3</span>
+            <h2>🖼️ 画像入力欄（AIアバター用画像）</h2>
+          </div>
+          <div class="card-body stack-gap">
+            <div style="background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 12px; border: 1px dashed var(--brand); text-align: center;">
+              <img src="https://nasu-utopia.jp/images/manager-avatar.jpg" onerror="this.src='bg-premium.png'" alt="那須ユートピア美野沢 支配人" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-bottom: 8px;">
+              <div style="font-size: 12px; font-weight: bold; color: white;">那須ユートピア美野沢 支配人公式アバター写真</div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">デフォルト画像設定済み（変更したい場合は以下から選択）</div>
+            </div>
+            <div>
+              <label for="mediaFiles" style="font-weight: bold; font-size: 13px;">別の画像/背景動画をアップロード (任意):</label>
+              <input id="mediaFiles" type="file" accept="image/*,video/*" multiple />
+            </div>
+            <div>
+              <label for="postAttachFiles" style="font-weight: bold; font-size: 13px;">📷 直接投稿用の添付写真 (Xなど):</label>
+              <input id="postAttachFiles" type="file" accept="image/*" multiple />
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 4: AIアバター動画制作欄 -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">4</span>
+            <h2>🎥 AIアバター動画制作欄</h2>
+          </div>
+          <div class="card-body stack-gap">
+            <p style="font-size: 12px; color: #94a3b8; margin: 0;">ステップ3の画像＋ステップ2の台本から、HeyGen APIで遠藤オーナーが喋るAIアバター動画を全自動制作します。</p>
+            <button type="button" id="generateAvatarVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); width: 100%; font-size: 15px; font-weight: bold; padding: 12px;">
+              🎥 HeyGenでAIアバター動画を制作する
+            </button>
+            <div id="avatarStatusMessage" style="font-size: 12px; color: var(--accent); text-align: center;"></div>
+
+            <!-- 動画完成後のダウンロード領域 -->
+            <div id="avatarVideoResult" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 14px; text-align: center;">
+              <p style="margin: 0 0 8px; font-size: 13px; font-weight: bold; color: #10b981;">✅ AIアバター動画が完成しました！</p>
+              <video id="avatarVideoPreview" controls style="width: 100%; max-height: 300px; border-radius: 8px; background: #000; margin-bottom: 8px;"></video>
+              <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                <a id="avatarVideoDownloadLink" href="#" download="endo_avatar_video.mp4" class="primary-btn" style="display: inline-block; background: #8b5cf6; padding: 8px 16px; font-size: 13px; font-weight: bold; border-radius: 8px; text-decoration: none; color: white;">
+                  📥 完成動画をダウンロード
+                </a>
+                <button type="button" id="useAvatarAsVideo1Btn" class="primary-btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 8px 16px; font-size: 13px; font-weight: bold; border-radius: 8px;">
+                  ➔ 動画接続スタジオの「動画①」にセット
+                </button>
+              </div>
+            </div>
+
+            <!-- ステータス確認ボタン -->
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="checkVideoIdInput" placeholder="動画ID (自動入力されます)" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: #0f172a; color: white; font-size: 12px;" />
+              <button type="button" id="checkVideoStatusBtn" class="primary-btn" style="background: #475569; font-size: 12px; padding: 8px 12px; white-space: nowrap;">
+                🔍 状態確認
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 🎬 NEW STEP: ショート動画2本接続（結合）スタジオ -->
+        <section class="card step-card" style="grid-column: 1 / -1; background: linear-gradient(180deg, #131b2e 0%, #0b1120 100%); border: 2px solid #d4af37; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);">
+          <div class="section-title" style="border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 10px;">
+            <span class="step-badge" style="background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000; font-weight: 900;">連結</span>
+            <h2 style="color: #fce79a;">🎬 ショート動画2本 接続・結合スタジオ</h2>
+            <span style="font-size: 12px; background: rgba(212, 175, 55, 0.2); color: #fce79a; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.4); margin-left: auto;">9:16 リール/TikTok規格</span>
+          </div>
+          <div class="card-body stack-gap" style="padding-top: 14px;">
+            <p style="font-size: 13px; color: #cbd5e1; margin: 0;">
+              2本のショート動画（例：<strong>① AIアバター語り動画</strong> ＋ <strong>② 自然風景・日常クリップ動画</strong>）をシームレスに接続し、1本の完成ショート動画に結合・出力します。
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 6px;">
+              
+              <!-- スロット 1: 動画①（前編・フック） -->
+              <div style="background: #0f172a; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; padding: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-weight: bold; color: #fce79a; font-size: 14px;">🎥 動画①（前編 / 導入・語り）</span>
+                  <span id="video1DurationBadge" style="font-size: 11px; background: #334155; padding: 2px 6px; border-radius: 4px; color: #94a3b8;">未選択</span>
+                </div>
+                <input type="file" id="concatVideoFile1" accept="video/*" style="width: 100%; margin-bottom: 8px;" />
+                <input type="text" id="concatVideoUrl1" placeholder="または動画URLを直接入力" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: #1e293b; color: white; font-size: 12px; margin-bottom: 8px;" />
+                <div style="width: 100%; height: 200px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <video id="previewConcatVideo1" controls style="width: 100%; height: 100%; object-fit: contain; display: none;"></video>
+                  <span id="previewConcatVideo1Empty" style="color: #64748b; font-size: 12px;">動画①を選択してください</span>
+                </div>
+              </div>
+
+              <!-- 順序入れ替え・繋ぎ目設定エリア -->
+              <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h4 style="margin: 0 0 10px; font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 6px;">
+                    ⚙️ 接続・繋ぎ目（トランジション）設定
+                  </h4>
+
+                  <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">繋ぎ目のエフェクト:</label>
+                    <select id="concatTransitionType" style="width: 100%; padding: 8px; border-radius: 6px; background: #1e293b; color: white; border: 1px solid var(--line); font-size: 13px;">
+                      <option value="crossfade" selected>✨ クロスフェード（滑らかに重ねて切り替え 0.5秒）</option>
+                      <option value="fade">🌑 黒フェード（暗転を挟んで切り替え）</option>
+                      <option value="cut">✂️ 即時カット（ダイレクト切り替え）</option>
+                    </select>
+                  </div>
+
+                  <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">透かしロゴ表示:</label>
+                    <label style="font-size: 13px; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <input type="checkbox" id="concatShowBranding" checked /> 遠藤正俊 思想ロゴ（ゴールドフレーム）を付与
+                    </label>
+                  </div>
+
+                  <div style="text-align: center; margin: 10px 0;">
+                    <button type="button" id="swapVideosBtn" class="secondary-btn" style="padding: 6px 14px; font-size: 12px; border-radius: 20px;">
+                      🔄 動画① と 動画② を入れ替える
+                    </button>
+                  </div>
+                </div>
+
+                <button type="button" id="startConcatBtn" class="primary-btn" style="width: 100%; padding: 12px; font-size: 15px; font-weight: bold; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000; border-radius: 8px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);">
+                  🎬 2つの動画を接続して1本に出力する ➔
+                </button>
+              </div>
+
+              <!-- スロット 2: 動画②（後編・本編・風景） -->
+              <div style="background: #0f172a; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; padding: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-weight: bold; color: #fce79a; font-size: 14px;">🎥 動画②（後編 / 本編・風景）</span>
+                  <span id="video2DurationBadge" style="font-size: 11px; background: #334155; padding: 2px 6px; border-radius: 4px; color: #94a3b8;">未選択</span>
+                </div>
+                <input type="file" id="concatVideoFile2" accept="video/*" style="width: 100%; margin-bottom: 8px;" />
+                <input type="text" id="concatVideoUrl2" placeholder="または動画URLを直接入力" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: #1e293b; color: white; font-size: 12px; margin-bottom: 8px;" />
+                <div style="width: 100%; height: 200px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <video id="previewConcatVideo2" controls style="width: 100%; height: 100%; object-fit: contain; display: none;"></video>
+                  <span id="previewConcatVideo2Empty" style="color: #64748b; font-size: 12px;">動画②を選択してください</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 結合中プログレス & 結果表示エリア -->
+            <div id="concatProgressArea" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 16px; text-align: center; margin-top: 10px;">
+              <div style="font-size: 14px; font-weight: bold; color: #60a5fa; margin-bottom: 6px;">⏳ 2本の動画を接続・レンダリング中...</div>
+              <div style="font-size: 12px; color: #94a3b8;">縦型ショート動画規格（1080×1920）に最適化して統合しています。少々お待ちください。</div>
+            </div>
+
+            <div id="concatResultArea" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px; text-align: center; margin-top: 10px;">
+              <p style="margin: 0 0 10px; font-size: 14px; font-weight: bold; color: #10b981;">🎉 2本の動画の接続が完了しました！（1本のショート動画が完成）</p>
+              <video id="concatFinalVideoPreview" controls style="max-width: 320px; width: 100%; max-height: 420px; border-radius: 8px; background: #000; margin: 0 auto 12px; display: block;"></video>
+              <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <a id="concatFinalDownloadLink" href="#" download="endo_combined_short.mp4" class="primary-btn" style="background: #8b5cf6; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; text-decoration: none; color: white;">
+                  📥 結合動画をダウンロード
+                </a>
+                <button type="button" id="useConcatVideoForPostBtn" class="primary-btn" style="background: linear-gradient(90deg, #10b981 0%, #059669 100%); padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 8px;">
+                  🚀 この完成動画でSNS投稿予約を行う
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- STEP 5: SNS接続 -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">5</span>
+            <h2>🔗 SNS接続</h2>
+          </div>
+          <div class="card-body stack-gap">
+            <label class="form-label-bold">投稿先SNSチャンネル:</label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+              <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" id="instagramCb" name="channelSelect" value="instagram" checked /> 📸 Instagram リール (9:16動画)</label>
+              <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;"><input type="checkbox" id="xCb" name="channelSelect" value="x" checked /> 🐦 X (旧Twitter)</label>
+            </div>
+            <div style="display: flex; gap: 16px; margin-top: 8px;">
+              <label style="font-size: 13px; color: #94a3b8;"><input type="radio" name="instagramType" value="reels" checked /> リール動画</label>
+              <label style="font-size: 13px; color: #94a3b8;"><input type="radio" name="instagramType" value="feed" /> フィード投稿</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 6: SNS投稿 -->
+        <section class="card step-card">
+          <div class="section-title">
+            <span class="step-badge">6</span>
+            <h2>🚀 SNS投稿</h2>
+          </div>
+          <div class="card-body stack-gap">
+            <form id="uploadForm">
+              <div style="margin-bottom: 12px;">
+                <label for="visibility" style="font-size: 13px; font-weight: bold;">公開方式:</label>
+                <select id="visibility" style="width: 100%; padding: 8px; border-radius: 8px; background: #0f172a; color: white;">
+                  <option value="review">承認後に投稿 (推奨)</option>
+                  <option value="auto_if_safe">安全判定なら即時自動投稿</option>
+                </select>
+              </div>
+              <textarea id="ngMemo" placeholder="公開NGメモ/注意点 (任意)" style="min-height: 50px; font-size: 12px; margin-bottom: 12px;"></textarea>
+
+              <button type="submit" class="submit-btn" style="width: 100%; font-size: 16px; padding: 14px; background: linear-gradient(90deg, #10b981 0%, #059669 100%);">
+                🚀 台本を登録してSNS投稿予約を行う
+              </button>
+              <p id="formMessage" class="help" style="text-align: center; margin-top: 8px;"></p>
+            </form>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- 投稿一覧・プレビュー管理エリア -->
+      <section class="card queue-section" style="margin-top: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--brand); padding-bottom: 12px; margin-bottom: 16px;">
+          <h2>📋 制作済み動画・SNS配信キュー一覧</h2>
+          <div style="display: flex; gap: 8px;">
+            <select id="statusFilter" style="padding: 4px 8px; border-radius: 6px; font-size: 12px; background: #0f172a; color: white;">
+              <option value="all">すべて</option>
+              <option value="review_required" selected>要確認</option>
+              <option value="approved">承認済み</option>
+              <option value="published">公開済み</option>
+            </select>
+          </div>
+        </div>
+        <div id="queue" class="queue-container">
+          <div class="card">データを読み込み中…</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- プレビュー用モーダル -->
+    <div id="previewModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>動画プレビュー</h2>
+        <div class="reel-preview-area">
+          <video id="reelVideo" src="" controls style="width: 100%; height: 100%; border-radius: 12px; display: none; object-fit: cover; background: #000;"></video>
+          <div class="reel-mock-screen" id="reelMockScreen">
+            <img id="reelImage" class="reel-bg-image" src="about:blank" alt="" style="display: none;" />
+            <div class="reel-text-overlay" id="reelTextOverlay"></div>
+          </div>
+          <div class="reel-controls" id="reelMockControls">
+            <button id="playBtn" class="primary-btn">再生</button>
+            <button id="pauseBtn" class="secondary-btn" disabled>一時停止</button>
+            <button id="downloadVideoBtn" class="primary-btn" style="background: #8b5cf6; margin-left: 10px; border-color: #8b5cf6;">📥 動画をダウンロード</button>
+            <button id="modalApproveBtn" class="primary-btn" style="background: #10b981; margin-left: 10px;">この動画を承認</button>
+            <button id="modalPublishNowBtn" class="primary-btn" style="background: #0284c7; margin-left: 10px;">📲 今すぐ投稿</button>
+            <span class="reel-timer" id="reelTimer">0.0s / 60.0s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <audio id="narrationAudio" style="display: none;"></audio>
+    <audio id="bgmAudio" style="display: none;"></audio>
+
+    <script type="module" src="index.js?v=2"></script>
+  </body>
+</html>

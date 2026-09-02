@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>赤沢温泉旅館 旅館AICEO 司令塔コックピット</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+JP:wght@400;600;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #04090c;
+      --card-bg: rgba(12, 22, 28, 0.85);
+      --card-border: rgba(212, 175, 55, 0.3);
+      --card-hover-border: rgba(212, 175, 55, 0.8);
+      --accent-gold: #d4af37;
+      --accent-gradient: linear-gradient(135deg, #faeed1 0%, #d4af37 50%, #997300 100%);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --green-glow: #10b981;
+      --purple-glow: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 10% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 60%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: 'Noto Serif JP', 'Shippori Mincho', serif;
+      min-height: 100vh;
+      line-height: 1.7;
+      padding-bottom: 5rem;
+    }
+
+    header {
+      padding: 2.5rem 1.5rem 1.5rem;
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .org-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.8rem;
+    }
+
+    .main-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.05em;
+    }
+
+    .org-structure-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .org-node {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 6px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .org-node.owner {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    .org-node.ceo {
+      border-color: #d4af37;
+      background: rgba(212, 175, 55, 0.25);
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .org-arrow {
+      color: var(--accent-gold);
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 2rem auto 0;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* 経営サマリー & KPI */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.2rem 1.4rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .kpi-val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-gain {
+      font-size: 0.85rem;
+      color: var(--green-glow);
+      font-weight: bold;
+    }
+
+    /* メイン2カラム（オーナーホットライン ⇆ 全システム連動コックピット） */
+    .executive-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 1.8rem;
+    }
+
+    @media (max-width: 960px) {
+      .executive-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.8rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.8rem;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* オーナー対話コンソール */
+    .quick-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 1.2rem;
+    }
+
+    .quick-prompt-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 8px;
+      color: #e2e8f0;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .quick-prompt-btn:hover {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: var(--accent-gold);
+      color: #fff;
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 280px;
+      max-height: 380px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      max-width: 90%;
+    }
+
+    .msg.owner {
+      align-self: flex-end;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fef08a;
+    }
+
+    .msg.ceo {
+      align-self: flex-start;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #f8fafc;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+
+    .send-btn {
+      background: var(--accent-gradient);
+      border: none;
+      color: #000;
+      font-weight: 700;
+      padding: 0 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+
+    /* 全システム連動オーケストレーター */
+    .system-hierarchy {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .system-dept {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .dept-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .system-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .system-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+      text-decoration: none;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .system-item:hover {
+      border-color: var(--accent-gold);
+      background: rgba(212, 175, 55, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .sys-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sys-status {
+      font-size: 0.72rem;
+      color: var(--green-glow);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .sys-status::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green-glow);
+      box-shadow: 0 0 8px var(--green-glow);
+    }
+
+    .orchestrate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      color: #fff;
+      font-weight: 900;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .orchestrate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6);
+    }
+
+    .back-portal-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-portal-link:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="max-width: 1200px; margin: 0 auto; text-align: left;">
+      <a href="/akasawa/index.html" class="back-portal-link">← 塩原温泉 赤沢温泉旅館 統合AIポータルへ戻る</a>
+    </div>
+    <div class="org-badge">👑 赤沢温泉旅館 最高執行機関</div>
+    <h1 class="main-title">旅館AICEO 経営司令塔コックピット</h1>
+    <p style="font-size: 0.95rem; color: var(--text-sub); max-width: 800px; margin: 0 auto;">
+      遠藤正俊オーナーの経営方針・哲学を専属で具現化し、配下9システムを自律連動して結果を創出する最高執行AI
+    </p>
+
+    <!-- 組織構造バー -->
+    <div class="org-structure-bar">
+      <div class="org-node owner">
+        <span>👤</span> 遠藤正俊 オーナー (最高意思決定者)
+      </div>
+      <div class="org-arrow">⇆ 専属ホットライン ⇆</div>
+      <div class="org-node ceo">
+        <span>👑</span> 赤沢温泉旅館 旅館AICEO (AI最高経営責任者)
+      </div>
+      <div class="org-arrow">▼ 指揮・統括連動 ▼</div>
+      <div class="org-node">
+        <span>⚙️</span> 配下9つの業務システム (DP / プラン / OTA / HP / SNS / ブログ / 接客 / 口コミ / CRM)
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- 経営成果トラッカー -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">想定月間売上予測 (売上向上モデル)</div>
+        <div class="kpi-val">¥4,860,000 <span class="kpi-gain">+219.7%</span></div>
+        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">客数1.3倍 × ADR 1.3倍 × リピート1.3倍</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">客単価（ADR）最適値</div>
+        <div class="kpi-val">¥22,800 <span class="kpi-gain">+¥4,800</span></div>
+        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">競合10宿価格リアルタイム連動</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">AI査定スコア (Google / LLMO)</div>
+        <div class="kpi-val">96 <span style="font-size: 1rem; color: #94a3b8;">/ 100点</span> <span class="kpi-gain">Sランク</span></div>
+        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">Schema.org 4型 & 構造化データ完備</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">システム自律稼働率</div>
+        <div class="kpi-val">100% <span class="kpi-gain">正常連動中</span></div>
+        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">9システムすべて旅館AICEO直結</div>
+      </div>
+    </div>
+
+    <!-- メインレイアウト -->
+    <div class="executive-layout">
+      
+      <!-- 左：オーナー ⇆ 旅館AICEO ホットライン対話 -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>👑</span> 遠藤オーナー ⇆ 旅館AICEO ホットライン
+          </div>
+          <span style="font-size: 0.75rem; background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 8px; border-radius: 10px; font-weight: bold;">Gemini 2.5 経営頭脳 稼働中</span>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 0.8rem;">
+          遠藤オーナーからの経営指示・質問を選択または入力してください。旅館AICEOが配下システムと連携して回答・実行します。
+        </p>
+
+        <!-- クイック経営指示ボタン -->
+        <div class="quick-prompts">
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt('今週末および直近30日の予約予測と、ダイナミックプライシングの最適価格設定を報告してください。')">
+            <span>📈 直近の予約動向とDP最適価格の報告</span>
+            <span>➔</span>
+          </button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt('競合10宿（まじま荘・元泉館など）の動向を踏まえ、赤沢のぬる湯と鹿肉ジンギスカンを活かした秋の高単価プランを企画・展開してください。')">
+            <span>🏨 競合10宿対抗・高単価宿泊プランの企画指示</span>
+            <span>➔</span>
+          </button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt('直近の口コミ評価を分析し、自然に過ごす猫の見守り状況やぬる湯への満足度推移、現場改善課題をまとめてください。')">
+            <span>💬 口コミ分析と現場改善課題の抽出</span>
+            <span>➔</span>
+          </button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt('遠藤オーナー個人の人生哲学（50代で安定を捨てた決断・他人の価値観ではなく人生の軸・何もしない余白）に基づき、個人動画システム（endo-sns）で発信する新しいショート動画台本を企画・連動生成してください。')">
+            <span>🎥 遠藤オーナー個人 人生哲学動画の企画・連動指示</span>
+            <span>➔</span>
+          </button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt('遠藤オーナーの理念（何もしない時間の価値・脱価格競争）に基づき、全9システムおよび個人動画システムを一括最適化して収益とブランド価値を極大化してください。')">
+            <span>⚡️ 理念に基づく全システム一括最適化指示</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <!-- チャット履歴 -->
+        <div class="chat-box" id="chatBox">
+          <div class="msg ceo">
+            <strong>👑 旅館AICEO:</strong><br>
+            遠藤オーナー、お疲れ様です。赤沢温泉旅館 AICEOの司令塔です。<br>
+            当館の「源泉かけ流し天然ぬる湯（38〜40℃）」「自然に過ごす猫たちを温かく見守る静養空間（※猫と遊ぶなら徒歩10分猫カフェ案内）」「箒川沿いの静寂」「鹿×豚ジンギスカン」の絶対的価値を守り、さらに<strong>「遠藤オーナー個人の人生哲学動画システム（endo-sns）」</strong>とも完全連動して統括しております。<br>
+            どのような経営判断・動画企画・施策の指示を出されますでしょうか？
+          </div>
+        </div>
+
+        <!-- 入力エリア -->
+        <div class="input-area">
+          <input type="text" id="ownerInput" class="chat-input" placeholder="遠藤オーナーからの指示・質問を入力..." onkeypress="if(event.key==='Enter') sendOwnerMessage()">
+          <button class="send-btn" id="sendBtn" onclick="sendOwnerMessage()">指示送信</button>
+        </div>
+      </div>
+
+      <!-- 右：配下9システム ＋ 遠藤オーナー個人動画システム一括オーケストレーション -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⚙️</span> 旅館AICEO 全システム統括コックピット
+          </div>
+          <span style="font-size: 0.75rem; color: var(--accent-gold); font-weight: bold;">自律連動オーケストレーター</span>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;">
+          旅館AICEOの指揮下にある3部門・9システム ＋ 遠藤オーナー個人動画システムです。AICEOの経営判断に基づき常時連携して稼働しています。
+        </p>
+
+        <div class="system-hierarchy">
+          
+          <!-- 0. 特別独立部門: 遠藤オーナー個人動画システム -->
+          <div class="system-dept" style="border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.06);">
+            <div class="dept-title" style="color: #fbbf24;">
+              <span>🎥</span> 遠藤正俊オーナー 個人動画＆SNSシステム (Owner Branding)
+            </div>
+            <div class="system-list">
+              <a href="/endo-sns/index.html" class="system-item" target="_blank" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(0,0,0,0.5);">
+                <div class="sys-name"><span style="color: #fbbf24;">👤</span> 遠藤正俊 人生哲学ショート動画AI</div>
+                <div class="sys-status" id="status-endo" style="color: #fbbf24;">人生哲学・生き方発信 連動中</div>
+              </a>
+              <a href="/endo-sns/review.html" class="system-item" target="_blank" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(0,0,0,0.5);">
+                <div class="sys-name"><span style="color: #fbbf24;">🎬</span> 動画審査・承認ダッシュボード</div>
+                <div class="sys-status" style="color: #fbbf24;">HeyGenアバター生成連動</div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 1. 収益・販売部門 -->
+          <div class="system-dept">
+            <div class="dept-title">
+              <span>💰</span> 収益・販売部門 (Revenue & Sales)
+            </div>
+            <div class="system-list">
+              <a href="/akasawa/dp/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>📈</span> ダイナミックプライシングAI</div>
+                <div class="sys-status" id="status-dp">競合10宿連動 正常</div>
+              </a>
+              <a href="/akasawa/plan/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>🏨</span> 宿泊プラン作成AI</div>
+                <div class="sys-status" id="status-plan">10原則プラン自動生成</div>
+              </a>
+              <a href="/akasawa/market/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>📱</span> OTA最適化・市場分析</div>
+                <div class="sys-status" id="status-ota">楽天/じゃらん最適化</div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 2. 集客・認知部門 -->
+          <div class="system-dept">
+            <div class="dept-title">
+              <span>🌐</span> 集客・認知部門 (Marketing & Acquisition)
+            </div>
+            <div class="system-list">
+              <a href="/akasawa/rag/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>🏛️</span> 公式HP & RAGナレッジ</div>
+                <div class="sys-status" id="status-rag">Schema.org 4型完備</div>
+              </a>
+              <a href="/akasawa-sns/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>🎥</span> SNSマーケティングAI</div>
+                <div class="sys-status" id="status-sns">ぬる湯/猫見守り動画キュー稼働</div>
+              </a>
+              <a href="/akasawa/blog/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>✍️</span> 公式ブログ自動執筆AI</div>
+                <div class="sys-status" id="status-blog">SEO/LLMO記事生成中</div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. 接客・顧客満足部門 -->
+          <div class="system-dept">
+            <div class="dept-title">
+              <span>❤️</span> 接客・顧客満足部門 (Hospitality & CRM)
+            </div>
+            <div class="system-list">
+              <a href="/akasawa/chat/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>🤖</span> 客室デジタルコンシェルジュ</div>
+                <div class="sys-status" id="status-chat">4カ国語24h案内中</div>
+              </a>
+              <a href="/akasawa/review/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>💬</span> 口コミ分析 & 返信AI</div>
+                <div class="sys-status" id="status-review">新着レビュー即時巡回</div>
+              </a>
+              <a href="/akasawa/ml/index.html" class="system-item" target="_blank">
+                <div class="sys-name"><span>💌</span> メルマガ & リピートCRM</div>
+                <div class="sys-status" id="status-crm">ファン化メッセージ配信</div>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 一括オーケストレーション実行ボタン -->
+        <button class="orchestrate-btn" id="orchestrateBtn" onclick="runFullOrchestration()">
+          <span>⚡️</span> 旅館AICEOによる「全システム ＆ 遠藤オーナー個人動画」一括自動最適化を発令・実行
+        </button>
+
+        <div id="orchestrateLog" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.6); border: 1px solid var(--green-glow); border-radius: 8px; padding: 10px; font-size: 0.78rem; color: #a7f3d0; line-height: 1.6;">
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    async function sendOwnerMessage() {
+      const input = document.getElementById('ownerInput');
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      appendMsg('owner', '👤 遠藤オーナー: ' + prompt);
+      input.value = '';
+
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = '思考中...';
+
+      try {
+        const res = await fetch('/.netlify/functions/akasawa-ceo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, actionType: 'chat' })
+        });
+        const data = await res.json();
+        const providerBadge = data.apiProvider ? `<span style="font-size: 0.7rem; background: rgba(212,175,55,0.2); color: #d4af37; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">[${data.apiProvider}]</span>` : '';
+        if (data.ceoResponse) {
+          appendMsg('ceo', '👑 <strong>旅館AICEO:</strong>' + providerBadge + '<br>' + formatCeoText(data.ceoResponse));
+        } else {
+          appendMsg('ceo', '👑 <strong>旅館AICEO:</strong><br>' + (data.error || 'エラーが発生しました。'));
+        }
+      } catch (err) {
+        appendMsg('ceo', '👑 <strong>旅館AICEO:</strong><br>通信エラーが発生しました: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '指示送信';
+      }
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('ownerInput').value = text;
+      sendOwnerMessage();
+    }
+
+    async function runFullOrchestration() {
+      const btn = document.getElementById('orchestrateBtn');
+      const logBox = document.getElementById('orchestrateLog');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> 旅館AICEOが全システム ＆ 遠藤オーナー個人動画へ自律連動指示を発令中...';
+      logBox.style.display = 'block';
+      logBox.innerHTML = '⚡️ <strong>【旅館AICEO 自律連動プロトコル起動】</strong><br>全システム（DP・プラン・OTA・HP・SNS・ブログ・接客・口コミ・CRM ＋ 遠藤オーナー個人動画）へ一括最適化指示を送信中...';
+
+      try {
+        const res = await fetch('/.netlify/functions/akasawa-ceo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actionType: 'orchestrate' })
+        });
+        const data = await res.json();
+        const providerBadge = data.apiProvider ? `<span style="font-size: 0.7rem; background: rgba(16,185,129,0.2); color: #10b981; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">[${data.apiProvider}]</span>` : '';
+        
+        if (data.ceoResponse) {
+          appendMsg('ceo', '👑 <strong>旅館AICEO【全システム一括連動完了報告】:</strong>' + providerBadge + '<br>' + formatCeoText(data.ceoResponse));
+          logBox.innerHTML = '✅ <strong>全システム ＆ 遠藤オーナー個人動画の一括自動最適化が完了しました。</strong><br>・遠藤オーナー個人動画: 人生哲学・生き方ショート動画台本キュー連動完了<br>・ダイナミックプライシング: 競合10宿価格に連動<br>・宿泊プラン: ぬる湯/鹿肉ジンギスカン高付加価値プラン更新<br>・公式HP/RAG: 構造化データ検証済み<br>・SNS/ブログ: 配信キュー設定完了<br>・口コミ/接客/CRM: 最新データ同期完了';
+        } else {
+          logBox.innerHTML = '⚠️ 最適化中にエラーが発生しました: ' + (data.error || '不明なエラー');
+        }
+      } catch (err) {
+        logBox.innerHTML = '⚠️ 通信エラー: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡️</span> 旅館AICEOによる「全システム ＆ 遠藤オーナー個人動画」一括自動最適化を発令・実行';
+      }
+    }
+
+    function appendMsg(type, html) {
+      const box = document.getElementById('chatBox');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'msg ' + type;
+      msgDiv.innerHTML = html;
+      box.appendChild(msgDiv);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function formatCeoText(text) {
+      return text
+        .replace(/\n/g, '<br>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+  </script>
+</body>
+</html>

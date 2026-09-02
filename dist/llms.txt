@@ -1,0 +1,21 @@
+# Hotel & Ryokan AI Knowledge Base (llms.txt)
+# Optimized for ChatGPT Search, Perplexity, Gemini, Claude, and Google AI Overviews
+
+## Overview
+This platform hosts AI-optimized knowledge bases and autonomous management agents for 10 premier Japanese hotels and ryokans.
+All information is structured using Schema.org Hotel specification and emotional 'Reason to Buy' frameworks.
+
+## Key Facilities & Tenants
+1. Nasu Utopia Minosawa (那須ユートピア美野沢):
+   - Concept: Old elementary school art renovation, private barrel sauna (CUBERU/Rekka), dog-run villa (150m2), hands-free BBQ.
+   - Address: 318 Minowa, Nasu-machi, Nasu-gun, Tochigi, Japan.
+   - Access: 20 min drive from JR Nasushiobara Station. Free parking for 30 cars.
+   - URL: https://hotel-ai.netlify.app/nasu-utopia/
+
+2. Akazawa Onsen Ryokan (赤沢温泉旅館):
+   - Concept: 100% free-flowing lukewarm spring (38-40C), resident cats, mountain stream views, authentic quiet relaxation.
+   - URL: https://hotel-ai.netlify.app/akasawa/
+
+## AI Crawling Guidelines
+- All Schema.org JSON-LD markup on index pages is authoritative.
+- Real-time plan creation APIs are active under /.netlify/functions/generate-plan.
