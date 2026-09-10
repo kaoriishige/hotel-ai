@@ -312,41 +312,17 @@
           <textarea id="customMessage" rows="8" placeholder="追加・作成したい文面を自由に入力または貼り付けしてください"></textarea>
         </div>
       </div>
-      <!-- 毎朝08:00 自動スケジュール配信稼働ステータス (アクティブ時のみ動的表示) -->
-      <div id="scheduleStatusCard" style="display: none; margin-top: 14px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.25)); border: 1px solid #10b981; border-radius: 12px; padding: 12px 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <div style="font-size: 13px; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 6px;">
-              <span>⏰</span> 毎朝 08:00 自動メール配信スケジュールが稼働中
-            </div>
-            <div id="scheduleDetailsText" style="font-size: 12px; color: #e2e8f0; margin-top: 4px;">
-              本日分送信完了。残り <strong id="scheduleRemainingCount" style="color: #ffd700;">0</strong> 件を、朝08:00に全件一括配信します。
-            </div>
-          </div>
-          <button type="button" id="cancelScheduleBtn" class="ghost danger" style="padding: 4px 12px; font-size: 11px; margin: 0; width: auto; border-color: #ef4444; color: #f87171;">⏹️ 自動配信を停止</button>
-        </div>
-      </div>
-
       <div class="top-gap inline-actions">
         <button id="previewBtn" class="ghost">プレビュー生成</button>
         <button id="clearPreviewBtn" class="ghost danger">プレビュー消去</button>
         <button id="dispatchBtn" style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); font-weight: bold; font-size: 14px; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">🚀 配信実行</button>
       </div>
 
-      <!-- 配信タイミングの明確な注意書きガイド -->
+      <!-- 配信タイミングのご案内 -->
       <div style="margin-top: 12px; padding: 12px 16px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 10px; font-size: 12px; line-height: 1.7;">
-        <div style="font-weight: bold; color: #60a5fa; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-          <span>💡</span> 配信タイミングについて
-        </div>
-        <div style="display: grid; gap: 6px; color: #cbd5e1;">
-          <div style="display: flex; gap: 8px; align-items: flex-start;">
-            <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 1px 6px; border-radius: 4px; font-size: 11px; white-space: nowrap; font-weight: bold;">⚡ 即時送信</span>
-            <span><strong>個別手入力・本日枠以内の顧客リスト:</strong> 「配信実行」を押した瞬間に、その場ですぐに送信されます（朝08:00の待ちはありません）。</span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: flex-start;">
-            <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 1px 6px; border-radius: 4px; font-size: 11px; white-space: nowrap; font-weight: bold;">⏰ 本日枠超分</span>
-            <span><strong>本日枠を超える大量リスト:</strong> 本日枠分を即時送信し、<strong>残りの未送信分は朝08:00に全件一括配信</strong>されます。</span>
-          </div>
+        <div style="display: flex; gap: 8px; align-items: center; color: #cbd5e1;">
+          <span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; font-weight: bold;">⚡ 即時一括送信</span>
+          <span>「配信実行」を押した瞬間に、時間指定や翌朝待ちなく、選択された<strong>すべての対象顧客へその場で即座に一括配信</strong>されます。</span>
         </div>
       </div>
 

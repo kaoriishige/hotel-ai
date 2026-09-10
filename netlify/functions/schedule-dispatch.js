@@ -14,11 +14,9 @@ try {
 
 function getResendApiKeys() {
   const keys = [];
-  // 1. 本番ドメイン認証済みキー RESEND_API_KEYS1 を最優先で追加
   const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
   if (k1 && k1.trim()) keys.push(k1.trim());
 
-  // 2. 追加の分散キー RESEND_API_KEYS2〜10 を追加
   for (let i = 2; i <= 10; i++) {
     const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
     if (k && k.trim()) keys.push(k.trim());
@@ -35,7 +33,6 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     const { payloads, customers, channel, scenario, customSubject, customMessage, scheduleTitle } = body;
 
-    // 軽量形式(customers: [{email, name, lineUserId}]) または 従来形式(payloads) の両方に対応
     let targetList = [];
     if (Array.isArray(customers) && customers.length > 0) {
       targetList = customers;
@@ -46,20 +43,15 @@ exports.handler = async (event) => {
     }
 
     const apiKeys = getResendApiKeys();
-    const from = process.env.MAIL_FROM || '赤沢温泉旅館 <onboarding@resend.dev>';
+    const from = process.env.MAIL_FROM || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
     if ((channel === 'email' || channel === 'both') && apiKeys.length === 0) {
       return json(400, { ok: false, error: 'RESEND_API_KEYS が設定されていません。' });
     }
 
-    // 初回本日分（利用可能なキー数 × 100件）の抽出
-    const dailyLimit = Math.max(apiKeys.length * 100, 100);
-    const todayTargets = targetList.slice(0, dailyLimit);
-    const remainingTargets = targetList.slice(dailyLimit);
+    console.log(`[schedule-dispatch] 即時一括配信開始: 対象総数 ${targetList.length} 件 (時間指定なし・即時全件送信)`);
 
-    console.log(`[schedule-dispatch] 受付総数: ${targetList.length}件, 本日即時送信: ${todayTargets.length}件, 明日以降自動配信: ${remainingTargets.length}件`);
-
-    // 1. 本日分の即時並列送信（メッセージ本文を展開）
-    const todayPayloads = todayTargets.map(t => {
+    // 朝08:00の時間指定・分割制限を完全削除し、対象者全員を即時一括送信
+    const allPayloads = targetList.map(t => {
       const name = t.customerName || t.name || 'お客様';
       const subj = t.subject || customSubject || '赤沢温泉旅館からのお知らせ';
       let msg = t.message || customMessage || '';
@@ -73,75 +65,23 @@ exports.handler = async (event) => {
       };
     });
 
-    let todaySendResult = { count: 0, failedNames: [] };
+    let sendResult = { count: 0, failedNames: [] };
     if (channel === 'email' || channel === 'both') {
-      todaySendResult = await sendEmailMultiKeyBatchParallel(todayPayloads, apiKeys, from, scenario);
+      sendResult = await sendEmailMultiKeyBatchParallel(allPayloads, apiKeys, from, scenario);
     }
 
-    const todaySuccessCount = todaySendResult.count || 0;
-    const todayFailedCount = (todaySendResult.failedNames || []).length;
+    const totalSuccessCount = sendResult.count || 0;
+    const totalFailedCount = (sendResult.failedNames || []).length;
 
-    // 2. 実際に送信成功した件数以降の全顧客を確実に残りキューへ保存（失敗分を絶対に欠落させない）
-    const actualRemainingTargets = targetList.slice(todaySuccessCount);
-    const remainingCount = actualRemainingTargets.length;
-
-    let scheduleId = null;
-    let db = null;
-    try {
-      if (getDb) db = getDb();
-    } catch (e) {
-      console.warn('Firestore not configured or error:', e.message);
-    }
-
-    if (actualRemainingTargets.length > 0 && db && admin) {
-      scheduleId = 'sched_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-      
-      // 軽量な顧客情報のみ保存（email, name, lineUserId）
-      const cleanRemaining = actualRemainingTargets.slice(0, 4500).map(t => ({
-        email: t.email || '',
-        name: t.customerName || t.name || '',
-        lineUserId: t.lineUserId || ''
-      }));
-
-      const scheduleDoc = {
-        scheduleId,
-        title: scheduleTitle || `赤沢温泉旅館 自動配信 (${targetList.length}件)`,
-        scenario: scenario || 'custom',
-        channel: channel || 'email',
-        customSubject: customSubject || '',
-        customMessage: customMessage || '',
-        totalInitialCount: targetList.length,
-        dailyLimit,
-        sentCountSoFar: todaySuccessCount,
-        remainingCount,
-        remainingCustomers: cleanRemaining,
-        remainingPayloads: cleanRemaining,
-        status: 'active',
-        nextRunTimeJST: '翌朝 08:00 (JST) 一括配信',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
-        history: [{
-          runAt: new Date().toISOString(),
-          sentCount: todaySuccessCount,
-          failedCount: todayFailedCount
-        }]
-      };
-
-      try {
-        await db.collection('mail_schedules').doc(scheduleId).set(scheduleDoc);
-        console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 実際に残った宛先=${remainingCount}件`);
-      } catch (dbErr) {
-        console.warn('[schedule-dispatch] DB保存エラー:', dbErr.message);
-      }
-    }
+    console.log(`[schedule-dispatch] 即時一括配信完了: 成功 ${totalSuccessCount} 件, 失敗 ${totalFailedCount} 件`);
 
     return json(200, {
       ok: true,
-      todaySentCount: todaySuccessCount,
-      todayFailedCount: todayFailedCount,
-      remainingCount,
-      scheduleId,
-      details: todaySendResult
+      todaySentCount: totalSuccessCount,
+      todayFailedCount: totalFailedCount,
+      remainingCount: 0,
+      scheduleId: null,
+      details: sendResult
     });
   } catch (err) {
     console.error('[schedule-dispatch] エラー:', err);
@@ -173,14 +113,13 @@ function getFromAddressForKey(keyNum, defaultFrom) {
   if (keyNum === 1) {
     return defaultFrom || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
   }
-  // mail.akasawaonsen.com を mail2.akasawaonsen.com などに自動置換
   if (defaultFrom && defaultFrom.includes('@mail.')) {
     return defaultFrom.replace(/@mail\./g, `@mail${keyNum}.`);
   }
   return `赤沢温泉旅館 <info@mail${keyNum}.akasawaonsen.com>`;
 }
 
-// 複数APIキーへの並列チャンク送信（超高速化）
+// 複数APIキーへの並列チャンク送信（時間指定なし・即時全件一括送信）
 async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validPayloads = payloads.filter(p => {
@@ -201,25 +140,19 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
   const failedNames = [];
   const usedKeysSummary = [];
 
-  // 各APIキーへ並列送信
+  // 全チャンクを登録済みAPIキーで巡回し、並列送信（上限・時間指定なし）
   const sendPromises = chunks.map(async (chunk, chunkIdx) => {
-    if (chunkIdx >= apiKeys.length) {
-      chunk.forEach(p => failedNames.push(`${p.email} (本日枠上限到達)`));
-      return;
-    }
-
-    const keyNum = chunkIdx + 1;
-    const currentKey = apiKeys[chunkIdx];
+    const keyIndex = chunkIdx % (apiKeys.length || 1);
+    const keyNum = keyIndex + 1;
+    const currentKey = apiKeys.length > 0 ? apiKeys[keyIndex] : process.env.RESEND_API_KEY;
     const keyFrom = getFromAddressForKey(keyNum, from);
 
     const chunkRequests = chunk.map(p => {
       const cid = (p.email || 'guest').trim().toLowerCase();
       const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
       
-      // 開封追跡用ピクセルURLの生成
       const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
       
-      // 本文の改行をHTMLの<br>に変換し、末尾に開封追跡用透明画像を埋め込む
       const htmlBody = `
         <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
         <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />

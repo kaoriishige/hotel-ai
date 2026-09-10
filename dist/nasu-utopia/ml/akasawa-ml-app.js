@@ -859,40 +859,36 @@ async function dispatchMessages() {
         throw new Error(errMsg);
       }
 
-      const todaySent = result.todaySentCount || 0;
-      const todayFailed = result.todayFailedCount || 0;
-      const remaining = result.remainingCount || 0;
+      const totalSent = result.todaySentCount || 0;
+      const totalFailed = result.todayFailedCount || 0;
 
-      // 実際に本日送信成功した顧客のみを選択解除（失敗分は次回以降に繰り越し）
-      const sentTargets = targets.slice(0, todaySent);
+      // 送信成功した顧客を選択解除
+      const sentTargets = targets.slice(0, totalSent);
       sentTargets.forEach(c => removeFromSelected(c.id));
 
       const foundLog = state.logs.find(l => l.id === logId);
       if (foundLog) {
-        foundLog.status = remaining > 0 ? 'scheduled' : (todayFailed > 0 ? 'error' : 'success');
-        foundLog.unreachedCount = todayFailed;
-        foundLog.todaySentCount = todaySent;
+        foundLog.status = totalFailed > 0 ? 'error' : 'success';
+        foundLog.unreachedCount = totalFailed;
+        foundLog.todaySentCount = totalSent;
         foundLog.sentRecipients = sentTargets.map(c => ({
           name: fullName(c),
           email: c.email || '',
           lineUserId: c.lineUserId || ''
         }));
-        foundLog.unreachedDetails = remaining > 0 
-          ? `本日送信成功: ${todaySent}件 / 残り朝08:00一括配信キュー: ${remaining}件`
-          : (todayFailed > 0 ? `失敗: ${todayFailed}件` : '全件送信完了');
+        foundLog.unreachedDetails = totalFailed > 0 ? `送信成功: ${totalSent}件 / 失敗: ${totalFailed}件` : '全件即時送信完了';
         persist();
         renderLogs();
       }
 
       persist();
       renderCustomers();
-      checkScheduleStatus();
 
-      if (remaining > 0) {
-        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、【朝08:00】に残りの全件が一括配信されます。\n（このまま画面を閉じてもサーバー側で自動配信されます）`);
-      } else {
-        alert(`🎉 全【${todaySent}件】のメール配信が完了いたしました！\n（本日分で全件送信完了しました）`);
+      let finishMsg = `🎉 全【${totalSent}件】のメール一括配信が完了いたしました！`;
+      if (totalFailed > 0) {
+        finishMsg += `\n（※ ${totalFailed}件の送信でエラーが発生しました）`;
       }
+      alert(finishMsg);
     } else {
       // Manual Mode
       const customer = targets[0];
