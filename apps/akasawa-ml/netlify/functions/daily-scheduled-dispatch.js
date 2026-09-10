@@ -13,15 +13,8 @@ try {
 }
 
 function getResendApiKeys() {
-  const keys = [];
-  const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
-  if (k1 && k1.trim()) keys.push(k1.trim());
-
-  for (let i = 2; i <= 10; i++) {
-    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
-    if (k && k.trim()) keys.push(k.trim());
-  }
-  return [...new Set(keys)];
+  const k = process.env.RESEND_API_KEY;
+  return k && k.trim() ? [k.trim()] : [];
 }
 
 function getFromAddressForKey(keyNum, defaultFrom) {

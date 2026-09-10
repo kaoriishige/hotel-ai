@@ -12,16 +12,10 @@ try {
   } catch (e2) {}
 }
 
-function getResendApiKeys() {
-  const keys = [];
-  const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
-  if (k1 && k1.trim()) keys.push(k1.trim());
-
-  for (let i = 2; i <= 10; i++) {
-    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
-    if (k && k.trim()) keys.push(k.trim());
-  }
-  return [...new Set(keys)];
+// ユーザー指示: RESEND_API_KEYS1〜7は使用せず、単一の RESEND_API_KEY のみを使用
+function getResendApiKey() {
+  const key = process.env.RESEND_API_KEY;
+  return key ? key.trim() : '';
 }
 
 exports.handler = async (event) => {
@@ -42,15 +36,15 @@ exports.handler = async (event) => {
       return json(400, { ok: false, error: 'customers or payloads array is required' });
     }
 
-    const apiKeys = getResendApiKeys();
+    const resendKey = getResendApiKey();
     const from = process.env.MAIL_FROM || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
-    if ((channel === 'email' || channel === 'both') && apiKeys.length === 0) {
-      return json(400, { ok: false, error: 'RESEND_API_KEYS が設定されていません。' });
+    if ((channel === 'email' || channel === 'both') && !resendKey) {
+      return json(400, { ok: false, error: 'RESEND_API_KEY が設定されていません。' });
     }
 
-    console.log(`[schedule-dispatch] 即時一括配信開始: 対象総数 ${targetList.length} 件 (時間指定なし・即時全件送信)`);
+    console.log(`[schedule-dispatch] RESEND_API_KEY 単一キーにて即時一括配信開始: 対象総数 ${targetList.length} 件`);
 
-    // 朝08:00の時間指定・分割制限を完全削除し、対象者全員を即時一括送信
+    // 全件のメッセージ本文を展開
     const allPayloads = targetList.map(t => {
       const name = t.customerName || t.name || 'お客様';
       const subj = t.subject || customSubject || '赤沢温泉旅館からのお知らせ';
@@ -67,13 +61,13 @@ exports.handler = async (event) => {
 
     let sendResult = { count: 0, failedNames: [] };
     if (channel === 'email' || channel === 'both') {
-      sendResult = await sendEmailMultiKeyBatchParallel(allPayloads, apiKeys, from, scenario);
+      sendResult = await sendEmailSingleKeyBatch(allPayloads, resendKey, from, scenario);
     }
 
     const totalSuccessCount = sendResult.count || 0;
     const totalFailedCount = (sendResult.failedNames || []).length;
 
-    console.log(`[schedule-dispatch] 即時一括配信完了: 成功 ${totalSuccessCount} 件, 失敗 ${totalFailedCount} 件`);
+    console.log(`[schedule-dispatch] 送信完了: 成功 ${totalSuccessCount} 件, 失敗 ${totalFailedCount} 件`);
 
     return json(200, {
       ok: true,
@@ -109,18 +103,8 @@ function wrapLinksWithTracking(text, cid, scenario) {
   });
 }
 
-function getFromAddressForKey(keyNum, defaultFrom) {
-  if (keyNum === 1) {
-    return defaultFrom || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
-  }
-  if (defaultFrom && defaultFrom.includes('@mail.')) {
-    return defaultFrom.replace(/@mail\./g, `@mail${keyNum}.`);
-  }
-  return `赤沢温泉旅館 <info@mail${keyNum}.akasawaonsen.com>`;
-}
-
-// 複数APIキーへの並列チャンク送信（時間指定なし・即時全件一括送信）
-async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario) {
+// 単一RESEND_API_KEYでの全件一括送信処理
+async function sendEmailSingleKeyBatch(payloads, resendKey, from, scenario) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validPayloads = payloads.filter(p => {
     if (!p.email) return false;
@@ -130,7 +114,7 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
 
   if (validPayloads.length === 0) return { type: 'email', count: 0, failedNames: [] };
 
-  const keyCapacity = 100;
+  const keyCapacity = 100; // Resend Batch API の最大100件/リクエスト
   const chunks = [];
   for (let i = 0; i < validPayloads.length; i += keyCapacity) {
     chunks.push(validPayloads.slice(i, i + keyCapacity));
@@ -138,65 +122,66 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
 
   let totalSent = 0;
   const failedNames = [];
-  const usedKeysSummary = [];
 
-  // 全チャンクを登録済みAPIキーで巡回し、並列送信（上限・時間指定なし）
-  const sendPromises = chunks.map(async (chunk, chunkIdx) => {
-    const keyIndex = chunkIdx % (apiKeys.length || 1);
-    const keyNum = keyIndex + 1;
-    const currentKey = apiKeys.length > 0 ? apiKeys[keyIndex] : process.env.RESEND_API_KEY;
-    const keyFrom = getFromAddressForKey(keyNum, from);
+  // レートリミット制限（429）を回避しながら高速送信するため、適度な並列度（最大5並列）でチャンクを送信
+  const concurrency = 4;
+  for (let i = 0; i < chunks.length; i += concurrency) {
+    const currentBatchChunks = chunks.slice(i, i + concurrency);
 
-    const chunkRequests = chunk.map(p => {
-      const cid = (p.email || 'guest').trim().toLowerCase();
-      const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
-      
-      const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
-      
-      const htmlBody = `
-        <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
-        <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
-      `;
+    const batchPromises = currentBatchChunks.map(async (chunk) => {
+      const chunkRequests = chunk.map(p => {
+        const cid = (p.email || 'guest').trim().toLowerCase();
+        const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
+        const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
+        const htmlBody = `
+          <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
+          <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
+        `;
 
-      const req = {
-        from: keyFrom,
-        to: p.email,
-        subject: p.subject,
-        text: wrappedMessage,
-        html: htmlBody
-      };
-      if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
-      return req;
-    });
-
-    try {
-      const res = await fetch('https://api.resend.com/emails/batch', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${currentKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(chunkRequests)
+        const req = {
+          from,
+          to: p.email,
+          subject: p.subject,
+          text: wrappedMessage,
+          html: htmlBody
+        };
+        if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
+        return req;
       });
 
-      let data = await res.json();
-      
-      if (res.ok) {
-        totalSent += chunkRequests.length;
-        usedKeysSummary.push({ keyNum, count: chunkRequests.length, from: keyFrom });
-      } else {
-        console.warn(`[schedule-dispatch] Resend Key ${keyNum} (${keyFrom}) batch error:`, data);
-        chunk.forEach(p => failedNames.push(`${p.email} (${data.message || '送信失敗'})`));
+      try {
+        const res = await fetch('https://api.resend.com/emails/batch', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(chunkRequests)
+        });
+
+        let data = await res.json();
+
+        if (res.ok) {
+          totalSent += chunkRequests.length;
+        } else {
+          console.warn('[schedule-dispatch] Resend single key batch error:', data);
+          chunk.forEach(p => failedNames.push(`${p.email} (${data.message || '送信失敗'})`));
+        }
+      } catch (err) {
+        console.warn('[schedule-dispatch] Resend fetch error:', err.message);
+        chunk.forEach(p => failedNames.push(`${p.email} (${err.message})`));
       }
-    } catch (err) {
-      console.warn(`[schedule-dispatch] Key ${keyNum} fetch error:`, err.message);
-      chunk.forEach(p => failedNames.push(`${p.email} (${err.message})`));
+    });
+
+    await Promise.all(batchPromises);
+
+    // 短時間の過密アクセスによるレート制限(429)を防ぐため、ごくわずかなインターバル(120ms)を設ける
+    if (i + concurrency < chunks.length) {
+      await new Promise(r => setTimeout(r, 120));
     }
-  });
+  }
 
-  await Promise.all(sendPromises);
-
-  return { type: 'email', count: totalSent, usedKeys: usedKeysSummary, failedNames };
+  return { type: 'email', count: totalSent, usedKeys: [{ key: 'RESEND_API_KEY', count: totalSent, from }], failedNames };
 }
 
 function json(statusCode, body) {

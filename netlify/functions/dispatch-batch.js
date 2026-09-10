@@ -154,18 +154,8 @@ exports.handler = async (event) => {
 };
 
 function getResendApiKeys() {
-  const keys = [];
-  // 一括配信・スケジュール配信は RESEND_API_KEYS2〜 (各キー100件/日) を使用
-  for (let i = 2; i <= 10; i++) {
-    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
-    if (k && k.trim()) keys.push(k.trim());
-  }
-  // 万が一2以降が未設定の場合はKey 1へフォールバック
-  if (keys.length === 0) {
-    const k1 = process.env.RESEND_API_KEYS1 || process.env.RESEND_API_KEY_1 || process.env.RESEND_API_KEY;
-    if (k1 && k1.trim()) keys.push(k1.trim());
-  }
-  return [...new Set(keys)];
+  const k = process.env.RESEND_API_KEY;
+  return k && k.trim() ? [k.trim()] : [];
 }
 
 async function sendEmailBatch(payloads) {
@@ -248,21 +238,10 @@ async function sendEmailBatch(payloads) {
   const responsesData = [];
   const usedKeysSummary = [];
 
+  const currentKey = apiKeys[0];
   for (let i = 0; i < batchRequests.length; i += keyCapacity) {
-    if (keyIndex >= apiKeys.length) {
-      // 利用可能なすべてのAPIキーの枠を使い切った場合
-      const remainingUnsent = batchRequests.slice(i);
-      remainingUnsent.forEach(r => {
-        const matchingP = validPayloads.find(p => p.email === r.to);
-        const name = matchingP ? (matchingP.customerName || r.to) : r.to;
-        failedNames.push(`${name} (全APIキーの本日枠上限到達・次回送信対象)`);
-      });
-      break;
-    }
-
-    const currentKey = apiKeys[keyIndex];
     const chunkRequests = batchRequests.slice(i, i + keyCapacity);
-    console.log(`[sendEmailBatch] APIキー #${keyIndex + 1} (${currentKey.substring(0, 8)}...) で ${chunkRequests.length} 件送信開始`);
+    console.log(`[sendEmailBatch] RESEND_API_KEY で ${chunkRequests.length} 件送信開始 (${i + 1}〜${Math.min(i + keyCapacity, batchRequests.length)} / ${batchRequests.length})`);
 
     try {
       const res = await fetch('https://api.resend.com/emails/batch', {
@@ -276,29 +255,20 @@ async function sendEmailBatch(payloads) {
 
       const data = await res.json();
       if (!res.ok) {
-        console.error(`[sendEmailBatch] APIキー #${keyIndex + 1} 送信失敗:`, data);
-        // レートリミット等の場合は次のキーで再試行
-        keyIndex++;
-        if (keyIndex < apiKeys.length) {
-          i -= keyCapacity; // 同じチャンクを次のキーで再試行
-          continue;
-        } else {
-          throw new Error(`Resend Batch API Error: ${JSON.stringify(data)}`);
-        }
-      }
-
-      sentCount += chunkRequests.length;
-      responsesData.push(data);
-      usedKeysSummary.push({ keyNum: keyIndex + 1, count: chunkRequests.length });
-      keyIndex++; // 次のチャンクは次のキーを使用
-    } catch (err) {
-      console.error(`[sendEmailBatch] APIキー #${keyIndex + 1} 例外発生:`, err.message);
-      keyIndex++;
-      if (keyIndex < apiKeys.length) {
-        i -= keyCapacity; // 次のキーで再試行
+        console.error('[sendEmailBatch] 送信失敗:', data);
+        chunkRequests.forEach(r => failedNames.push(`${r.to} (${data.message || '送信エラー'})`));
       } else {
-        throw err;
+        sentCount += chunkRequests.length;
+        responsesData.push(data);
+        usedKeysSummary.push({ keyNum: 1, count: chunkRequests.length });
       }
+    } catch (err) {
+      console.error('[sendEmailBatch] 例外発生:', err.message);
+      chunkRequests.forEach(r => failedNames.push(`${r.to} (${err.message})`));
+    }
+
+    if (i + keyCapacity < batchRequests.length) {
+      await new Promise(r => setTimeout(r, 120));
     }
   }
   

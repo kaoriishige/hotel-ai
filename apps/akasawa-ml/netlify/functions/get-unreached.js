@@ -11,16 +11,8 @@ if (!myFetch) {
 }
 
 function getResendApiKeys() {
-  const keys = [];
-  for (let i = 1; i <= 10; i++) {
-    const k = process.env[`RESEND_API_KEYS${i}`] || process.env[`RESEND_API_KEY_${i}`];
-    if (k && k.trim()) keys.push(k.trim());
-  }
-  if (process.env.RESEND_API_KEYS) {
-    const splitted = process.env.RESEND_API_KEYS.split(',').map(s => s.trim()).filter(Boolean);
-    keys.push(...splitted);
-  }
-  return [...new Set(keys)];
+  const k = process.env.RESEND_API_KEY;
+  return k && k.trim() ? [k.trim()] : [];
 }
 
 exports.handler = async (event) => {
