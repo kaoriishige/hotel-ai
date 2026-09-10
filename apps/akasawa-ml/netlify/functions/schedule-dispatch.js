@@ -115,8 +115,9 @@ exports.handler = async (event) => {
         sentCountSoFar: todaySuccessCount,
         remainingCount,
         remainingCustomers: cleanRemaining,
+        remainingPayloads: cleanRemaining,
         status: 'active',
-        nextRunTimeJST: '翌朝 08:00 (JST)',
+        nextRunTimeJST: '翌朝 08:00 (JST) 一括配信',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
         history: [{
@@ -127,7 +128,7 @@ exports.handler = async (event) => {
       };
 
       try {
-        await db.collection('dispatch_schedules').doc(scheduleId).set(scheduleDoc);
+        await db.collection('mail_schedules').doc(scheduleId).set(scheduleDoc);
         console.log(`[schedule-dispatch] スケジュール登録完了: id=${scheduleId}, 実際に残った宛先=${remainingCount}件`);
       } catch (dbErr) {
         console.warn('[schedule-dispatch] DB保存エラー:', dbErr.message);

@@ -878,7 +878,7 @@ async function dispatchMessages() {
           lineUserId: c.lineUserId || ''
         }));
         foundLog.unreachedDetails = remaining > 0 
-          ? `本日送信成功: ${todaySent}件 / 残り毎朝08:00自動配信キュー: ${remaining}件`
+          ? `本日送信成功: ${todaySent}件 / 残り朝08:00一括配信キュー: ${remaining}件`
           : (todayFailed > 0 ? `失敗: ${todayFailed}件` : '全件送信完了');
         persist();
         renderLogs();
@@ -889,7 +889,7 @@ async function dispatchMessages() {
       checkScheduleStatus();
 
       if (remaining > 0) {
-        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、すべて送りきるまで【毎朝08:00】に自動で分散配信されます。\n（このまま画面を閉じてもサーバー側で自動配信が継続されます）`);
+        alert(`🎉 本日分【${todaySent}件】のメール配信が完了しました！\n\n⏰ 残り【${remaining}件】のお客様は、【朝08:00】に残りの全件が一括配信されます。\n（このまま画面を閉じてもサーバー側で自動配信されます）`);
       } else {
         alert(`🎉 全【${todaySent}件】のメール配信が完了いたしました！\n（本日分で全件送信完了しました）`);
       }
@@ -2457,7 +2457,7 @@ async function checkScheduleStatus() {
         el.scheduleStatusCard.style.display = 'block';
         if (el.scheduleRemainingCount) el.scheduleRemainingCount.textContent = activeSched.remainingCount;
         if (el.scheduleDetailsText) {
-          el.scheduleDetailsText.innerHTML = `「${escapeHtml(activeSched.title)}」: 本日分送信済。残り <strong style="color:#ffd700;">${activeSched.remainingCount}</strong> 件を、全件完了するまで<strong>毎朝 08:00</strong>に自動分散配信します。`;
+          el.scheduleDetailsText.innerHTML = `「${escapeHtml(activeSched.title)}」: 本日分送信済。残り <strong style="color:#ffd700;">${activeSched.remainingCount}</strong> 件を、<strong>朝 08:00</strong>に全件一括配信します。`;
         }
         return;
       }
