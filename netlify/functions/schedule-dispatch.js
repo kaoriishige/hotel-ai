@@ -211,6 +211,7 @@ async function sendEmailMultiKeyBatchParallel(payloads, apiKeys, from, scenario)
     const currentKey = apiKeys[chunkIdx];
     const keyFrom = getFromAddressForKey(keyNum, from);
 
+    const chunkRequests = chunk.map(p => {
       const cid = (p.email || 'guest').trim().toLowerCase();
       const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
       

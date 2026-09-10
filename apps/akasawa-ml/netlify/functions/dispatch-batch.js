@@ -128,7 +128,6 @@ exports.handler = async (event) => {
           results.email.failedCount = (results.email.failedCount || 0) + skippedInvalidPayloads.length;
           results.email.failedNames = [...(results.email.failedNames || []), ...skippedInvalidPayloads];
         }
-        }
       } catch (err) {
         results.email = { status: 'failed', error: err.message };
         hasErrors = true;
