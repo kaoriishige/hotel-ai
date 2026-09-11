@@ -2140,45 +2140,43 @@ function initUrlToolEvents() {
 
   if (qResetBtn) {
     qResetBtn.addEventListener('click', async () => {
-      if (!confirm('成果レポートの集計データをすべてリセット（0件に初期化）しますか？\n（サーバーの履歴データおよびローカルデータがすべてリセットされます）')) return;
+      if (!confirm('テストで増やした「総予約数・獲得売上」のみをゼロ（0件）にリセットしますか？\n（※ お客様の「メール開封数」や「プランクリック数」の実績は消えずにそのまま保持されます）')) return;
       qResetBtn.disabled = true;
       qResetBtn.textContent = 'リセット中...';
 
       try {
-        await fetch('/api/get-campaign-stats?action=reset', { method: 'POST' });
+        const res = await fetch('/api/get-campaign-stats?action=reset_bookings', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok && data.stats) {
+          remoteCampaignStats = data.stats;
+        }
       } catch (e) {
         console.warn('Reset server stats error:', e);
       }
 
+      // 予約データのみを削除（開封 opened、クリック clicked は一切消さず保持！）
       state.customers.forEach(c => {
-        delete c.opened;
-        delete c.openedAt;
-        delete c.clicked;
-        delete c.clickedAt;
         delete c.bookedPlanName;
         delete c.bookedAmount;
         delete c.bookedDate;
         delete c.bookedChannel;
+        delete c.bookedPlanKey;
+        delete c.bookedAt;
       });
-      state.logs.forEach(l => {
-        l.openCount = 0;
-        l.clickCount = 0;
-      });
-      remoteCampaignStats = {
-        totalOpens: 0,
-        totalClicks: 0,
-        totalBookings: 0,
-        totalRevenue: 0,
-        planCounts: {},
-        planRevenues: {},
-        channelStats: { email: { opens: 0, clicks: 0, bookings: 0 }, line: { opens: 0, clicks: 0, bookings: 0 } },
-        logsStats: {}
-      };
+
+      // 予約関連の集計のみ初期化（開封・クリックはそのまま保持）
+      if (remoteCampaignStats) {
+        remoteCampaignStats.totalBookings = 0;
+        remoteCampaignStats.totalRevenue = 0;
+        remoteCampaignStats.planCounts = {};
+        remoteCampaignStats.planRevenues = {};
+      }
+
       persist();
       render();
-      alert('🎉 成果レポートのデータをすべて「0件」に初期化しました！\n最初から正確に計測を開始できます。');
+      alert('🎉 予約数・獲得売上を「0件」にリセットしました！\n（※ 開封数・クリック数の実績はそのまま保持されています）');
       qResetBtn.disabled = false;
-      qResetBtn.textContent = '🧹 リセット';
+      qResetBtn.textContent = '🧹 予約数をゼロに戻す';
     });
   }
 }
