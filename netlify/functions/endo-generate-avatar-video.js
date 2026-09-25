@@ -43,9 +43,50 @@ exports.handler = async (event) => {
     }
 
     // ========================================
-    // STEP 1: Cartesia API で遠藤正俊オーナー本人の声を直接生成
+    // STEP 1: 音声誤読防止・自動ひらがな発音変換
     // ========================================
-    console.log(`Step 1: Generating Endou Masatoshi Owner voice via Cartesia (Voice ID: ${cartesiaVoiceId})...`);
+    let voiceTranscript = script;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+
+    if (geminiApiKey) {
+      try {
+        console.log('Converting script to furigana (hiragana) for mispronunciation-free TTS...');
+        const prompt = `以下の日本語文章を、音声読み上げAI（TTS）が漢字の読み間違いを絶対に起こさないように、漢字をすべて正しい文脈の【ひらがな】に変換してください。
+【必須ルール】
+1. 漢字はすべて【ひらがな】に変換してください（例: 「何もしない」→「なにもしない」、「舵を切る」→「かじをきる」、「50代」→「ごじゅうだい」）。
+2. カタカナやアルファベットは発音通りのカタカナまたはひらがなにしてください。
+3. 自然な息継ぎ・間（ポーズ）が取れるよう、適切な位置に句読点（、。）を入れてください。
+4. 出力は変換後の【ひらがな文章のみ】を出力してください。余計な解説や引用符は一切出力しないでください。
+
+入力文章:
+${script}`;
+
+        const gRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (gRes.ok) {
+          const gData = await gRes.json();
+          const kana = gData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (kana) {
+            voiceTranscript = kana;
+            console.log(`Original Script: ${script}`);
+            console.log(`Furigana Transcript for TTS: ${voiceTranscript}`);
+          }
+        }
+      } catch (gErr) {
+        console.warn('Furigana conversion fallback to original script:', gErr.message);
+      }
+    }
+
+    // ========================================
+    // STEP 2: Cartesia API で遠藤正俊オーナー本人の声を直接生成
+    // ========================================
+    console.log(`Step 2: Generating Endou Masatoshi Owner voice via Cartesia (Voice ID: ${cartesiaVoiceId})...`);
     
     const cartesiaRes = await fetch('https://api.cartesia.ai/tts/bytes', {
       method: 'POST',
@@ -56,7 +97,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model_id: 'sonic-3.5',
-        transcript: script,
+        transcript: voiceTranscript,
         voice: {
           mode: 'id',
           id: cartesiaVoiceId

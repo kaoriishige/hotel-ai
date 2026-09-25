@@ -236,12 +236,39 @@ function startVideoPolling(videoId) {
 
       if (data.ok && data.status === 'completed' && data.videoUrl) {
         clearInterval(interval);
-        if (statusEl) statusEl.textContent = '✅ 動画が完成しました！';
         if (resultEl) resultEl.style.display = 'block';
         if (previewEl) previewEl.src = data.videoUrl;
+        const filename = `endo_avatar_${videoId}.mp4`;
         if (downloadLink) {
           downloadLink.href = data.videoUrl;
-          downloadLink.download = `endo_avatar_${videoId}.mp4`;
+          downloadLink.download = filename;
+        }
+
+        // 💾 ① お手元のPC（ダウンロードフォルダ）へ自動ダウンロード保存
+        try {
+          const autoA = document.createElement('a');
+          autoA.href = data.videoUrl;
+          autoA.download = filename;
+          autoA.target = '_blank';
+          document.body.appendChild(autoA);
+          autoA.click();
+          document.body.removeChild(autoA);
+        } catch (dlErr) {
+          console.warn('Auto download error:', dlErr);
+        }
+
+        // 🎬 ② 動画結合スタジオの「動画①」にも自動セット
+        if (typeof setVideo1Source === 'function') {
+          setVideo1Source(data.videoUrl);
+        }
+
+        // 📋 ③ 下部の制作済みキュー一覧を自動更新して履歴に永続表示
+        if (typeof loadQueue === 'function') {
+          loadQueue();
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>AIアバター動画が完成しました！</strong><br><span style="color: #6ee7b7; font-size: 12px; font-weight: bold;">💾 パソコンへ自動保存しました。動画接続スタジオの「動画①」および下部の一覧にも保存されています。</span>`;
         }
       } else if (data.status === 'failed') {
         clearInterval(interval);
@@ -271,15 +298,42 @@ if (checkVideoStatusBtn) {
       const data = await res.json();
 
       if (data.ok && data.status === 'completed' && data.videoUrl) {
-        if (statusEl) statusEl.textContent = '✅ 動画が完成しました！';
         const resultEl = document.getElementById('avatarVideoResult');
         const previewEl = document.getElementById('avatarVideoPreview');
         const downloadLink = document.getElementById('avatarVideoDownloadLink');
+        const filename = `endo_avatar_${videoId}.mp4`;
         if (resultEl) resultEl.style.display = 'block';
         if (previewEl) previewEl.src = data.videoUrl;
         if (downloadLink) {
           downloadLink.href = data.videoUrl;
-          downloadLink.download = `endo_avatar_${videoId}.mp4`;
+          downloadLink.download = filename;
+        }
+
+        // 💾 ① お手元のPC（ダウンロードフォルダ）へ自動ダウンロード保存
+        try {
+          const autoA = document.createElement('a');
+          autoA.href = data.videoUrl;
+          autoA.download = filename;
+          autoA.target = '_blank';
+          document.body.appendChild(autoA);
+          autoA.click();
+          document.body.removeChild(autoA);
+        } catch (dlErr) {
+          console.warn('Auto download error:', dlErr);
+        }
+
+        // 🎬 ② 動画結合スタジオの「動画①」にも自動セット
+        if (typeof setVideo1Source === 'function') {
+          setVideo1Source(data.videoUrl);
+        }
+
+        // 📋 ③ 下部の制作済みキュー一覧を自動更新して履歴に永続表示
+        if (typeof loadQueue === 'function') {
+          loadQueue();
+        }
+
+        if (statusEl) {
+          statusEl.innerHTML = `✅ <strong>AIアバター動画が完成しました！</strong><br><span style="color: #6ee7b7; font-size: 12px; font-weight: bold;">💾 パソコンへ自動保存しました。動画接続スタジオの「動画①」および下部の一覧にも保存されています。</span>`;
         }
       } else if (data.status === 'processing' || data.status === 'pending') {
         if (statusEl) statusEl.textContent = '⏳ まだ生成中です。しばらくお待ちください。（ステータス: ' + data.status + '）';
