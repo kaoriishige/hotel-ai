@@ -1625,6 +1625,117 @@ if (useConcatVideoForPostBtn) {
   });
 }
 
+// ==============================================================
+// 🎥 背景映像の指示（キーワード入力）自動検索＆動画②セット制御
+// ==============================================================
+const bgKeywordInput = document.getElementById('bgKeywordInput');
+const searchBgVideoBtn = document.getElementById('searchBgVideoBtn');
+const bgSearchResults = document.getElementById('bgSearchResults');
+const bgQuickTags = document.querySelectorAll('.bg-quick-tag');
+
+async function executeBgVideoSearch(query) {
+  if (!bgSearchResults) return;
+  
+  bgSearchResults.style.display = 'block';
+  bgSearchResults.innerHTML = '<div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px;">⏳ 日本仕様の背景映像を検索中...</div>';
+
+  try {
+    const res = await fetch(`/.netlify/functions/search-background-videos?keyword=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.ok || !data.videos || data.videos.length === 0) {
+      bgSearchResults.innerHTML = '<div style="color: #ef4444; font-size: 12px; padding: 8px;">該当する映像が見つかりませんでした。別のキーワードをお試しください。</div>';
+      return;
+    }
+
+    let html = `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">🔍 検索結果: ${data.videos.length}件の厳選映像</div>`;
+    html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    data.videos.forEach(v => {
+      const isRoad = v.isLeftHandTraffic;
+      html += `
+        <div style="display: flex; gap: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; align-items: center;">
+          <div style="position: relative; width: 84px; height: 52px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #000;">
+            <img src="${v.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="${v.title}" />
+            ${isRoad ? '<span style="position: absolute; bottom: 2px; left: 2px; background: rgba(16, 185, 129, 0.9); color: white; font-size: 9px; font-weight: bold; padding: 1px 4px; border-radius: 2px;">左側通行</span>' : ''}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 12px; font-weight: bold; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${v.title}
+            </div>
+            <div style="font-size: 10px; color: #94a3b8; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              ${v.description}
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <button type="button" class="set-bg-video-btn" data-url="${v.videoUrl}" data-title="${v.title}" data-is-road="${isRoad}" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; padding: 3px 8px; cursor: pointer;">
+                ✅ 動画②にセット
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    bgSearchResults.innerHTML = html;
+
+    // セットボタンのイベントバインド
+    bgSearchResults.querySelectorAll('.set-bg-video-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-url');
+        const title = btn.getAttribute('data-title');
+
+        if (url) {
+          setVideo2Source(url, false);
+          // 日本仕様の左側通行の場合は反転チェックをオフにする（すでに左側通行のため）
+          const concatVideo2Flip = document.getElementById('concatVideo2Flip');
+          if (concatVideo2Flip) {
+            concatVideo2Flip.checked = false;
+            if (previewConcatVideo2) previewConcatVideo2.style.transform = 'none';
+          }
+
+          alert(`✅ 「${title}」を動画②に自動セットしました！\n（日本の交通ルールに沿った映像が適用されます）`);
+          // プレビュー枠へスクロール
+          previewConcatVideo2?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    bgSearchResults.innerHTML = `<div style="color: #ef4444; font-size: 12px; padding: 8px;">検索に失敗しました: ${err.message}</div>`;
+  }
+}
+
+if (searchBgVideoBtn && bgKeywordInput) {
+  searchBgVideoBtn.addEventListener('click', () => {
+    const q = bgKeywordInput.value.trim();
+    if (!q) {
+      alert('検索したい背景のキーワード（例：日本の道路、那須の森、夜のドライブ、箒川の渓流など）を入力してください。');
+      return;
+    }
+    executeBgVideoSearch(q);
+  });
+
+  bgKeywordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchBgVideoBtn.click();
+    }
+  });
+}
+
+// クイックタグのクリック
+bgQuickTags.forEach(tag => {
+  tag.addEventListener('click', () => {
+    const kw = tag.getAttribute('data-keyword');
+    if (bgKeywordInput && kw) {
+      bgKeywordInput.value = kw;
+      executeBgVideoSearch(kw);
+    }
+  });
+});
+
 // 初期起動時のデータ読み込み
 loadQueue();
 loadTrendSuggestions();

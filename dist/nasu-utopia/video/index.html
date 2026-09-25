@@ -208,6 +208,31 @@
                   <span style="font-weight: bold; color: #fce79a; font-size: 14px;">🎥 動画②（後編 / 本編・風景）</span>
                   <span id="video2DurationBadge" style="font-size: 11px; background: #334155; padding: 2px 6px; border-radius: 4px; color: #94a3b8;">未選択</span>
                 </div>
+
+                <!-- 🎥 背景映像の指示（キーワード入力）自動取得エリア -->
+                <div style="margin-bottom: 12px; background: rgba(15, 23, 42, 0.9); border: 1px solid #3b82f6; border-radius: 8px; padding: 10px;">
+                  <label style="font-size: 12px; font-weight: bold; color: #60a5fa; display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+                    🎥 背景映像の指示（キーワード入力で自動セット）:
+                  </label>
+                  <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                    <input type="text" id="bgKeywordInput" placeholder="例: 日本の道路、夜のドライブ、那須の森、那須連山の那須の大自然..." style="flex: 1; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line); background: #0f172a; color: white; font-size: 12px;" />
+                    <button type="button" id="searchBgVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-size: 12px; padding: 7px 14px; white-space: nowrap; font-weight: bold;">
+                      🔍 映像を自動検索
+                    </button>
+                  </div>
+                  <!-- おすすめクイック指示タグ -->
+                  <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px;">
+                    <button type="button" class="bg-quick-tag" data-keyword="日本の道路" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🚗 日本の道路（左側通行）</button>
+                    <button type="button" class="bg-quick-tag" data-keyword="夜のドライブ" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌃 夜のドライブ</button>
+                    <button type="button" class="bg-quick-tag" data-keyword="那須の森" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌲 那須の森</button>
+                    <button type="button" class="bg-quick-tag" data-keyword="那須連山の那須の大自然" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.4); color: #7dd3fc; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌊 那須連山の那須の大自然</button>
+                    <button type="button" class="bg-quick-tag" data-keyword="焚き火" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🔥 焚き火</button>
+                  </div>
+                  <!-- 検索結果一覧コンテナ -->
+                  <div id="bgSearchResults" style="display: none; max-height: 260px; overflow-y: auto; background: #090d16; border: 1px solid #334155; border-radius: 6px; padding: 8px; margin-top: 6px;"></div>
+                </div>
+
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">または手持ちの動画ファイル / URLを入力:</div>
                 <input type="file" id="concatVideoFile2" accept="video/*" style="width: 100%; margin-bottom: 8px;" />
                 <input type="text" id="concatVideoUrl2" placeholder="または動画URLを直接入力" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: #1e293b; color: white; font-size: 12px; margin-bottom: 8px;" />
                 <div style="width: 100%; height: 200px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
