@@ -52,6 +52,30 @@ if (simpleTag) {
   });
 }
 
+// 📸 ステップ3: 新しい顔写真が選択された時のリアルタイムプレビュー制御
+if (mediaFilesInput) {
+  mediaFilesInput.addEventListener('change', () => {
+    const file = mediaFilesInput.files?.[0];
+    const previewImg = document.getElementById('avatarPreviewImg');
+    const previewTitle = document.getElementById('avatarPreviewTitle');
+    const previewStatus = document.getElementById('avatarPreviewStatus');
+
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (previewImg) previewImg.src = e.target.result;
+        if (previewTitle) previewTitle.textContent = `📸 選択中の顔写真: ${file.name}`;
+        if (previewStatus) {
+          previewStatus.textContent = '✅ 新しい顔写真が読み込まれました！この写真でAIアバター動画が制作されます。';
+          previewStatus.style.color = '#10b981';
+          previewStatus.style.fontWeight = 'bold';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
 // Instagramのチェック状態に応じた表示制御
 if (instagramCb && instagramDetailSettings) {
   const toggleInstagramSettings = () => {
@@ -143,9 +167,9 @@ if (generateAvatarVideoBtn) {
           reader.onload = () => resolve(reader.result);
           reader.readAsDataURL(file);
         });
-        if (statusEl) statusEl.textContent = '📸 画像取得完了。HeyGenへ送信中...';
+        if (statusEl) statusEl.textContent = `📸 新しい顔写真（${file.name}）をHeyGenへ登録中（枠の自動整理中）...`;
       } else {
-        if (statusEl) statusEl.textContent = '📸 デフォルト画像（支配人オーナー）を使用。動画生成中...';
+        if (statusEl) statusEl.textContent = '📸 支配人オーナー登録済みアバターを使用。動画生成中...';
       }
 
       const res = await fetch('/.netlify/functions/generate-avatar-video', {

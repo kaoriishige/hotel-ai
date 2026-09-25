@@ -80,13 +80,14 @@
           </div>
           <div class="card-body stack-gap">
             <div style="background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 12px; border: 1px dashed var(--brand); text-align: center;">
-              <img src="https://nasu-utopia.jp/images/manager-avatar.jpg" onerror="this.src='bg-premium.png'" alt="塩原温泉 赤沢温泉旅館 館主遠藤" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-bottom: 8px;">
-              <div style="font-size: 12px; font-weight: bold; color: white;">塩原温泉 赤沢温泉旅館 館主遠藤公式アバター写真</div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">デフォルト画像設定済み（変更したい場合は以下から選択）</div>
+              <img id="avatarPreviewImg" src="bg-premium.png" alt="遠藤正俊オーナー" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-bottom: 8px;">
+              <div id="avatarPreviewTitle" style="font-size: 12px; font-weight: bold; color: white;">遠藤正俊オーナー 公式アバター写真</div>
+              <div id="avatarPreviewStatus" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">デフォルト画像設定済み（新しい写真で動画を作りたい場合は以下から選択）</div>
             </div>
             <div>
-              <label for="mediaFiles" style="font-weight: bold; font-size: 13px;">別の画像/背景動画をアップロード (任意):</label>
-              <input id="mediaFiles" type="file" accept="image/*,video/*" multiple />
+              <label for="mediaFiles" style="font-weight: bold; font-size: 13px;">📸 AIアバター用 新しい顔写真をアップロード (任意):</label>
+              <input id="mediaFiles" type="file" accept="image/*" />
+              <div style="font-size: 11px; color: #64748b; margin-top: 3px;">※ 正面を向いた明るく鮮明な顔写真を選択すると、自動的にその写真のアバター動画が制作されます。</div>
             </div>
             <div>
               <label for="postAttachFiles" style="font-weight: bold; font-size: 13px;">📷 直接投稿用の添付写真 (Xなど):</label>
