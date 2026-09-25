@@ -1,6 +1,7 @@
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { getDb, admin } = require('./_lib-endo/firebase-admin');
 
 /**
@@ -37,7 +38,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { script, imageBase64, imageUrl } = JSON.parse(event.body || '{}');
+    const { script, imageBase64, imageUrl, motionPrompt } = JSON.parse(event.body || '{}');
 
     if (!script) {
       return { statusCode: 400, body: JSON.stringify({ ok: false, error: '台本(script)が必要です' }) };
@@ -231,7 +232,51 @@ exports.handler = async (event) => {
     let videoRes = null;
     let videoData = null;
 
-    // 1. まず HeyGen v3 API を試行
+    // ユーザーからの背景・演出指示（プロンプト）の処理
+    let finalMotionPrompt = 'Natural hand gestures, warm smile, open arms, occasional pointing';
+    if (motionPrompt && typeof motionPrompt === 'string' && motionPrompt.trim()) {
+      const userPrompt = motionPrompt.trim();
+      console.log(`User provided custom motion prompt: "${userPrompt}"`);
+
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (geminiApiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(geminiApiKey);
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+          const promptInstruction = `You are an AI video generation prompt engineer for HeyGen avatar videos.
+Convert the user's Japanese instruction into a clear, concise English 'motion_prompt' for HeyGen v3.
+User Instruction: "${userPrompt}"
+
+Key requirements:
+1. If the user mentions cars, driving, or left-side traffic (左側通行), explicitly specify: "Japanese left-hand traffic, cars and vehicles in background driving on the left lane, right-hand drive".
+2. Include natural gestures (smooth natural hand movements, warm smile, confident posture).
+3. Describe any background environment (lighting, interior, scenery) concisely if requested.
+4. Output ONLY the English prompt string under 35 words. No quotes, no markdown, no explanation.`;
+
+          const geminiRes = await model.generateContent(promptInstruction);
+          const generatedPrompt = geminiRes.response.text().trim();
+          if (generatedPrompt) {
+            finalMotionPrompt = generatedPrompt.replace(/["'\n]/g, ' ').trim();
+            console.log(`Generated HeyGen motion_prompt via Gemini: ${finalMotionPrompt}`);
+          }
+        } catch (gErr) {
+          console.warn('Gemini motion_prompt translation error, falling back to rule-based:', gErr.message);
+          if (userPrompt.includes('左側通行') || userPrompt.includes('車') || userPrompt.includes('道路')) {
+            finalMotionPrompt = 'Japanese left-hand traffic, cars in background driving on the left lane, smooth natural hand gestures, warm friendly expression';
+          } else {
+            finalMotionPrompt = `${userPrompt}, natural hand gestures, warm smile`;
+          }
+        }
+      } else {
+        if (userPrompt.includes('左側通行') || userPrompt.includes('車') || userPrompt.includes('道路')) {
+          finalMotionPrompt = 'Japanese left-hand traffic, cars in background driving on the left lane, smooth natural hand gestures, warm friendly expression';
+        } else {
+          finalMotionPrompt = `${userPrompt}, natural hand gestures, warm smile`;
+        }
+      }
+    }
+
+    // 1. まず HeyGen v3 API を試行 (motion_prompt にユーザー指示を反映)
     try {
       videoRes = await fetch('https://api.heygen.com/v3/videos', {
         method: 'POST',
@@ -244,7 +289,7 @@ exports.handler = async (event) => {
           avatar_id: avatarId,
           audio_url: ownerAudioUrl,
           engine: { type: 'avatar_iv' },
-          motion_prompt: 'Natural hand gestures, warm smile, open arms, occasional pointing',
+          motion_prompt: finalMotionPrompt,
           aspect_ratio: '9:16'
         })
       });

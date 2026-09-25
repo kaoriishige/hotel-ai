@@ -92,41 +92,7 @@
               <div style="font-size: 11px; color: #64748b; margin-top: 3px;">※ 正面を向いた明るく鮮明な顔写真を選択すると、自動的にその写真のアバター動画が制作されます。</div>
             </div>
 
-            <!-- ② ★新設: 🎥 背景映像の指示（キーワード入力）自動セットエリア -->
-            <div style="margin-top: 8px; background: linear-gradient(180deg, #131d35 0%, #0d1527 100%); border: 2px solid #3b82f6; border-radius: 10px; padding: 12px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);">
-              <label style="font-size: 13px; font-weight: bold; color: #60a5fa; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                🎥 背景映像の指示（キーワードを入力して自動セット）
-              </label>
-              <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 8px;">
-                使いたい背景のキーワード（例：<strong>日本の道路、夜のドライブ、那須の森、箒川の渓流</strong>）を入力すると、日本の交通規則に準拠した左側通行の車・道路映像や美しい自然映像を自動で呼び出して背景にセットします。
-              </div>
 
-              <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                <input type="text" id="step3BgKeywordInput" placeholder="指示キーワード（例: 日本の道路、夜のドライブ、那須の森、箒川の渓流...）" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #3b82f6; background: #0b1120; color: white; font-size: 13px;" />
-                <button type="button" id="step3SearchBgVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-size: 13px; padding: 8px 16px; white-space: nowrap; font-weight: bold; border-radius: 6px;">
-                  🔍 映像を自動検索
-                </button>
-              </div>
-
-              <!-- おすすめクイック指示タグ -->
-              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
-                <button type="button" class="step3-bg-quick-tag" data-keyword="日本の道路" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: bold;">🚗 日本の道路（左側通行）</button>
-                <button type="button" class="step3-bg-quick-tag" data-keyword="夜のドライブ" style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: bold;">🌃 夜のドライブ</button>
-                <button type="button" class="step3-bg-quick-tag" data-keyword="那須の森" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #6ee7b7; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: bold;">🌲 那須の森</button>
-                <button type="button" class="step3-bg-quick-tag" data-keyword="箒川の渓流" style="background: rgba(14, 165, 233, 0.2); border: 1px solid rgba(14, 165, 233, 0.5); color: #7dd3fc; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: bold;">🌊 箒川の渓流</button>
-                <button type="button" class="step3-bg-quick-tag" data-keyword="焚き火" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fcd34d; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: bold;">🔥 焚き火</button>
-              </div>
-
-              <!-- 検索結果一覧コンテナ -->
-              <div id="step3BgSearchResults" style="display: none; max-height: 260px; overflow-y: auto; background: #070a12; border: 1px solid #1e293b; border-radius: 6px; padding: 8px; margin-top: 6px;"></div>
-
-              <!-- 選択中の背景映像プレビュー表示 -->
-              <div id="step3CurrentBgPreviewBox" style="display: none; margin-top: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 6px; padding: 8px;">
-                <div style="font-size: 11px; font-weight: bold; color: #10b981; margin-bottom: 4px;">✅ 選択中の背景映像（アバター動画・スタジオ動画②に連動中）:</div>
-                <div id="step3CurrentBgTitle" style="font-size: 12px; color: white; font-weight: bold;"></div>
-                <input type="hidden" id="selectedBackgroundVideoUrl" />
-              </div>
-            </div>
 
             <div>
               <label for="postAttachFiles" style="font-weight: bold; font-size: 13px;">📷 直接投稿用の添付写真 (Xなど):</label>
@@ -143,6 +109,25 @@
           </div>
           <div class="card-body stack-gap">
             <p style="font-size: 12px; color: #94a3b8; margin: 0;">ステップ3の画像＋ステップ2の台本から、HeyGen APIで遠藤オーナーが喋るAIアバター動画を全自動制作します。</p>
+
+            <!-- 💬 AIへの背景・演出指示（プロンプト入力） -->
+            <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid #d4af37; border-radius: 8px; padding: 12px;">
+              <label for="avatarMotionPrompt" style="font-size: 13px; font-weight: bold; color: #fce79a; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                💬 AIへの背景・演出指示（プロンプト）:
+              </label>
+              <textarea id="avatarMotionPrompt" rows="2" placeholder="例: 背景の車を左側通行にして、手振りを交えて穏やかに語る" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0b1120; color: white; font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+              
+              <!-- おすすめクイック指示ボタン -->
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+                <button type="button" class="prompt-quick-btn" data-text="背景の車を日本の左側通行ルールにして" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🚗 背景の車を左側通行にする</button>
+                <button type="button" class="prompt-quick-btn" data-text="自然な手振りと穏やかな笑顔で語る" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">👋 自然な手振りと穏やかな笑顔</button>
+                <button type="button" class="prompt-quick-btn" data-text="背景は落ち着いた夜の車内・ドライブ風景" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🌃 夜のドライブ風景</button>
+                <button type="button" class="prompt-quick-btn" data-text="自然光が差し込む静かな部屋で語る" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🌿 静かな部屋・自然光</button>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
+                💡 映像ファイルは不要です。ここに「背景の車を左側通行にして」等と指示を入力するだけで、AIが自動的にプロンプトを最適化してHeyGenに反映します。
+              </div>
+            </div>
             <button type="button" id="generateAvatarVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); width: 100%; font-size: 15px; font-weight: bold; padding: 12px;">
               🎥 HeyGenでAIアバター動画を制作する
             </button>
@@ -248,30 +233,7 @@
                   <span id="video2DurationBadge" style="font-size: 11px; background: #334155; padding: 2px 6px; border-radius: 4px; color: #94a3b8;">未選択</span>
                 </div>
 
-                <!-- 🎥 背景映像の指示（キーワード入力）自動取得エリア -->
-                <div style="margin-bottom: 12px; background: rgba(15, 23, 42, 0.9); border: 1px solid #3b82f6; border-radius: 8px; padding: 10px;">
-                  <label style="font-size: 12px; font-weight: bold; color: #60a5fa; display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
-                    🎥 背景映像の指示（キーワード入力で自動セット）:
-                  </label>
-                  <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                    <input type="text" id="bgKeywordInput" placeholder="例: 日本の道路、夜のドライブ、那須の森、箒川の渓流..." style="flex: 1; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line); background: #0f172a; color: white; font-size: 12px;" />
-                    <button type="button" id="searchBgVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-size: 12px; padding: 7px 14px; white-space: nowrap; font-weight: bold;">
-                      🔍 映像を自動検索
-                    </button>
-                  </div>
-                  <!-- おすすめクイック指示タグ -->
-                  <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px;">
-                    <button type="button" class="bg-quick-tag" data-keyword="日本の道路" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🚗 日本の道路（左側通行）</button>
-                    <button type="button" class="bg-quick-tag" data-keyword="夜のドライブ" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌃 夜のドライブ</button>
-                    <button type="button" class="bg-quick-tag" data-keyword="那須の森" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌲 那須の森</button>
-                    <button type="button" class="bg-quick-tag" data-keyword="箒川の渓流" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.4); color: #7dd3fc; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🌊 箒川の渓流</button>
-                    <button type="button" class="bg-quick-tag" data-keyword="焚き火" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; font-size: 11px; padding: 3px 8px; border-radius: 12px; cursor: pointer;">🔥 焚き火</button>
-                  </div>
-                  <!-- 検索結果一覧コンテナ -->
-                  <div id="bgSearchResults" style="display: none; max-height: 260px; overflow-y: auto; background: #090d16; border: 1px solid #334155; border-radius: 6px; padding: 8px; margin-top: 6px;"></div>
-                </div>
-
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">または手持ちの動画ファイル / URLを入力:</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">手持ちの動画ファイル / URLを入力:</div>
                 <input type="file" id="concatVideoFile2" accept="video/*" style="width: 100%; margin-bottom: 8px;" />
                 <input type="text" id="concatVideoUrl2" placeholder="または動画URLを直接入力" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: #1e293b; color: white; font-size: 12px; margin-bottom: 8px;" />
                 <div style="width: 100%; height: 200px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
