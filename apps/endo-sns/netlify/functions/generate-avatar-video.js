@@ -233,7 +233,10 @@ exports.handler = async (event) => {
     let videoData = null;
 
     // ユーザーからの背景・演出指示（プロンプト）の処理
-    let finalMotionPrompt = 'Natural hand gestures, warm smile, open arms, occasional pointing';
+    // ★厳格ルール: 「画像以外は動画にするな（背景を勝手に動かすな、車を走らせるな）」を完全徹底
+    const STATIC_BG_RULE = 'Strictly freeze the photo background completely static. Do NOT animate the background. Absolutely no moving cars, vehicles, or traffic. Only animate the person\'s face, lipsync, and subtle natural gestures.';
+    
+    let finalMotionPrompt = STATIC_BG_RULE;
     if (motionPrompt && typeof motionPrompt === 'string' && motionPrompt.trim()) {
       const userPrompt = motionPrompt.trim();
       console.log(`User provided custom motion prompt: "${userPrompt}"`);
@@ -247,32 +250,28 @@ exports.handler = async (event) => {
 Convert the user's Japanese instruction into a clear, concise English 'motion_prompt' for HeyGen v3.
 User Instruction: "${userPrompt}"
 
-Key requirements:
-1. If the user mentions cars, driving, or left-side traffic (左側通行), explicitly specify: "Japanese left-hand traffic, cars and vehicles in background driving on the left lane, right-hand drive".
-2. Include natural gestures (smooth natural hand movements, warm smile, confident posture).
-3. Describe any background environment (lighting, interior, scenery) concisely if requested.
-4. Output ONLY the English prompt string under 35 words. No quotes, no markdown, no explanation.`;
+MANDATORY RULES:
+1. STRICTLY FORBID background animation, moving cars, or traffic. The background must remain 100% STATIC and FROZEN as in the original photo.
+2. Only animate the person in the photo (face, lipsync, subtle natural gestures).
+3. If user mentions "背景固定" or "車を走らせない" or "画像以外は動画にするな", emphasize completely static background.
+4. Output ONLY the English prompt string under 35 words.`;
 
           const geminiRes = await model.generateContent(promptInstruction);
           const generatedPrompt = geminiRes.response.text().trim();
           if (generatedPrompt) {
             finalMotionPrompt = generatedPrompt.replace(/["'\n]/g, ' ').trim();
+            // 念のため背景静止指示が含まれているか担保
+            if (!finalMotionPrompt.toLowerCase().includes('static') && !finalMotionPrompt.toLowerCase().includes('freeze')) {
+              finalMotionPrompt = `Static background, no moving cars. ${finalMotionPrompt}`;
+            }
             console.log(`Generated HeyGen motion_prompt via Gemini: ${finalMotionPrompt}`);
           }
         } catch (gErr) {
           console.warn('Gemini motion_prompt translation error, falling back to rule-based:', gErr.message);
-          if (userPrompt.includes('左側通行') || userPrompt.includes('車') || userPrompt.includes('道路')) {
-            finalMotionPrompt = 'Japanese left-hand traffic, cars in background driving on the left lane, smooth natural hand gestures, warm friendly expression';
-          } else {
-            finalMotionPrompt = `${userPrompt}, natural hand gestures, warm smile`;
-          }
+          finalMotionPrompt = `Static background, absolutely no moving cars or traffic. ${userPrompt}, subtle natural gestures.`;
         }
       } else {
-        if (userPrompt.includes('左側通行') || userPrompt.includes('車') || userPrompt.includes('道路')) {
-          finalMotionPrompt = 'Japanese left-hand traffic, cars in background driving on the left lane, smooth natural hand gestures, warm friendly expression';
-        } else {
-          finalMotionPrompt = `${userPrompt}, natural hand gestures, warm smile`;
-        }
+        finalMotionPrompt = `Static background, absolutely no moving cars or traffic. ${userPrompt}, subtle natural gestures.`;
       }
     }
 

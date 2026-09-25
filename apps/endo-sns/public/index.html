@@ -112,20 +112,22 @@
 
             <!-- 💬 AIへの背景・演出指示（プロンプト入力） -->
             <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid #d4af37; border-radius: 8px; padding: 12px;">
-              <label for="avatarMotionPrompt" style="font-size: 13px; font-weight: bold; color: #fce79a; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                💬 AIへの背景・演出指示（プロンプト）:
-              </label>
-              <textarea id="avatarMotionPrompt" rows="2" placeholder="例: 背景の車を左側通行にして、手振りを交えて穏やかに語る" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0b1120; color: white; font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="avatarMotionPrompt" style="font-size: 13px; font-weight: bold; color: #fce79a; display: flex; align-items: center; gap: 6px;">
+                  💬 AIへの演出指示（画像以外は動画にしない完全固定ルール適用中）:
+                </label>
+                <span style="font-size: 11px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px;">🛡️ 背景静止固定</span>
+              </div>
+              <textarea id="avatarMotionPrompt" rows="2" placeholder="空欄のままでOKです（自動で『画像以外は動画にしない・背景完全固定・人物のみ自然に語る』指示がHeyGenに送られます）。手振りや表情を指定したい場合のみ追記してください。" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0b1120; color: white; font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
               
               <!-- おすすめクイック指示ボタン -->
               <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
-                <button type="button" class="prompt-quick-btn" data-text="背景の車を日本の左側通行ルールにして" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🚗 背景の車を左側通行にする</button>
+                <button type="button" class="prompt-quick-btn" data-text="画像以外は動画にしない、背景完全固定" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: bold;">🛡️ 画像以外は動画にしない（背景固定）</button>
                 <button type="button" class="prompt-quick-btn" data-text="自然な手振りと穏やかな笑顔で語る" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">👋 自然な手振りと穏やかな笑顔</button>
-                <button type="button" class="prompt-quick-btn" data-text="背景は落ち着いた夜の車内・ドライブ風景" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🌃 夜のドライブ風景</button>
-                <button type="button" class="prompt-quick-btn" data-text="自然光が差し込む静かな部屋で語る" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">🌿 静かな部屋・自然光</button>
+                <button type="button" class="prompt-quick-btn" data-text="控えめな身振りで落ち着いて語る" style="background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); color: #fce79a; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">✨ 控えめな身振り・落ち着いたトーン</button>
               </div>
               <div style="font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.4;">
-                💡 映像ファイルは不要です。ここに「背景の車を左側通行にして」等と指示を入力するだけで、AIが自動的にプロンプトを最適化してHeyGenに反映します。
+                💡 <strong>背景指示は出さなくて大丈夫です。</strong> システム側で「背景の車や映像を勝手に生成・アニメーション化せず、写真の人物だけを動かす」指示を常時強制適用しています。
               </div>
             </div>
             <button type="button" id="generateAvatarVideoBtn" class="primary-btn" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); width: 100%; font-size: 15px; font-weight: bold; padding: 12px;">
