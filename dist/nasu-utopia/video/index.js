@@ -1736,6 +1736,123 @@ bgQuickTags.forEach(tag => {
   });
 });
 
+// ==============================================================
+// 🖼️ STEP 3 専用: 背景映像の指示（キーワード入力）自動検索＆セット制御
+// ==============================================================
+const step3BgKeywordInput = document.getElementById('step3BgKeywordInput');
+const step3SearchBgVideoBtn = document.getElementById('step3SearchBgVideoBtn');
+const step3BgSearchResults = document.getElementById('step3BgSearchResults');
+const step3BgQuickTags = document.querySelectorAll('.step3-bg-quick-tag');
+const step3CurrentBgPreviewBox = document.getElementById('step3CurrentBgPreviewBox');
+const step3CurrentBgTitle = document.getElementById('step3CurrentBgTitle');
+const selectedBackgroundVideoUrl = document.getElementById('selectedBackgroundVideoUrl');
+
+async function executeStep3BgVideoSearch(query) {
+  if (!step3BgSearchResults) return;
+
+  step3BgSearchResults.style.display = 'block';
+  step3BgSearchResults.innerHTML = '<div style="color: #94a3b8; font-size: 12px; text-align: center; padding: 12px;">⏳ 日本仕様の背景映像を検索中...</div>';
+
+  try {
+    const res = await fetch(`/.netlify/functions/search-background-videos?keyword=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.ok || !data.videos || data.videos.length === 0) {
+      step3BgSearchResults.innerHTML = '<div style="color: #ef4444; font-size: 12px; padding: 8px;">該当する映像が見つかりませんでした。別のキーワードをお試しください。</div>';
+      return;
+    }
+
+    let html = `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">🔍 検索結果: ${data.videos.length}件の厳選映像</div>`;
+    html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    data.videos.forEach(v => {
+      const isRoad = v.isLeftHandTraffic;
+      html += `
+        <div style="display: flex; gap: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; align-items: center;">
+          <div style="position: relative; width: 84px; height: 52px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #000;">
+            <img src="${v.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="${v.title}" />
+            ${isRoad ? '<span style="position: absolute; bottom: 2px; left: 2px; background: rgba(16, 185, 129, 0.9); color: white; font-size: 9px; font-weight: bold; padding: 1px 4px; border-radius: 2px;">左側通行</span>' : ''}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 12px; font-weight: bold; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${v.title}
+            </div>
+            <div style="font-size: 10px; color: #94a3b8; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              ${v.description}
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <button type="button" class="step3-set-bg-btn" data-url="${v.videoUrl}" data-title="${v.title}" data-is-road="${isRoad}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; padding: 4px 10px; cursor: pointer;">
+                ✅ この背景映像をセット
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    step3BgSearchResults.innerHTML = html;
+
+    // セットボタンのイベントバインド
+    step3BgSearchResults.querySelectorAll('.step3-set-bg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.getAttribute('data-url');
+        const title = btn.getAttribute('data-title');
+
+        if (url) {
+          // 1. STEP 3の選択中プレビューを更新
+          if (selectedBackgroundVideoUrl) selectedBackgroundVideoUrl.value = url;
+          if (step3CurrentBgTitle) step3CurrentBgTitle.textContent = title;
+          if (step3CurrentBgPreviewBox) step3CurrentBgPreviewBox.style.display = 'block';
+
+          // 2. スタジオの「動画②」にも自動反映
+          setVideo2Source(url, false);
+          const concatVideo2Flip = document.getElementById('concatVideo2Flip');
+          if (concatVideo2Flip) {
+            concatVideo2Flip.checked = false;
+            if (previewConcatVideo2) previewConcatVideo2.style.transform = 'none';
+          }
+
+          alert(`🎉 「${title}」を背景映像にセットしました！\n（日本の交通規則・左側通行に沿った映像が適用されます）`);
+        }
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    step3BgSearchResults.innerHTML = `<div style="color: #ef4444; font-size: 12px; padding: 8px;">検索に失敗しました: ${err.message}</div>`;
+  }
+}
+
+if (step3SearchBgVideoBtn && step3BgKeywordInput) {
+  step3SearchBgVideoBtn.addEventListener('click', () => {
+    const q = step3BgKeywordInput.value.trim();
+    if (!q) {
+      alert('検索したい背景のキーワード（例：日本の道路、夜のドライブ、那須の森、那須連山の那須の大自然など）を入力してください。');
+      return;
+    }
+    executeStep3BgVideoSearch(q);
+  });
+
+  step3BgKeywordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      step3SearchBgVideoBtn.click();
+    }
+  });
+}
+
+// STEP 3 クイックタグのクリック
+step3BgQuickTags.forEach(tag => {
+  tag.addEventListener('click', () => {
+    const kw = tag.getAttribute('data-keyword');
+    if (step3BgKeywordInput && kw) {
+      step3BgKeywordInput.value = kw;
+      executeStep3BgVideoSearch(kw);
+    }
+  });
+});
+
 // 初期起動時のデータ読み込み
 loadQueue();
 loadTrendSuggestions();
