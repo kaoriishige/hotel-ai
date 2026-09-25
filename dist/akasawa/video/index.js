@@ -1465,6 +1465,25 @@ if (concatVideoUrl2) {
   });
 }
 
+// 🚗 プレビュー動画のリアルタイム左右反転（左側通行ミラー）
+const concatVideo2FlipCb = document.getElementById('concatVideo2Flip');
+if (concatVideo2FlipCb) {
+  concatVideo2FlipCb.addEventListener('change', () => {
+    if (previewConcatVideo2) {
+      previewConcatVideo2.style.transform = concatVideo2FlipCb.checked ? 'scaleX(-1)' : 'none';
+    }
+  });
+}
+
+const concatVideo1FlipCb = document.getElementById('concatVideo1Flip');
+if (concatVideo1FlipCb) {
+  concatVideo1FlipCb.addEventListener('change', () => {
+    if (previewConcatVideo1) {
+      previewConcatVideo1.style.transform = concatVideo1FlipCb.checked ? 'scaleX(-1)' : 'none';
+    }
+  });
+}
+
 // AIアバター動画を動画①にセット
 if (useAvatarAsVideo1Btn) {
   useAvatarAsVideo1Btn.addEventListener('click', () => {
@@ -1543,6 +1562,8 @@ if (startConcatBtn) {
 
       const transitionType = document.getElementById('concatTransitionType')?.value || 'crossfade';
       const showBranding = document.getElementById('concatShowBranding')?.checked ?? true;
+      const video1FlipHorizontal = document.getElementById('concatVideo1Flip')?.checked ?? false;
+      const video2FlipHorizontal = document.getElementById('concatVideo2Flip')?.checked ?? false;
 
       const payload = {
         video1Url: concatState.video1.file ? '' : concatState.video1.url,
@@ -1552,7 +1573,9 @@ if (startConcatBtn) {
         duration1Sec: concatState.video1.duration || 15,
         duration2Sec: concatState.video2.duration || 15,
         transitionType,
-        showBranding
+        showBranding,
+        video1FlipHorizontal,
+        video2FlipHorizontal
       };
 
       const response = await fetch('/.netlify/functions/concat-videos', {

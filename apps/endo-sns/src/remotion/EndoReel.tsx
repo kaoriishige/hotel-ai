@@ -9,6 +9,7 @@ export interface EndoReelProps {
   bgmUrl?: string;        // 自然音BGM of URL
   backgroundUrl?: string; // 背景映像または画像のURL（単一）
   backgroundUrls?: string[]; // 背景映像または画像のURL配列
+  flipBackgroundHorizontal?: boolean; // 背景の左右反転（車を左側通行にする）
 }
 
 export const EndoReel = ({
@@ -17,7 +18,8 @@ export const EndoReel = ({
   voiceUrl,
   bgmUrl = 'https://assets.mixkit.co/active_storage/sfx/2433/2433-84.wav',
   backgroundUrl,
-  backgroundUrls
+  backgroundUrls,
+  flipBackgroundHorizontal = false
 }: EndoReelProps) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -166,7 +168,7 @@ export const EndoReel = ({
             width: '100%',
             height: '100%',
             opacity: 0.75, // 可視性を上げるため少し明るく
-            transform: 'scale(1.05)'
+            transform: flipBackgroundHorizontal ? 'scale(1.05) scaleX(-1)' : 'scale(1.05)'
           }}
           loop
           muted
@@ -179,7 +181,7 @@ export const EndoReel = ({
             width: '100%',
             height: '100%',
             opacity: 0.75, // 可視性を上げるため少し明るく
-            transform: 'scale(1.05)'
+            transform: flipBackgroundHorizontal ? 'scale(1.05) scaleX(-1)' : 'scale(1.05)'
           }}
         />
       )}

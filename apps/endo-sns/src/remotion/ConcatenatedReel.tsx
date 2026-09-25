@@ -22,6 +22,8 @@ export interface ConcatenatedReelProps {
   video1Volume?: number; // 動画1の音量
   video2Volume?: number; // 動画2の音量
   showBranding?: boolean; // オーナー哲学ブランド透かしを表示するか
+  video1FlipHorizontal?: boolean; // 動画1の左右反転（左側通行ミラー）
+  video2FlipHorizontal?: boolean; // 動画2の左右反転（左側通行ミラー）
 }
 
 export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
@@ -35,7 +37,9 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
   bgmVolume = 0.25,
   video1Volume = 1.0,
   video2Volume = 1.0,
-  showBranding = true
+  showBranding = true,
+  video1FlipHorizontal = false,
+  video2FlipHorizontal = false
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -77,6 +81,7 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
             durationInFrames={duration1InFrames}
             transitionType={transitionType}
             transitionDuration={transDuration}
+            flipHorizontal={video1FlipHorizontal}
           />
         </Series.Sequence>
 
@@ -93,6 +98,7 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
             durationInFrames={duration2InFrames}
             transitionType={transitionType}
             transitionDuration={transDuration}
+            flipHorizontal={video2FlipHorizontal}
           />
         </Series.Sequence>
       </Series>
@@ -167,6 +173,7 @@ interface VideoClipProps {
   isLast: boolean;
   transitionType: 'cut' | 'fade' | 'crossfade';
   transitionDuration: number;
+  flipHorizontal?: boolean;
 }
 
 const VideoClip: React.FC<VideoClipProps> = ({
@@ -176,7 +183,8 @@ const VideoClip: React.FC<VideoClipProps> = ({
   isFirst,
   isLast,
   transitionType,
-  transitionDuration
+  transitionDuration,
+  flipHorizontal = false
 }) => {
   const frame = useCurrentFrame();
 
@@ -224,7 +232,8 @@ const VideoClip: React.FC<VideoClipProps> = ({
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'cover'
+          objectFit: 'cover',
+          transform: flipHorizontal ? 'scaleX(-1)' : 'none'
         }}
       />
     </AbsoluteFill>

@@ -33,6 +33,8 @@ exports.handler = async (event, context) => {
       transitionDurationSec = 0.5,
       bgmUrl = '',
       showBranding = true,
+      video1FlipHorizontal = false,
+      video2FlipHorizontal = false,
       submissionId: providedId
     } = body;
 
@@ -92,7 +94,9 @@ exports.handler = async (event, context) => {
       transitionType,
       transitionDurationInFrames,
       bgmUrl,
-      showBranding
+      showBranding,
+      video1FlipHorizontal: !!video1FlipHorizontal,
+      video2FlipHorizontal: !!video2FlipHorizontal
     };
 
     console.log(`[ConcatVideos] Starting concat render for ${submissionId}...`, inputProps);

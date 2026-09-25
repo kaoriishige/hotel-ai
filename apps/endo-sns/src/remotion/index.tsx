@@ -20,7 +20,8 @@ export const RemotionVideo: React.FC = () => {
           text: '世界中を植林し、命を育んできた私が、最後にたどり着いたのは、この山奥の「枯れ葉」の美しさでした。効率だけを求める世界では見落とされてしまう、静かな命の循環が、ここにはあります。',
           voiceUrl: '',
           bgmUrl: '',
-          backgroundUrl: ''
+          backgroundUrl: '',
+          flipBackgroundHorizontal: false
         }}
         calculateMetadata={async ({ props }) => {
           const fps = 30;
@@ -65,7 +66,9 @@ export const RemotionVideo: React.FC = () => {
           bgmVolume: 0.2,
           video1Volume: 1.0,
           video2Volume: 1.0,
-          showBranding: true
+          showBranding: true,
+          video1FlipHorizontal: false,
+          video2FlipHorizontal: false
         }}
         calculateMetadata={async ({ props }) => {
           const dur1 = props.duration1InFrames || 450;
