@@ -275,35 +275,20 @@ MANDATORY RULES:
       }
     }
 
-    // 1. まず HeyGen v3 API を試行 (motion_prompt にユーザー指示を反映)
-    try {
-      videoRes = await fetch('https://api.heygen.com/v3/videos', {
-        method: 'POST',
-        headers: {
-          'X-Api-Key': heygenApiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: 'avatar',
-          avatar_id: avatarId,
-          audio_url: ownerAudioUrl,
-          engine: { type: 'avatar_iv' },
-          motion_prompt: finalMotionPrompt,
-          aspect_ratio: '9:16'
-        })
-      });
-      videoData = await videoRes.json();
-      console.log('HeyGen v3 API response:', JSON.stringify(videoData));
-      if (videoRes.ok && videoData.data?.video_id) {
-        videoId = videoData.data.video_id;
-      }
-    } catch (v3Err) {
-      console.warn('HeyGen v3 API attempt error:', v3Err.message);
-    }
+    // ==========================================
+    // STEP 4: HeyGen 動画生成
+    // ★最重要解決策: 「田舎なのに車が通りすぎる」問題を完全解決
+    // v3 (avatar_iv) は背景に道路があると勝手に車を走らせてしまう生成AI仕様のため、
+    // 背景を100%完全静止画として固定し、人物の顔・口パクのみを動かす「talking_photo (v2)」を最優先・標準で実行する！
+    // ==========================================
+    console.log('Step 4: Submitting HeyGen video generation request (prioritizing 100% static background talking_photo)...');
+    let videoId = null;
+    let videoRes = null;
+    let videoData = null;
 
-    // 2. v3 でエラーとなった場合、HeyGen v2 API に安全フォールバック
-    if (!videoId) {
-      console.log('Falling back to HeyGen v2 API endpoint...');
+    // 1. まず HeyGen v2 API (talking_photo: 背景完全静止・車走行ゼロ保証) を最優先で実行
+    try {
+      console.log('Using HeyGen v2 talking_photo for completely frozen background (no moving cars)...');
       videoRes = await fetch('https://api.heygen.com/v2/video/generate', {
         method: 'POST',
         headers: {
@@ -330,6 +315,38 @@ MANDATORY RULES:
       console.log('HeyGen v2 API response:', JSON.stringify(videoData));
       if (videoRes.ok && videoData.data?.video_id) {
         videoId = videoData.data.video_id;
+        console.log(`Successfully queued static-background talking_photo video: ${videoId}`);
+      }
+    } catch (v2Err) {
+      console.warn('HeyGen v2 API attempt error:', v2Err.message);
+    }
+
+    // 2. 万が一 v2 で失敗した場合のみ、v3 API に安全フォールバック
+    if (!videoId) {
+      console.log('Falling back to HeyGen v3 API endpoint...');
+      try {
+        videoRes = await fetch('https://api.heygen.com/v3/videos', {
+          method: 'POST',
+          headers: {
+            'X-Api-Key': heygenApiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'avatar',
+            avatar_id: avatarId,
+            audio_url: ownerAudioUrl,
+            engine: { type: 'avatar_iv' },
+            motion_prompt: finalMotionPrompt,
+            aspect_ratio: '9:16'
+          })
+        });
+        videoData = await videoRes.json();
+        console.log('HeyGen v3 fallback response:', JSON.stringify(videoData));
+        if (videoRes.ok && videoData.data?.video_id) {
+          videoId = videoData.data.video_id;
+        }
+      } catch (v3Err) {
+        console.warn('HeyGen v3 API fallback error:', v3Err.message);
       }
     }
 
