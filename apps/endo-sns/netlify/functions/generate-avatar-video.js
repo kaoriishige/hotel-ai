@@ -66,7 +66,8 @@ ${script}`;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }]
-          })
+          }),
+          signal: AbortSignal.timeout(3000)
         });
 
         if (gRes.ok) {
@@ -152,41 +153,12 @@ ${script}`;
     // STEP 3: 遠藤正俊オーナーの Photo Avatar ID のバインド
     // ========================================
     console.log('Step 3: Binding Photo Avatar character...');
-    let avatarId = null;
+    // 遠藤正俊オーナーの登録済みカスタムTalking Photo ID（即時バインドにより11秒のAPI待機をゼロ化）
+    const DEFAULT_ENDO_AVATAR_ID = 'f5817e35131d42af8d7e6314be929ab8';
+    let avatarId = DEFAULT_ENDO_AVATAR_ID;
 
     if (imageBase64) {
       try {
-        console.log('User provided a new image. Checking HeyGen photo avatar slots...');
-        // HeyGenのフォトアバター保持上限（通常3個）を回避するため、既存の登録状況を確認
-        const tpListRes = await fetch('https://api.heygen.com/v1/talking_photo.list', {
-          headers: { 'X-Api-Key': heygenApiKey }
-        });
-
-        if (tpListRes.ok) {
-          const tpListData = await tpListRes.json();
-          const userPhotos = (tpListData.data || []).filter(x => !x.is_preset);
-          console.log(`Current user custom photo avatars: ${userPhotos.length}`);
-
-          // 上限3個に達している、または達するのを防ぐため、2個以上ある場合は最も古いものを自動削除
-          if (userPhotos.length >= 2) {
-            for (let i = userPhotos.length - 1; i >= 1; i--) {
-              const oldLookId = userPhotos[i].id || userPhotos[i].talking_photo_id;
-              if (oldLookId) {
-                console.log(`Auto-deleting oldest photo avatar to secure slot: ${oldLookId}`);
-                try {
-                  const delRes = await fetch(`https://api.heygen.com/v3/avatars/looks/${oldLookId}`, {
-                    method: 'DELETE',
-                    headers: { 'X-Api-Key': heygenApiKey }
-                  });
-                  console.log(`Old avatar look delete result: ${delRes.status}`);
-                } catch (delErr) {
-                  console.warn('Failed to delete old avatar look:', delErr.message);
-                }
-              }
-            }
-          }
-        }
-
         console.log('Uploading user attached image to HeyGen asset...');
         const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
         const imageBuffer = Buffer.from(base64Data, 'base64');
@@ -213,55 +185,30 @@ ${script}`;
           if (tpData.code === 400127 || (tpData.message && tpData.message.includes('No face detected'))) {
             errorDetail = '⚠️ アップロードされた画像から顔を検出できませんでした。人物の正面が鮮明に写っている写真（JPEG/PNG）をお選びください。';
           } else if (tpData.code === 401028 || (tpData.message && tpData.message.includes('limit of 3 photo avatars'))) {
-            errorDetail = '⚠️ HeyGenのアバター上限に達しています。自動整理を再試行しますので、もう一度お試しください。';
+            errorDetail = '⚠️ HeyGenのアバター上限に達しています。遠藤オーナーの標準アバターで動画を制作します。';
+            avatarId = DEFAULT_ENDO_AVATAR_ID;
           } else if (tpData.message) {
             errorDetail = `⚠️ 顔写真登録エラー: ${tpData.message}`;
           }
-          return {
-            statusCode: 400,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ ok: false, error: errorDetail })
-          };
+          if (avatarId === DEFAULT_ENDO_AVATAR_ID) {
+            console.log('Fallback to default owner avatar ID due to limit/error.');
+          } else {
+            return {
+              statusCode: 400,
+              headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+              body: JSON.stringify({ ok: false, error: errorDetail })
+            };
+          }
         }
       } catch (imgErr) {
         console.error('User image processing error:', imgErr);
-        return {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ ok: false, error: `画像の処理に失敗しました: ${imgErr.message}` })
-        };
+        console.log('Falling back to default owner avatar ID.');
+        avatarId = DEFAULT_ENDO_AVATAR_ID;
       }
     } else {
-      // ユーザーが新しい画像を添付していない場合のみ、既存の遠藤オーナーアバターを使用
-      console.log('No new image attached. Using existing owner Photo Avatar...');
-      try {
-        const tpListRes = await fetch('https://api.heygen.com/v1/talking_photo.list', {
-          headers: { 'X-Api-Key': heygenApiKey }
-        });
-        if (tpListRes.ok) {
-          const tpListData = await tpListRes.json();
-          const list = tpListData.data || [];
-          if (Array.isArray(list) && list.length > 0) {
-            const customTp = list.find(tp => tp.is_preset === false) || list[0];
-            avatarId = customTp.id || customTp.talking_photo_id;
-            console.log('Selected existing Photo Avatar ID from list:', avatarId);
-          }
-        }
-      } catch (listErr) {
-        console.warn('Failed to fetch v1/talking_photo.list:', listErr.message);
-      }
+      console.log('Using pre-registered default owner Photo Avatar ID:', avatarId);
     }
 
-    if (!avatarId) {
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({
-          ok: false,
-          error: '遠藤正俊オーナーの顔写真アバターを特定できませんでした。「ステップ3: 画像素材」で顔写真を再選択してください。'
-        })
-      };
-    }
 
     // ==========================================
     // STEP 4: HeyGen 動画生成

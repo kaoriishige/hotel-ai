@@ -247,7 +247,18 @@ if (generateAvatarVideoBtn) {
           motionPrompt: motionPrompt
         })
       });
-      const data = await res.json();
+
+      const resText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(resText);
+      } catch (parseErr) {
+        if (resText.includes('504') || resText.includes('Timeout') || resText.includes('<HTML>') || resText.includes('<html>')) {
+          throw new Error('サーバーがタイムアウトしました。動画生成処理に時間がかかっています。少し時間をおいてから再試行してください。');
+        }
+        throw new Error(`サーバーエラー (${res.status}): ${resText.substring(0, 120)}`);
+      }
+
       if (res.ok && data.ok) {
         const videoId = data.videoId;
         alert('🎉 HeyGen AIアバター動画の生成を開始しました！完成まで数分かかります。');
