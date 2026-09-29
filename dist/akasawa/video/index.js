@@ -291,7 +291,10 @@ if (generateRagBtn) {
           keywordsCard.style.display = 'block';
         }
 
-        setMessage(`✅「${theme}」の深層調査が完了し、台本・フック・SNS検索キーワードを出力しました！`);
+        // 🛡️ AI二重チェック監査レポートの描画
+        renderAuditReport(data.audit);
+
+        setMessage(`✅「${theme}」の深層調査＆二重チェック監査（Score: ${data.audit?.score || 100}点）が完了しました！`);
       } else {
         throw new Error(data.error || '台本の生成に失敗しました');
       }
@@ -334,6 +337,66 @@ if (appendKeywordsBtn) {
   });
 }
 
+// 🛡️ AI二重チェック監査レポートの画面レンダリング関数
+function renderAuditReport(audit) {
+  const auditCard = document.getElementById('scriptAuditCard');
+  const scoreBadge = document.getElementById('auditScoreBadge');
+  const durationBadge = document.getElementById('auditDurationBadge');
+  const checksList = document.getElementById('auditChecksList');
+  const summaryMsg = document.getElementById('auditSummaryMessage');
+
+  if (!auditCard || !audit) return;
+
+  const score = audit.score || 100;
+  if (scoreBadge) {
+    scoreBadge.textContent = `${score}点 / ${audit.status === 'EXCELLENT' ? '完全合格' : audit.status === 'PASS' ? '合格' : '要確認'}`;
+    if (score >= 90) {
+      scoreBadge.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    } else if (score >= 75) {
+      scoreBadge.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+    } else {
+      scoreBadge.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+    }
+  }
+
+  if (durationBadge) {
+    durationBadge.textContent = `⏱️ 推定${audit.estimatedSeconds || 27}秒 (${audit.scriptLength || 0}文字)`;
+  }
+
+  if (checksList && Array.isArray(audit.checks)) {
+    checksList.innerHTML = audit.checks.map(c => `
+      <div style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; background: rgba(30, 41, 59, 0.6); padding: 8px 10px; border-radius: 6px; border: 1px solid ${c.pass ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.4)'};">
+        <span style="font-size: 14px; line-height: 1;">${c.pass ? '✅' : '⚠️'}</span>
+        <div style="flex: 1;">
+          <div style="font-weight: bold; color: ${c.pass ? '#6ee7b7' : '#fca5a5'}; margin-bottom: 2px;">
+            ${c.name}
+          </div>
+          <div style="color: #cbd5e1; font-size: 11px; line-height: 1.4;">
+            ${c.detail}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (summaryMsg) {
+    summaryMsg.textContent = audit.message || 'すべての監査項目をクリアしました。';
+  }
+
+  auditCard.style.display = 'block';
+}
+
+// ユーザーが手動で台本・フックを修正した場合のリアルタイム監査更新
+if (ownerComment) {
+  ownerComment.addEventListener('input', () => {
+    const text = ownerComment.value.trim();
+    const durationBadge = document.getElementById('auditDurationBadge');
+    if (durationBadge && text) {
+      const sec = (text.length / 5.4).toFixed(1);
+      durationBadge.textContent = `⏱️ 推定${sec}秒 (${text.length}文字)`;
+    }
+  });
+}
 
 // HeyGen AIアバター動画生成処理（ステップ3の画像を自動送信）
 const generateAvatarVideoBtn = document.getElementById('generateAvatarVideoBtn');
