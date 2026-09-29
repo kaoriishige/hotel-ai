@@ -151,14 +151,36 @@ ${script}`;
 
     // ========================================
     // STEP 3: 遠藤正俊オーナーの Photo Avatar ID のバインド
+    // ★新しい画像を入れたら前の画像を確実にHeyGenから削除して入れ替える
     // ========================================
     console.log('Step 3: Binding Photo Avatar character...');
-    // 遠藤正俊オーナーの登録済み完全9:16（1080x1920・上下余白ゼロ）カスタムTalking Photo ID
-    const DEFAULT_ENDO_AVATAR_ID = 'da4cbe2f7e3e444a9d7d7a6c5decba36';
+    // 遠藤正俊オーナーの登録済み完全9:16（1080x1920・上下余白ゼロ）公式Talking Photo ID
+    const DEFAULT_ENDO_AVATAR_ID = '04d4f5dd6b944c099ec7b0d9bd459ac7';
     let avatarId = DEFAULT_ENDO_AVATAR_ID;
 
     if (imageBase64) {
       try {
+        console.log('User provided a new image. Checking and removing previous custom avatar to free HeyGen slot...');
+        
+        // 1. 直前にアップロードされたカスタムアバターIDをFirestoreから取得し、確実にHeyGenから削除
+        try {
+          const db = getDb();
+          const configDoc = await db.collection('settings').doc('endo_avatar_slot').get();
+          const lastCustomId = configDoc.exists ? configDoc.data()?.lastTalkingPhotoId : null;
+
+          if (lastCustomId && lastCustomId !== DEFAULT_ENDO_AVATAR_ID) {
+            console.log(`Auto-deleting previous custom avatar from HeyGen to free slot: ${lastCustomId}`);
+            const delRes = await fetch(`https://api.heygen.com/v2/talking_photo/${lastCustomId}`, {
+              method: 'DELETE',
+              headers: { 'X-Api-Key': heygenApiKey }
+            });
+            console.log(`Previous avatar delete response status: ${delRes.status}`);
+          }
+        } catch (delPrevErr) {
+          console.warn('Failed to delete previous avatar via Firestore tracking:', delPrevErr.message);
+        }
+
+        // 2. 画像のBase64デコードおよび9:16（1080x1920）自動整形
         console.log('Uploading user attached image to HeyGen asset...');
         const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
         const imageBuffer = Buffer.from(base64Data, 'base64');
@@ -205,47 +227,53 @@ ${script}`;
         let tpData = await tpRes.json();
         console.log('HeyGen talking photo upload response:', JSON.stringify(tpData));
 
-        // もし3個上限（limit of 3 photo avatars）に達していた場合、自動で古いアバターを枠から1件削除して再試行
+        // 3. もし3個上限（limit of 3 photo avatars）に達していた場合の非常時安全解放
         if (tpData.code === 401028 || (tpData.message && tpData.message.includes('limit of 3 photo avatars'))) {
-          console.log('Avatar limit reached (limit of 3). Auto-cleaning oldest talking photos to free slot...');
+          console.log('Avatar limit reached (limit of 3). Cleaning all non-default custom avatars from HeyGen...');
           try {
             const listRes = await fetch('https://api.heygen.com/v1/talking_photo.list', {
               headers: { 'X-Api-Key': heygenApiKey }
             });
             if (listRes.ok) {
               const listData = await listRes.json();
-              const photos = listData.data?.talking_photos || [];
-              // デフォルトの9:16アバター以外で最も古いものを1つ削除
-              const deletable = photos.find(p => (p.talking_photo_id || p.id) !== DEFAULT_ENDO_AVATAR_ID);
-              if (deletable) {
-                const delId = deletable.talking_photo_id || deletable.id;
-                console.log(`Deleting old avatar ${delId} to free slot...`);
-                await fetch(`https://api.heygen.com/v1/talking_photo/${delId}`, {
-                  method: 'DELETE',
-                  headers: { 'X-Api-Key': heygenApiKey }
-                });
-                console.log('Slot freed. Retrying talking photo upload...');
-                tpRes = await uploadTalkingPhoto(finalImageBuffer, finalMimeType);
-                tpData = await tpRes.json();
-                console.log('Retry upload response:', JSON.stringify(tpData));
+              const photos = (listData.data?.talking_photos || listData.data || []).filter(p => !p.is_preset);
+              for (const p of photos) {
+                const pId = p.talking_photo_id || p.id;
+                if (pId && pId !== DEFAULT_ENDO_AVATAR_ID) {
+                  console.log(`Emergency deleting custom avatar: ${pId}`);
+                  await fetch(`https://api.heygen.com/v2/talking_photo/${pId}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Api-Key': heygenApiKey }
+                  });
+                }
               }
+              console.log('Slot freed. Retrying talking photo upload...');
+              tpRes = await uploadTalkingPhoto(finalImageBuffer, finalMimeType);
+              tpData = await tpRes.json();
+              console.log('Retry upload response:', JSON.stringify(tpData));
             }
           } catch (cleanErr) {
-            console.warn('Auto-cleanup failed:', cleanErr.message);
+            console.warn('Emergency cleanup failed:', cleanErr.message);
           }
         }
 
         if (tpRes.ok && (tpData.data?.talking_photo_id || tpData.data?.id)) {
           avatarId = tpData.data?.talking_photo_id || tpData.data?.id;
           console.log('Successfully created new talking_photo_id from uploaded image:', avatarId);
+
+          // 4. 新しいカスタムアバターIDを次回削除用にFirestoreに保存
+          try {
+            const db = getDb();
+            await db.collection('settings').doc('endo_avatar_slot').set({
+              lastTalkingPhotoId: avatarId,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log('Saved new custom talking_photo_id to Firestore for next rotation.');
+          } catch (saveSlotErr) {
+            console.warn('Failed to save slot to Firestore:', saveSlotErr.message);
+          }
         } else {
           console.error('HeyGen talking photo upload failed:', tpData);
-          let errorDetail = 'アップロードされた顔写真の登録に失敗しました。';
-          if (tpData.code === 400127 || (tpData.message && tpData.message.includes('No face detected'))) {
-            errorDetail = '⚠️ アップロードされた画像から顔を検出できませんでした。人物の正面が鮮明に写っている写真（JPEG/PNG）をお選びください。';
-          } else if (tpData.message) {
-            errorDetail = `⚠️ 顔写真登録エラー: ${tpData.message}`;
-          }
           avatarId = DEFAULT_ENDO_AVATAR_ID;
           console.log('Fallback to default 9:16 owner avatar ID:', avatarId);
         }
