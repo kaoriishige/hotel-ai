@@ -153,8 +153,8 @@ ${script}`;
     // STEP 3: 遠藤正俊オーナーの Photo Avatar ID のバインド
     // ========================================
     console.log('Step 3: Binding Photo Avatar character...');
-    // 遠藤正俊オーナーの登録済みカスタムTalking Photo ID（即時バインドにより11秒のAPI待機をゼロ化）
-    const DEFAULT_ENDO_AVATAR_ID = 'f5817e35131d42af8d7e6314be929ab8';
+    // 遠藤正俊オーナーの登録済み完全9:16（1080x1920・上下余白ゼロ）カスタムTalking Photo ID
+    const DEFAULT_ENDO_AVATAR_ID = 'da4cbe2f7e3e444a9d7d7a6c5decba36';
     let avatarId = DEFAULT_ENDO_AVATAR_ID;
 
     if (imageBase64) {
@@ -190,17 +190,50 @@ ${script}`;
           console.warn('Server-side sharp optimization bypassed:', sharpErr.message);
         }
 
-        const tpRes = await fetch('https://upload.heygen.com/v1/talking_photo', {
-          method: 'POST',
-          headers: {
-            'X-Api-Key': heygenApiKey,
-            'Content-Type': finalMimeType
-          },
-          body: finalImageBuffer
-        });
+        const uploadTalkingPhoto = async (buf, mime) => {
+          return await fetch('https://upload.heygen.com/v1/talking_photo', {
+            method: 'POST',
+            headers: {
+              'X-Api-Key': heygenApiKey,
+              'Content-Type': mime
+            },
+            body: buf
+          });
+        };
 
-        const tpData = await tpRes.json();
+        let tpRes = await uploadTalkingPhoto(finalImageBuffer, finalMimeType);
+        let tpData = await tpRes.json();
         console.log('HeyGen talking photo upload response:', JSON.stringify(tpData));
+
+        // もし3個上限（limit of 3 photo avatars）に達していた場合、自動で古いアバターを枠から1件削除して再試行
+        if (tpData.code === 401028 || (tpData.message && tpData.message.includes('limit of 3 photo avatars'))) {
+          console.log('Avatar limit reached (limit of 3). Auto-cleaning oldest talking photos to free slot...');
+          try {
+            const listRes = await fetch('https://api.heygen.com/v1/talking_photo.list', {
+              headers: { 'X-Api-Key': heygenApiKey }
+            });
+            if (listRes.ok) {
+              const listData = await listRes.json();
+              const photos = listData.data?.talking_photos || [];
+              // デフォルトの9:16アバター以外で最も古いものを1つ削除
+              const deletable = photos.find(p => (p.talking_photo_id || p.id) !== DEFAULT_ENDO_AVATAR_ID);
+              if (deletable) {
+                const delId = deletable.talking_photo_id || deletable.id;
+                console.log(`Deleting old avatar ${delId} to free slot...`);
+                await fetch(`https://api.heygen.com/v1/talking_photo/${delId}`, {
+                  method: 'DELETE',
+                  headers: { 'X-Api-Key': heygenApiKey }
+                });
+                console.log('Slot freed. Retrying talking photo upload...');
+                tpRes = await uploadTalkingPhoto(finalImageBuffer, finalMimeType);
+                tpData = await tpRes.json();
+                console.log('Retry upload response:', JSON.stringify(tpData));
+              }
+            }
+          } catch (cleanErr) {
+            console.warn('Auto-cleanup failed:', cleanErr.message);
+          }
+        }
 
         if (tpRes.ok && (tpData.data?.talking_photo_id || tpData.data?.id)) {
           avatarId = tpData.data?.talking_photo_id || tpData.data?.id;
@@ -210,29 +243,19 @@ ${script}`;
           let errorDetail = 'アップロードされた顔写真の登録に失敗しました。';
           if (tpData.code === 400127 || (tpData.message && tpData.message.includes('No face detected'))) {
             errorDetail = '⚠️ アップロードされた画像から顔を検出できませんでした。人物の正面が鮮明に写っている写真（JPEG/PNG）をお選びください。';
-          } else if (tpData.code === 401028 || (tpData.message && tpData.message.includes('limit of 3 photo avatars'))) {
-            errorDetail = '⚠️ HeyGenのアバター上限に達しています。遠藤オーナーの標準アバターで動画を制作します。';
-            avatarId = DEFAULT_ENDO_AVATAR_ID;
           } else if (tpData.message) {
             errorDetail = `⚠️ 顔写真登録エラー: ${tpData.message}`;
           }
-          if (avatarId === DEFAULT_ENDO_AVATAR_ID) {
-            console.log('Fallback to default owner avatar ID due to limit/error.');
-          } else {
-            return {
-              statusCode: 400,
-              headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-              body: JSON.stringify({ ok: false, error: errorDetail })
-            };
-          }
+          avatarId = DEFAULT_ENDO_AVATAR_ID;
+          console.log('Fallback to default 9:16 owner avatar ID:', avatarId);
         }
       } catch (imgErr) {
         console.error('User image processing error:', imgErr);
-        console.log('Falling back to default owner avatar ID.');
+        console.log('Falling back to default 9:16 owner avatar ID.');
         avatarId = DEFAULT_ENDO_AVATAR_ID;
       }
     } else {
-      console.log('Using pre-registered default owner Photo Avatar ID:', avatarId);
+      console.log('Using pre-registered default 9:16 owner Photo Avatar ID:', avatarId);
     }
 
 
