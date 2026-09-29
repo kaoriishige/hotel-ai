@@ -447,3 +447,31 @@ footer {
 .suggestion-item {
   transition: all 0.2s ease-in-out;
 }
+
+/* 深層リサーチ用クイックチップ */
+.theme-chip {
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 9px;
+  margin: 2px 4px 2px 0;
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.9);
+  color: #cbd5e1;
+  border: 1px solid #475569;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+}
+.theme-chip:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #60a5fa;
+  color: #93c5fd;
+  transform: translateY(-1px);
+}
+.theme-chip.active {
+  background: #2563eb;
+  border-color: #60a5fa;
+  color: #ffffff;
+  font-weight: bold;
+}
+

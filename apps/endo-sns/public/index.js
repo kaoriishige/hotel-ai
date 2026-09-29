@@ -40,14 +40,24 @@ const customThemeInput = document.getElementById('customThemeInput');
 const instagramCb = document.getElementById('instagramCb');
 const instagramDetailSettings = document.getElementById('instagramDetailSettings');
 
-// テーマの選択状態に応じた表示制御
+// テーマの選択状態・クイックチップの制御
+const themeChips = document.querySelectorAll('.theme-chip');
+themeChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    themeChips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const selectedTheme = chip.getAttribute('data-theme');
+    if (customThemeInput) {
+      customThemeInput.value = selectedTheme;
+      customThemeInput.focus();
+    }
+  });
+});
+
 if (simpleTag) {
   simpleTag.addEventListener('change', () => {
-    if (simpleTag.value === 'custom') {
-      customThemeContainer.style.display = 'block';
-    } else {
-      customThemeContainer.style.display = 'none';
-      customThemeInput.value = '';
+    if (simpleTag.value && simpleTag.value !== 'custom') {
+      if (customThemeInput) customThemeInput.value = simpleTag.value;
     }
   });
 }
@@ -91,19 +101,21 @@ const setMessage = (text, isError = false) => {
   message.style.color = isError ? '#ef4444' : '#10b981';
 };
 
-// RAGからの自動生成機能
+// 深層リサーチ＆RAG自動生成機能
+let currentKeywords = [];
 if (generateRagBtn) {
   generateRagBtn.addEventListener('click', async () => {
-    let theme = simpleTag.value;
-    if (theme === 'custom') {
-      theme = customThemeInput.value.trim();
-    }
-    if (!theme) {
-      alert('自動生成する前に「投稿テーマ」を選択または直接入力してください。');
+    let theme = (customThemeInput ? customThemeInput.value.trim() : '') || (simpleTag ? simpleTag.value : '');
+    if (!theme || theme === 'custom') {
+      alert('調査したい温泉名、地名、またはテーマを入力するか、上のクイック候補をクリックしてください。');
+      if (customThemeInput) customThemeInput.focus();
       return;
     }
-    generateRagBtn.textContent = '⏳ 生成中...';
+
+    generateRagBtn.textContent = '🔎 泉質・歴史・自然・SNS検索ワードを深層調査中...';
     generateRagBtn.disabled = true;
+    setMessage('AIが泉質・歴史・自然環境・SNS検索トレンドを深層リサーチしています...', false);
+
     try {
       const response = await fetch('/.netlify/functions/generate-script-from-rag', {
         method: 'POST',
@@ -115,29 +127,79 @@ if (generateRagBtn) {
       try {
         data = JSON.parse(responseText);
       } catch (parseErr) {
-        console.warn('Response was not JSON, using fallback script:', parseErr.message);
+        console.warn('Response was not JSON, fallback:', parseErr.message);
         data = {
-          hook: '「その重荷、降ろしませんか？」',
-          script: '私たちは皆、完璧であろうと、ついつい頑張りすぎてしまいますね。しかし、森の木々が、ただそこに在るだけで美しいように、人間もまた、ありのままの姿で尊いもの。時に立ち止まり、心の奥底で感じる静けさに身を委ねてみる。それが、自分自身への一番の贈り物ではないでしょうか。'
+          hook: `「${theme}」の奥底に眠る、本当の真実。`,
+          script: `日常の喧騒から離れて「${theme}」と静かに向き合うとき、私たちがどれほど世間の常識に縛られていたかに気づかされます。木々が誰とも競わずに根を張るように、他人のものさしを手放し、自分の心の声に耳を傾けること。それこそがブレずに生き抜くための大切な知恵だと思うのです。`
         };
       }
 
       if (data && (data.hook || data.script)) {
         if (data.hook) hookText.value = data.hook;
         if (data.script) ownerComment.value = data.script;
-        setMessage('思想RAGからフックとアバター台本を自動生成しました。');
+
+        // 🔎 AI深層リサーチ要約の表示
+        const researchCard = document.getElementById('researchSummaryCard');
+        const researchText = document.getElementById('researchSummaryText');
+        if (researchCard && researchText && data.researchSummary) {
+          researchText.textContent = data.researchSummary;
+          researchCard.style.display = 'block';
+        }
+
+        // 🏷️ SNS検索キーワード＆ハッシュタグの表示
+        const keywordsCard = document.getElementById('keywordsCard');
+        const keywordsTagsList = document.getElementById('keywordsTagsList');
+        if (keywordsCard && keywordsTagsList && Array.isArray(data.keywords) && data.keywords.length > 0) {
+          currentKeywords = data.keywords;
+          keywordsTagsList.innerHTML = data.keywords
+            .map(kw => `<span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500;">${kw}</span>`)
+            .join('');
+          keywordsCard.style.display = 'block';
+        }
+
+        setMessage(`✅「${theme}」の深層調査が完了し、台本・フック・SNS検索キーワードを出力しました！`);
       } else {
-        throw new Error(data.error || '生成に失敗しました');
+        throw new Error(data.error || '台本の生成に失敗しました');
       }
     } catch (err) {
       console.error(err);
       alert('エラー: ' + err.message);
+      setMessage('生成に失敗しました: ' + err.message, true);
     } finally {
-      generateRagBtn.textContent = '🤖 思想RAGから自動生成';
+      generateRagBtn.textContent = '🤖 このテーマ・温泉を深層調査して台本をAI出力する ➔';
       generateRagBtn.disabled = false;
     }
   });
 }
+
+// ハッシュタグコピー＆本文追加機能
+const copyKeywordsBtn = document.getElementById('copyKeywordsBtn');
+if (copyKeywordsBtn) {
+  copyKeywordsBtn.addEventListener('click', () => {
+    if (currentKeywords.length === 0) return;
+    const text = currentKeywords.join(' ');
+    navigator.clipboard.writeText(text).then(() => {
+      alert('📋 ハッシュタグをクリップボードにコピーしました！\n' + text);
+    }).catch(e => {
+      prompt('以下のハッシュタグをコピーしてください:', text);
+    });
+  });
+}
+
+const appendKeywordsBtn = document.getElementById('appendKeywordsBtn');
+if (appendKeywordsBtn) {
+  appendKeywordsBtn.addEventListener('click', () => {
+    if (currentKeywords.length === 0 || !ownerComment) return;
+    const tagsString = '\n\n' + currentKeywords.join(' ');
+    if (!ownerComment.value.includes(currentKeywords[0])) {
+      ownerComment.value = ownerComment.value.trim() + tagsString;
+      setMessage('台本本文の末尾にSNS検索用ハッシュタグを追加しました。');
+    } else {
+      alert('既に本文にタグが含まれています。');
+    }
+  });
+}
+
 
 // HeyGen AIアバター動画生成処理（ステップ3の画像を自動送信）
 const generateAvatarVideoBtn = document.getElementById('generateAvatarVideoBtn');

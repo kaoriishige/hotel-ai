@@ -23,51 +23,116 @@
     <main style="max-width: 1200px; margin: 20px auto; padding: 0 16px;">
       <div class="steps-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
         
-        <!-- STEP 1: 台本完全AI出力欄 -->
+        <!-- STEP 1: 🔍 テーマ・温泉・地名の深層調査 ＆ AI台本自動生成 -->
         <section class="card step-card">
           <div class="section-title">
             <span class="step-badge">1</span>
-            <h2>🤖 台本完全AI出力欄</h2>
+            <h2>🔍 テーマ・温泉・地名の深層調査 ＆ 台本AI生成</h2>
           </div>
           <div class="card-body stack-gap">
-            
-            <!-- 台本テーマの選択/入力 -->
+            <p style="font-size: 13px; color: #94a3b8; margin: 0 0 6px; line-height: 1.5;">
+              全国の温泉名・地名・巡礼地・人生哲学テーマを入力してください。AIが泉質・歴史・自然環境・SNS検索トレンドを深層リサーチし、検索で上位表示される具体的な固有名詞と遠藤正俊の深い人生哲学を掛け合わせた心に刺さる台本を自動構築します。
+            </p>
+
+            <!-- 台本テーマの自由入力欄（常時表示） -->
             <div>
-              <label class="form-label-bold" style="color: var(--accent); margin-bottom: 6px; font-size: 13px;">✍️ 投稿テーマの選択 (または自由入力):</label>
-              <select id="simpleTag" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: #0f172a; color: white;">
-                <option value="安定を捨てて生き方を変えた理由">1. 🌲 安定を捨てて、50代で自分の生き方に舵を切った決断と思考法</option>
-                <option value="他人の価値観で生きるのをやめる">2. ⏳ 「他人の価値観」で生きるのをやめ、人生の軸を取り戻す技術</option>
-                <option value="世界中で大自然を見て気づいた人間社会のバグ">3. 🌍 世界中で大自然を見て気づいた、現代人が疲弊していく本当の原因</option>
-                <option value="価格競争・数字の競争から抜け出す思考">4. 💡 なぜ価格競争や数字の比較に巻き込まれると不幸になるのか？</option>
-                <option value="余白と休息を意識的に作るマインドセット">5. 🌿 「何もしない時間」を意図的に作れない現代人が余白を取り戻す方法</option>
-                <option value="custom">✍️ 新しいテーマを直接入力する</option>
-              </select>
-            </div>
-            
-            <div id="customThemeContainer" style="display: none;">
-              <input type="text" id="customThemeInput" placeholder="テーマを自由に入力（例：夜の深呼吸、スマホから離れる時間）" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: #0f172a; color: white;" />
+              <label class="form-label-bold" style="color: var(--accent); margin-bottom: 6px; font-size: 13px;">✍️ 調査したい温泉・地名・テーマ（直接入力）:</label>
+              <input type="text" id="customThemeInput" placeholder="例：草津温泉、別府温泉、酸ヶ湯温泉、足尾、屋久島、熊野古道、他人の価値観で生きるのをやめる" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--brand); background: #0f172a; color: white; font-size: 14px; font-weight: 500;" />
             </div>
 
-            <button type="button" id="generateRagBtn" class="primary-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); width: 100%; font-size: 14px; font-weight: bold; padding: 12px; margin-top: 4px;">
-              🤖 選択したテーマで台本を完全AI出力する ➔
+            <!-- クイック選択タグ群（チップ） -->
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 10px; border: 1px solid var(--line);">
+              <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-bottom: 8px;">💡 ワンクリック深層リサーチ候補（クリックで自動入力）:</div>
+              
+              <!-- 温泉候補 -->
+              <div style="margin-bottom: 8px;">
+                <span style="font-size: 11px; color: #f59e0b; font-weight: bold; margin-right: 6px;">♨️ 全国の名湯:</span>
+                <span class="theme-chip" data-theme="草津温泉">草津温泉</span>
+                <span class="theme-chip" data-theme="別府温泉">別府温泉</span>
+                <span class="theme-chip" data-theme="酸ヶ湯温泉">酸ヶ湯温泉</span>
+                <span class="theme-chip" data-theme="十津川温泉">十津川温泉</span>
+                <span class="theme-chip" data-theme="有馬温泉">有馬温泉</span>
+                <span class="theme-chip" data-theme="黒川温泉">黒川温泉</span>
+                <span class="theme-chip" data-theme="乳頭温泉郷">乳頭温泉郷</span>
+                <span class="theme-chip" data-theme="登別温泉">登別温泉</span>
+                <span class="theme-chip" data-theme="長湯温泉">長湯温泉</span>
+                <span class="theme-chip" data-theme="道後温泉">道後温泉</span>
+                <span class="theme-chip" data-theme="万座温泉">万座温泉</span>
+              </div>
+
+              <!-- 地名・巡礼地 -->
+              <div style="margin-bottom: 8px;">
+                <span style="font-size: 11px; color: #34d399; font-weight: bold; margin-right: 6px;">🗺️ 地名・巡礼地:</span>
+                <span class="theme-chip" data-theme="足尾">足尾（緑の再生）</span>
+                <span class="theme-chip" data-theme="屋久島">屋久島（縄文杉）</span>
+                <span class="theme-chip" data-theme="熊野古道">熊野古道（巡礼）</span>
+                <span class="theme-chip" data-theme="奥日本シルバールート">奥日本シルバールート</span>
+                <span class="theme-chip" data-theme="白神山地">白神山地</span>
+                <span class="theme-chip" data-theme="佐渡">佐渡島</span>
+              </div>
+
+              <!-- 思想テーマ -->
+              <div>
+                <span style="font-size: 11px; color: #a78bfa; font-weight: bold; margin-right: 6px;">🌲 遠藤正俊の人生哲学:</span>
+                <span class="theme-chip" data-theme="安定を捨てて生き方を変えた理由">安定を捨てた決断</span>
+                <span class="theme-chip" data-theme="他人の価値観で生きるのをやめる">他人の価値観を手放す</span>
+                <span class="theme-chip" data-theme="価格競争・数字の競争から抜け出す思考">価格競争からの脱出</span>
+                <span class="theme-chip" data-theme="世界中で大自然を見て気づいた人間社会のバグ">大自然と現代社会のバグ</span>
+                <span class="theme-chip" data-theme="余白と休息を意識的に作るマインドセット">余白と休息の技術</span>
+              </div>
+            </div>
+
+            <!-- セレクトボックス（補助） -->
+            <div style="display: none;">
+              <select id="simpleTag">
+                <option value="custom">custom</option>
+              </select>
+              <div id="customThemeContainer"></div>
+            </div>
+
+            <button type="button" id="generateRagBtn" class="primary-btn" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); width: 100%; font-size: 15px; font-weight: bold; padding: 14px; margin-top: 4px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); cursor: pointer; border: none; border-radius: 8px; color: white;">
+              🤖 このテーマ・温泉を深層調査して台本をAI出力する ➔
             </button>
           </div>
         </section>
 
-        <!-- STEP 2: 台本入力欄（本人制作・AI編集） -->
+        <!-- STEP 2: 台本入力欄（本人制作・AI編集） ＆ 🔎 深層リサーチ結果 -->
         <section class="card step-card">
           <div class="section-title">
             <span class="step-badge">2</span>
             <h2>✍️ 台本入力欄（本人制作・編集）</h2>
           </div>
           <div class="card-body stack-gap">
+
+            <!-- 🔎 AI深層リサーチ要約表示カード -->
+            <div id="researchSummaryCard" style="display: none; background: rgba(30, 58, 138, 0.25); border: 1px solid #3b82f6; border-radius: 10px; padding: 12px 14px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #60a5fa; font-size: 13px; margin-bottom: 4px;">
+                <span>🔎</span><span>AI深層リサーチ結果（泉質・歴史・自然背景）:</span>
+              </div>
+              <p id="researchSummaryText" style="margin: 0; font-size: 13px; color: #e2e8f0; line-height: 1.5;"></p>
+            </div>
+
+            <!-- 🏷️ SNS検索キラーキーワード＆ハッシュタグ表示カード -->
+            <div id="keywordsCard" style="display: none; background: rgba(6, 78, 59, 0.25); border: 1px solid #10b981; border-radius: 10px; padding: 12px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #34d399; font-size: 13px;">
+                  <span>🏷️</span><span>SNS検索キラーキーワード（TikTok / Reels / SEO上位表示）:</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" id="copyKeywordsBtn" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">📋 タグをコピー</button>
+                  <button type="button" id="appendKeywordsBtn" style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #93c5fd; font-size: 11px; padding: 4px 8px; border-radius: 6px; cursor: pointer;">➕ 本文に追加</button>
+                </div>
+              </div>
+              <div id="keywordsTagsList" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            </div>
+
             <div>
-              <label for="hookText" style="font-weight: bold; color: var(--accent);">🎣 冒頭3秒フック (任意・惹きつけ文)</label>
-              <textarea id="hookText" placeholder="例：「頑張りすぎている、あなたへ。」「『完璧じゃなくていい』って、知ってる？」" style="min-height: 60px;"></textarea>
+              <label for="hookText" style="font-weight: bold; color: var(--accent);">🎣 冒頭3秒フック (スクロールを止める強烈な一言 / 15〜22文字程度)</label>
+              <textarea id="hookText" placeholder="例：pH2.1の強酸性。地球の熱が、人のプライドを溶かす。" style="min-height: 50px; font-size: 14px; font-weight: 600;"></textarea>
             </div>
             <div>
-              <label for="ownerComment" style="font-weight: bold; color: var(--brand);">動画台本本文 (必須)</label>
-              <textarea id="ownerComment" required placeholder="ここに本人の台本を入力するか、「🤖 台本完全AI出力」を押すと自動入力されます。" style="min-height: 140px;"></textarea>
+              <label for="ownerComment" style="font-weight: bold; color: var(--brand);">動画台本本文 (約25〜30秒 / 140〜170文字程度)</label>
+              <textarea id="ownerComment" required placeholder="ここに本人の台本を入力するか、「🤖 このテーマ・温泉を深層調査して台本をAI出力する」を押すと自動入力されます。" style="min-height: 140px; font-size: 14px; line-height: 1.6;"></textarea>
             </div>
           </div>
         </section>
