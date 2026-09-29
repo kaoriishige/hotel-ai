@@ -163,14 +163,40 @@ ${script}`;
         const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
         const imageBuffer = Buffer.from(base64Data, 'base64');
         const mimeType = imageBase64.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
+        let finalImageBuffer = imageBuffer;
+        let finalMimeType = mimeType;
+
+        try {
+          const sharp = require('sharp');
+          const metadata = await sharp(imageBuffer).metadata();
+          if (metadata.width && metadata.height) {
+            const ratio = metadata.width / metadata.height;
+            const targetRatio = 1080 / 1920; // 0.5625
+            // 9:16 と異なる場合、白い部分のない1080x1920の縦型画像に自動クロップ・カバー変換
+            if (Math.abs(ratio - targetRatio) > 0.03) {
+              console.log(`Server: Auto-optimizing image (${metadata.width}x${metadata.height}) to 9:16 (1080x1920 cover) to eliminate white padding...`);
+              finalImageBuffer = await sharp(imageBuffer)
+                .resize(1080, 1920, {
+                  fit: 'cover',
+                  position: 'center'
+                })
+                .jpeg({ quality: 95 })
+                .toBuffer();
+              finalMimeType = 'image/jpeg';
+              console.log('Server: Successfully created 9:16 image with zero white borders.');
+            }
+          }
+        } catch (sharpErr) {
+          console.warn('Server-side sharp optimization bypassed:', sharpErr.message);
+        }
 
         const tpRes = await fetch('https://upload.heygen.com/v1/talking_photo', {
           method: 'POST',
           headers: {
             'X-Api-Key': heygenApiKey,
-            'Content-Type': mimeType
+            'Content-Type': finalMimeType
           },
-          body: imageBuffer
+          body: finalImageBuffer
         });
 
         const tpData = await tpRes.json();

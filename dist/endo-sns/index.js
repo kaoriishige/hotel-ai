@@ -62,29 +62,163 @@ if (simpleTag) {
   });
 }
 
-// 📸 ステップ3: 新しい顔写真が選択された時のリアルタイムプレビュー制御
-if (mediaFilesInput) {
-  mediaFilesInput.addEventListener('change', () => {
-    const file = mediaFilesInput.files?.[0];
-    const previewImg = document.getElementById('avatarPreviewImg');
-    const previewTitle = document.getElementById('avatarPreviewTitle');
-    const previewStatus = document.getElementById('avatarPreviewStatus');
+// ==========================================================
+// 📱 どんな画像でも「白い部分なし」の9:16縦型画像に自動変換するエンジン
+// ==========================================================
+let currentOptimizedAvatarBase64 = null;
+let currentRawAvatarFile = null;
 
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (previewImg) previewImg.src = e.target.result;
-        if (previewTitle) previewTitle.textContent = `📸 選択中の顔写真: ${file.name}`;
-        if (previewStatus) {
-          previewStatus.textContent = '✅ 新しい顔写真が読み込まれました！この写真でAIアバター動画が制作されます。';
-          previewStatus.style.color = '#10b981';
-          previewStatus.style.fontWeight = 'bold';
+async function convertImageTo916Vertical(fileOrDataUrl, mode = 'cover') {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const targetWidth = 1080;
+      const targetHeight = 1920;
+      const targetRatio = targetWidth / targetHeight; // 9 / 16 = 0.5625
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+
+      const srcWidth = img.naturalWidth || img.width;
+      const srcHeight = img.naturalHeight || img.height;
+      const srcRatio = srcWidth / srcHeight;
+
+      if (mode === 'blur') {
+        // --- 方式B: 背景ぼかし拡張（白い余白完全ゼロ） ---
+        // 1. 背景に元画像を画面いっぱいにカバー描画し、ブラー（ぼかし）をかける
+        let bgW, bgH, bgX, bgY;
+        if (srcRatio > targetRatio) {
+          bgH = targetHeight;
+          bgW = srcWidth * (targetHeight / srcHeight);
+          bgX = (targetWidth - bgW) / 2;
+          bgY = 0;
+        } else {
+          bgW = targetWidth;
+          bgH = srcHeight * (targetWidth / srcWidth);
+          bgX = 0;
+          bgY = (targetHeight - bgH) / 2;
         }
-      };
-      reader.readAsDataURL(file);
+
+        ctx.save();
+        ctx.filter = 'blur(40px) brightness(0.65)';
+        ctx.drawImage(img, bgX - 25, bgY - 25, bgW + 50, bgH + 50);
+        ctx.restore();
+
+        // 2. 前景の中央に元画像をアスペクト比を維持して美しく配置
+        let fgW, fgH, fgX, fgY;
+        if (srcRatio > targetRatio) {
+          fgW = targetWidth;
+          fgH = srcHeight * (targetWidth / srcWidth);
+          fgX = 0;
+          fgY = (targetHeight - fgH) / 2;
+        } else {
+          fgH = targetHeight;
+          fgW = srcWidth * (targetHeight / srcHeight);
+          fgX = (targetWidth - fgW) / 2;
+          fgY = 0;
+        }
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur = 25;
+        ctx.drawImage(img, fgX, fgY, fgW, fgH);
+        ctx.restore();
+
+      } else {
+        // --- 方式A: スマート人物フル拡大（標準・白い部分なし） ---
+        // 横長画像（16:9等）の場合、人物（通常中央に写る）を活かして9:16全体にカバークロップ
+        let cropW, cropH, cropX, cropY;
+
+        if (srcRatio > targetRatio) {
+          // 横長（16:9等）の場合：高さを100%使い、幅を中央から9:16分切り出す
+          cropH = srcHeight;
+          cropW = srcHeight * targetRatio;
+          cropX = (srcWidth - cropW) / 2;
+          cropY = 0; // 頭部が切れないよう上端から切り出し
+        } else {
+          // 縦長の場合：幅を100%使い、高さを中央から9:16分切り出す
+          cropW = srcWidth;
+          cropH = srcWidth / targetRatio;
+          cropX = 0;
+          cropY = Math.max(0, (srcHeight - cropH) * 0.25); // 頭が切れないようやや上寄り基準
+        }
+
+        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetWidth, targetHeight);
+      }
+
+      // 高品質JPEG Base64出力
+      resolve(canvas.toDataURL('image/jpeg', 0.95));
+    };
+
+    img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+
+    if (typeof fileOrDataUrl === 'string') {
+      img.src = fileOrDataUrl;
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(fileOrDataUrl);
     }
   });
 }
+
+// 📸 ステップ3: 新しい顔写真が選択された時の自動9:16変換＆リアルタイムプレビュー
+async function processAndPreviewAvatar(file) {
+  if (!file) return;
+  currentRawAvatarFile = file;
+  const previewImg = document.getElementById('avatarPreviewImg');
+  const previewTitle = document.getElementById('avatarPreviewTitle');
+  const previewStatus = document.getElementById('avatarPreviewStatus');
+
+  const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
+
+  if (previewStatus) {
+    previewStatus.textContent = '⏳ 自動で9:16縦型画像（余白ゼロ）へ変換中...';
+    previewStatus.style.color = '#38bdf8';
+  }
+
+  try {
+    const optimizedBase64 = await convertImageTo916Vertical(file, mode);
+    currentOptimizedAvatarBase64 = optimizedBase64;
+
+    if (previewImg) previewImg.src = optimizedBase64;
+    if (previewTitle) previewTitle.textContent = `📸 最適化完了: ${file.name}`;
+    if (previewStatus) {
+      previewStatus.textContent = '✅ 横長画像を自動で9:16の縦型（白い余白ゼロ）に変換しました！この縦画像で動画が制作されます。';
+      previewStatus.style.color = '#10b981';
+      previewStatus.style.fontWeight = 'bold';
+    }
+  } catch (err) {
+    console.error('9:16変換エラー:', err);
+    if (previewStatus) {
+      previewStatus.textContent = '⚠️ 画像の変換に失敗しました。通常の画像を使用します。';
+      previewStatus.style.color = '#f59e0b';
+    }
+  }
+}
+
+if (mediaFilesInput) {
+  mediaFilesInput.addEventListener('change', () => {
+    const file = mediaFilesInput.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      processAndPreviewAvatar(file);
+    }
+  });
+}
+
+// 9:16 変換モード切り替え時の即時再プレビュー
+document.querySelectorAll('input[name="cropMode"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    if (currentRawAvatarFile) {
+      processAndPreviewAvatar(currentRawAvatarFile);
+    }
+  });
+});
+
 
 // Instagramのチェック状態に応じた表示制御
 if (instagramCb && instagramDetailSettings) {
@@ -217,19 +351,21 @@ if (generateAvatarVideoBtn) {
     if (statusEl) statusEl.textContent = '⏳ HeyGenに画像を送信中...';
 
     try {
-      // ステップ3の画像入力欄から画像を取得
+      // ステップ3の画像入力欄から画像を取得（9:16自動最適化済みBase64を優先）
       let imageBase64 = null;
       const avatarFiles = mediaFilesInput ? [...mediaFilesInput.files] : [];
       
       if (avatarFiles.length > 0) {
-        // アップロード画像がある場合、Base64に変換して送信
         const file = avatarFiles[0];
-        imageBase64 = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-        if (statusEl) statusEl.textContent = `📸 新しい顔写真（${file.name}）をHeyGenへ登録中（枠の自動整理中）...`;
+        const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
+        if (statusEl) statusEl.textContent = `📸 9:16縦型（余白ゼロ）に最適化してHeyGenへ送信中...`;
+
+        // 9:16最適化済みBase64を優先使用（なければ即時生成）
+        if (currentOptimizedAvatarBase64) {
+          imageBase64 = currentOptimizedAvatarBase64;
+        } else {
+          imageBase64 = await convertImageTo916Vertical(file, mode);
+        }
       } else {
         if (statusEl) statusEl.textContent = '📸 遠藤オーナー登録済みアバターを使用。動画生成中...';
       }
