@@ -49,7 +49,18 @@
   to = "/akasawa-dp/index.html"
   status = 200
 
-# 各施設 ポータルダッシュボード ルーティング
+# 遠藤正俊オーナー ショート動画・SNS配信システム ルーティング
+[[redirects]]
+  from = "/endo-sns"
+  to = "/endo-sns/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/endo-sns/*"
+  to = "/endo-sns/:splat"
+  status = 200
+
+# 施設別ポータルダッシュボード ルーティング
 [[redirects]]
   from = "/akasawa"
   to = "/akasawa/index.html"

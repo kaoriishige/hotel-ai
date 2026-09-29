@@ -1120,6 +1120,10 @@ const redirectsContent = `# Netlify Serverless Functions 保護 (最優先リダ
 /akasawa/dp/*      /akasawa/dp/index.html      200
 /akasawa-dp/*      /akasawa-dp/index.html      200
 
+# 遠藤正俊オーナー ショート動画・SNS配信システム ルーティング
+/endo-sns      /endo-sns/index.html      200
+/endo-sns/*    /endo-sns/:splat          200
+
 # 施設別ポータルルーティング
 /akasawa      /akasawa/index.html      200
 /nasu-utopia  /nasu-utopia/index.html  200
