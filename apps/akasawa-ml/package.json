@@ -8,6 +8,7 @@
     "build": "echo 'Static app build not required'"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.758.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

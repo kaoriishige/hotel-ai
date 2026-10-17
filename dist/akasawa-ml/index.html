@@ -401,9 +401,25 @@
         <button id="closeOptOutModalBtn" class="ghost" style="padding: 4px 12px; font-size: 13px; border: 1px solid var(--line); color: var(--text); border-radius: 6px; cursor: pointer;">✕ 閉じる</button>
       </div>
       <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">
-        ※ここに含まれるメールアドレスは、CSV取込時や毎朝08:00の自動配信から全自動で除外されます。<br>
+        ※ここに含まれるメールアドレスは、CSV取込時や一斉配信・バッチ送信から<strong>サーバー側で100%全自動で安全に遮断・除外</strong>されます。<br>
         「🔄 配信を復活」を押すと配信停止が解除され、通常通りメルマガ・一斉配信を送信できるようになります。
       </p>
+
+      <!-- 手動オプトアウト登録フォーム -->
+      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+        <div style="font-size: 12px; font-weight: bold; color: #fca5a5; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <span>➕</span> 配信停止（オプトアウト）アドレスを手動追加
+        </div>
+        <div style="display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap;">
+          <input type="text" id="manualOptOutInput" placeholder="メールアドレスを入力 (複数ある場合はカンマまたはスペース区切り)" style="flex: 1; min-width: 260px; padding: 6px 10px; font-size: 12px; background: #0b1120; border: 1px solid var(--line); border-radius: 4px; color: #fff;" />
+          <input type="text" id="manualOptOutReason" placeholder="停止理由 (例: 電話での停止依頼、返信希望など)" style="width: 220px; padding: 6px 10px; font-size: 12px; background: #0b1120; border: 1px solid var(--line); border-radius: 4px; color: #fff;" />
+          <button type="button" id="manualOptOutAddBtn" class="danger" style="padding: 6px 14px; font-size: 12px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">登録する</button>
+        </div>
+        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+          過去にメール返信等で配信停止を希望された方のメールアドレスを登録すると、即座に全配信から完全に除外されます。
+        </div>
+      </div>
+
       <div class="table-container" style="flex: 1; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; min-height: 180px;">
         <table class="table" style="width: 100%; border-collapse: collapse;">
           <thead style="position: sticky; top: 0; background: #142038; z-index: 10;">
@@ -418,7 +434,8 @@
           <tbody id="optOutTableBody"></tbody>
         </table>
       </div>
-      <div style="margin-top: 14px; text-align: right;">
+      <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <span id="optOutCountSummary" style="font-size: 12px; color: #94a3b8;">登録件数: 0 件</span>
         <button id="closeOptOutModalFooterBtn" class="ghost" style="padding: 6px 16px; font-size: 12px; border: 1px solid var(--line); cursor: pointer;">↩️ 閉じてダッシュボードに戻る</button>
       </div>
     </div>

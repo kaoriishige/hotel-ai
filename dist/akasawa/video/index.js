@@ -68,7 +68,7 @@ if (simpleTag) {
 let currentOptimizedAvatarBase64 = null;
 let currentRawAvatarFile = null;
 
-async function convertImageTo916Vertical(fileOrDataUrl, mode = 'cover') {
+async function convertImageTo916Vertical(fileOrDataUrl, mode = 'cover', colorFilter = 'normal') {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -149,6 +149,35 @@ async function convertImageTo916Vertical(fileOrDataUrl, mode = 'cover') {
         ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetWidth, targetHeight);
       }
 
+      // --- 🎨 カラーフィルター（色調）の適用 ---
+      if (colorFilter === 'sepia') {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = targetWidth;
+        tempCanvas.height = targetHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(canvas, 0, 0);
+
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
+        ctx.save();
+        // 重厚で味わい深いクラシックセピア調
+        ctx.filter = 'sepia(0.92) contrast(1.12) brightness(0.95)';
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.restore();
+      } else if (colorFilter === 'grayscale') {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = targetWidth;
+        tempCanvas.height = targetHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(canvas, 0, 0);
+
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
+        ctx.save();
+        // 静寂と陰影のノワールモノクロ調
+        ctx.filter = 'grayscale(1) contrast(1.15) brightness(0.96)';
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.restore();
+      }
+
       // 高品質JPEG Base64出力
       resolve(canvas.toDataURL('image/jpeg', 0.95));
     };
@@ -166,30 +195,72 @@ async function convertImageTo916Vertical(fileOrDataUrl, mode = 'cover') {
   });
 }
 
-// 📸 ステップ3: 新しい顔写真が選択された時の自動9:16変換＆リアルタイムプレビュー
-async function processAndPreviewAvatar(file) {
-  if (!file) return;
-  currentRawAvatarFile = file;
+// 📸 ステップ3: 顔写真選択・変換モード・色調変更時のリアルタイムプレビュー＆Base64生成
+async function processAndPreviewAvatar(fileOrUrl) {
+  const target = fileOrUrl || currentRawAvatarFile || 'endo-916.jpg';
+  if (fileOrUrl instanceof File) {
+    currentRawAvatarFile = fileOrUrl;
+  }
+
   const previewImg = document.getElementById('avatarPreviewImg');
   const previewTitle = document.getElementById('avatarPreviewTitle');
   const previewStatus = document.getElementById('avatarPreviewStatus');
+  const activeFilterBadge = document.getElementById('activeFilterBadge');
 
   const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
+  const colorFilter = document.querySelector('input[name="colorFilter"]:checked')?.value || 'normal';
+
+  const filterLabels = {
+    normal: '通常カラー',
+    sepia: 'クラシックセピア',
+    grayscale: 'ノワールモノクロ'
+  };
+
+  if (activeFilterBadge) {
+    activeFilterBadge.textContent = filterLabels[colorFilter] || '通常カラー';
+    if (colorFilter === 'sepia') {
+      activeFilterBadge.style.color = '#fce79a';
+      activeFilterBadge.style.background = 'rgba(212, 175, 55, 0.25)';
+    } else if (colorFilter === 'grayscale') {
+      activeFilterBadge.style.color = '#cbd5e1';
+      activeFilterBadge.style.background = 'rgba(148, 163, 184, 0.25)';
+    } else {
+      activeFilterBadge.style.color = '#38bdf8';
+      activeFilterBadge.style.background = 'rgba(56, 189, 248, 0.15)';
+    }
+  }
 
   if (previewStatus) {
-    previewStatus.textContent = '⏳ 自動で9:16縦型画像（余白ゼロ）へ変換中...';
+    previewStatus.textContent = `⏳ ${filterLabels[colorFilter]}＆9:16縦型画像へ最適化中...`;
     previewStatus.style.color = '#38bdf8';
   }
 
   try {
-    const optimizedBase64 = await convertImageTo916Vertical(file, mode);
+    const optimizedBase64 = await convertImageTo916Vertical(target, mode, colorFilter);
     currentOptimizedAvatarBase64 = optimizedBase64;
 
     if (previewImg) previewImg.src = optimizedBase64;
-    if (previewTitle) previewTitle.textContent = `📸 最適化完了: ${file.name}`;
+
+    const isCustomFile = currentRawAvatarFile instanceof File;
+    if (previewTitle) {
+      previewTitle.textContent = isCustomFile
+        ? `📸 最適化完了: ${currentRawAvatarFile.name} (${filterLabels[colorFilter]})`
+        : `📸 遠藤正俊オーナー 公式写真 (${filterLabels[colorFilter]})`;
+    }
+
     if (previewStatus) {
-      previewStatus.textContent = '✅ 横長画像を自動で9:16の縦型（白い余白ゼロ）に変換しました！この縦画像で動画が制作されます。';
-      previewStatus.style.color = '#10b981';
+      if (colorFilter === 'sepia') {
+        previewStatus.textContent = '☕ 格調高いクラシックセピア色に変換しました！この色調でHeyGen動画が制作されます。';
+        previewStatus.style.color = '#fce79a';
+      } else if (colorFilter === 'grayscale') {
+        previewStatus.textContent = '🎞️ 静寂のノワールモノクロに変換しました！この色調でHeyGen動画が制作されます。';
+        previewStatus.style.color = '#cbd5e1';
+      } else {
+        previewStatus.textContent = isCustomFile
+          ? '✅ 横長画像を自動で9:16の縦型（白い余白ゼロ）に変換しました！この縦画像で動画が制作されます。'
+          : '✅ デフォルト写真設定済み（白い部分のない9:16縦型規格）';
+        previewStatus.style.color = '#10b981';
+      }
       previewStatus.style.fontWeight = 'bold';
     }
   } catch (err) {
@@ -213,9 +284,14 @@ if (mediaFilesInput) {
 // 9:16 変換モード切り替え時の即時再プレビュー
 document.querySelectorAll('input[name="cropMode"]').forEach(radio => {
   radio.addEventListener('change', () => {
-    if (currentRawAvatarFile) {
-      processAndPreviewAvatar(currentRawAvatarFile);
-    }
+    processAndPreviewAvatar(currentRawAvatarFile || 'endo-916.jpg');
+  });
+});
+
+// 🎨 カラーフィルター切り替え時の即時再プレビュー
+document.querySelectorAll('input[name="colorFilter"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    processAndPreviewAvatar(currentRawAvatarFile || 'endo-916.jpg');
   });
 });
 
@@ -414,21 +490,24 @@ if (generateAvatarVideoBtn) {
     if (statusEl) statusEl.textContent = '⏳ HeyGenに画像を送信中...';
 
     try {
-      // ステップ3の画像入力欄から画像を取得（9:16自動最適化済みBase64を優先）
+      // ステップ3の画像入力欄から画像を取得（9:16自動最適化＆色調適用済みBase64を優先）
       let imageBase64 = null;
       const avatarFiles = mediaFilesInput ? [...mediaFilesInput.files] : [];
-      
-      if (avatarFiles.length > 0) {
-        const file = avatarFiles[0];
-        const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
-        if (statusEl) statusEl.textContent = `📸 9:16縦型（余白ゼロ）に最適化してHeyGenへ送信中...`;
+      const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
+      const colorFilter = document.querySelector('input[name="colorFilter"]:checked')?.value || 'normal';
 
-        // 9:16最適化済みBase64を優先使用（なければ即時生成）
-        if (currentOptimizedAvatarBase64) {
-          imageBase64 = currentOptimizedAvatarBase64;
-        } else {
-          imageBase64 = await convertImageTo916Vertical(file, mode);
-        }
+      if (currentOptimizedAvatarBase64) {
+        imageBase64 = currentOptimizedAvatarBase64;
+        const filterName = colorFilter === 'sepia' ? '（セピア調）' : (colorFilter === 'grayscale' ? '（モノクロ調）' : '');
+        if (statusEl) statusEl.textContent = `📸 9:16最適化画像${filterName}をHeyGenへ送信中...`;
+      } else if (avatarFiles.length > 0) {
+        const file = avatarFiles[0];
+        if (statusEl) statusEl.textContent = `📸 9:16縦型（余白ゼロ）に最適化してHeyGenへ送信中...`;
+        imageBase64 = await convertImageTo916Vertical(file, mode, colorFilter);
+      } else if (colorFilter !== 'normal') {
+        const filterName = colorFilter === 'sepia' ? 'セピア色' : 'モノクロ';
+        if (statusEl) statusEl.textContent = `📸 遠藤オーナー公式写真を${filterName}に変換してHeyGenへ送信中...`;
+        imageBase64 = await convertImageTo916Vertical('endo-916.jpg', mode, colorFilter);
       } else {
         if (statusEl) statusEl.textContent = '📸 遠藤オーナー登録済みアバターを使用。動画生成中...';
       }
@@ -1894,6 +1973,7 @@ if (startConcatBtn) {
       const showBranding = document.getElementById('concatShowBranding')?.checked ?? true;
       const video1FlipHorizontal = document.getElementById('concatVideo1Flip')?.checked ?? false;
       const video2FlipHorizontal = document.getElementById('concatVideo2Flip')?.checked ?? false;
+      const concatColorFilter = document.getElementById('concatColorFilter')?.value || 'normal';
 
       const payload = {
         video1Url: concatState.video1.file ? '' : concatState.video1.url,
@@ -1905,7 +1985,8 @@ if (startConcatBtn) {
         transitionType,
         showBranding,
         video1FlipHorizontal,
-        video2FlipHorizontal
+        video2FlipHorizontal,
+        colorFilter: concatColorFilter
       };
 
       const response = await fetch('/.netlify/functions/concat-videos', {
@@ -1941,6 +2022,20 @@ if (startConcatBtn) {
       if (concatProgressArea) concatProgressArea.style.display = 'none';
     }
   });
+}
+
+// 結合スタジオの色調フィルタープレビュー反映
+const concatColorFilterSelect = document.getElementById('concatColorFilter');
+if (concatColorFilterSelect) {
+  const updateConcatPreviewsFilter = () => {
+    const val = concatColorFilterSelect.value;
+    let cssFilter = 'none';
+    if (val === 'sepia') cssFilter = 'sepia(0.85) contrast(1.1) brightness(0.95)';
+    else if (val === 'grayscale') cssFilter = 'grayscale(1) contrast(1.15) brightness(0.95)';
+    if (previewConcatVideo1) previewConcatVideo1.style.filter = cssFilter;
+    if (previewConcatVideo2) previewConcatVideo2.style.filter = cssFilter;
+  };
+  concatColorFilterSelect.addEventListener('change', updateConcatPreviewsFilter);
 }
 
 // 結合した動画をSNS投稿予約にセット

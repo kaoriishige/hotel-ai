@@ -20,6 +20,7 @@
     "dev:plan": "npm run dev --workspace=apps/akasawa-plan"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.758.0",
     "@google/generative-ai": "^0.21.0",
     "@remotion/lambda-client": "^4.0.120",
     "dayjs": "^1.11.13",

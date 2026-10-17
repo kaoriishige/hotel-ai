@@ -103,14 +103,11 @@ if (!fs.existsSync(adminDistPath) || !fs.existsSync(path.join(adminDistPath, 'in
   console.log('  → akasawa-dp: dist already exists, skipping build.');
 }
 
-// 6. 全2施設への「9システム統合AIダッシュボードポータル」のデプロイ
-console.log('Building and deploying 9-system AI Dashboards for facilities...');
+// 6. 赤沢温泉旅館「9システム統合AIダッシュボードポータル」のデプロイ
+console.log('Building and deploying 9-system AI Dashboard for Akasawa Ryokan...');
 const facilityMap = [
   { folder: 'akasawa', name: '赤沢温泉旅館' },
-  { folder: 'akasawa-dp', name: '赤沢温泉旅館' },
-  { folder: 'nasu-utopia', name: '那須ユートピア美野沢' },
-  { folder: 'nasu-utopia-ai', name: '那須ユートピア美野沢' },
-  { folder: 'nasumid-p', name: '那須ユートピア美野沢' }
+  { folder: 'akasawa-dp', name: '赤沢温泉旅館' }
 ];
 
 const templatePath = path.join(__dirname, 'facility-dashboard-template.html');
@@ -123,45 +120,32 @@ if (fs.existsSync(templatePath)) {
     
     let renderedHtml = templateHtml
       .replace(/\{\{FACILITY_NAME\}\}/g, item.name)
-      .replace(/\{\{FACILITY_PATH\}\}/g, item.folder);
+      .replace(/\{\{FACILITY_PATH\}\}/g, item.folder)
+      .replace(/https:\/\/nasu-utopia\.jp\//g, 'https://hotel-ai.netlify.app/akasawa/')
+      .replace(/那須ユートピア美野沢/g, '塩原温泉 赤沢温泉旅館')
+      .replace(/NASU UTOPIA MINOSAWA/g, 'SHIOBARA ONSEN AKASAWA RYOKAN')
+      .replace(/旧美野沢小学校を再生したアートリノベーション型プライベートヴィラ。フィンランド式貸切バレルサウナ CUBERU・REKKA、150㎡ドッグラン付きヴィラ、那須連山の伏流水かけ流し水風呂を完備。定員 1〜8 名、駐車場 30 台無料。那須塩原駅から車 30 分、那須 IC から車 35 分。/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、自然体で過ごす猫たちを静かに見守る空間（※猫と遊びたい方は徒歩10分の猫カフェをご利用ください）、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。')
+      .replace(/旧美野沢小学校リノベーションリゾート/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿')
+      .replace(/那須郡那須町/g, '那須塩原市')
+      .replace(/箕輪318/g, '塩原1149')
+      .replace(/那須町観光協会/g, '塩原温泉観光協会')
+      .replace(/サウナ（CUBERU\/Rekka）、グランピングヴィラ、手ぶらBBQのご案内/g, '源泉かけ流しぬる湯、自然に過ごす猫たちの見守り（徒歩10分猫カフェ有）、箒川一軒宿、鹿肉ジンギスカンのご案内')
+      .replace(/那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）/g, '塩原温泉 赤沢温泉旅館の独自の強み（天然ぬる湯、自然に過ごす猫たちの見守り、箒川のせせらぎ）')
+      .replace(/那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）/g, '塩原温泉 赤沢温泉旅館の全データ（ぬる湯・自然に過ごす猫の見守り・温泉・お食事）')
+      .replace(/那須ユートピア美野沢の全データ/g, '塩原温泉 赤沢温泉旅館の全データ')
+      .replace(/CUBERU・REKKA フィンランド式バレルサウナ\(完全貸切 90分\)/g, '源泉かけ流し天然ぬる湯（38〜40℃・加温加水なし）')
+      .replace(/REKKA 水風呂\(那須連山伏流水かけ流し・15℃\)/g, '箒川を望む露天風呂・静養空間')
+      .replace(/150㎡ドッグラン付きヴィラ\(小型〜中型犬 4頭まで同伴可\)/g, '自然に過ごす猫たちの静かな見守り（※猫と遊ぶなら徒歩10分の猫カフェへ）')
+      .replace(/地元食材 BBQ グリル\(ガス・炭火両対応\)/g, '赤沢風 鹿×豚ジンギスカン料理')
+      .replace(/ヴィラ A\(ドッグラン 150㎡ 付き・定員 6名\)/g, '箒川を望む和室（定員 5名）')
+      .replace(/ヴィラ B\(サウナ・定員 8名\)/g, '特別和室（静養・湯治向け）')
+      .replace(/「那須高原和牛BBQセット」「朝食焼き立てバゲット」/g, '「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の味覚」')
+      .replace(/サウナー・愛犬家・家族ファミリー・アート好きカップル/g, '温泉・長湯愛好家・静養・温泉治癒を求めるお客様（※猫と遊びたい方は徒歩10分猫カフェ案内）')
+      .replace(/Q1\. 貸切バレルサウナの利用時間は？/g, 'Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？')
+      .replace(/A1\. 90分完全貸切制です。15:00〜22:00 \/ 7:00〜10:00からご希望の時間枠をお選びいただけます。/g, 'A1. 当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。');
 
-    // 那須ユートピア美野沢・赤沢温泉旅館それぞれのRAG・9システム文言の完全カスタマイズ
-    if (item.folder.includes('nasu')) {
-      renderedHtml = renderedHtml
-        .replace(/「ととのう」の、その先へ(?!\s*\(BEYOND)/g, '「ととのう」の、その先へ (BEYOND TOTONOU FEELING)')
-        .replace(/猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿/g, 'アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート')
-        .replace(/お食事、館内施設、温泉のご案内/g, 'サウナ（CUBERU/Rekka）、グランピングヴィラ、手ぶらBBQのご案内')
-        .replace(/オーナー遠藤正俊氏のトーン＆マナー/g, '那須ユートピアの温かみと『ととのい体験』に寄り添うトーン＆マナー')
-        .replace(/赤沢温泉の独自の強み（ぬる湯、猫、おもてなし）/g, '那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）')
-        .replace(/赤沢温泉旅館の全データ/g, '那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）');
-    } else if (item.folder.includes('akasawa')) {
-      renderedHtml = renderedHtml
-        .replace(/https:\/\/nasu-utopia\.jp\//g, 'https://hotel-ai.netlify.app/akasawa/')
-        .replace(/那須ユートピア美野沢/g, '塩原温泉 赤沢温泉旅館')
-        .replace(/NASU UTOPIA MINOSAWA/g, 'SHIOBARA ONSEN AKASAWA RYOKAN')
-        .replace(/旧美野沢小学校を再生したアートリノベーション型プライベートヴィラ。フィンランド式貸切バレルサウナ CUBERU・REKKA、150㎡ドッグラン付きヴィラ、那須連山の伏流水かけ流し水風呂を完備。定員 1〜8 名、駐車場 30 台無料。那須塩原駅から車 30 分、那須 IC から車 35 分。/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿。加温・加水なし38度〜40度の天然ぬる湯、自然体で過ごす猫たちを静かに見守る空間（※猫と遊びたい方は徒歩10分の猫カフェへ）、箒川を望む静寂空間、鹿肉ジンギスカン・季節の味覚を提供します。')
-        .replace(/旧美野沢小学校リノベーションリゾート/g, '塩原温泉 源泉かけ流しのぬる湯と自然に過ごす猫のいる静養宿')
-        .replace(/那須郡那須町/g, '那須塩原市')
-        .replace(/箕輪318/g, '塩原1149')
-        .replace(/那須町観光協会/g, '塩原温泉観光協会')
-        .replace(/サウナ（CUBERU\/Rekka）、グランピングヴィラ、手ぶらBBQのご案内/g, '源泉かけ流しぬる湯、自然に過ごす猫たちの見守り（徒歩10分猫カフェ有）、箒川一軒宿、鹿肉ジンギスカンのご案内')
-        .replace(/那須ユートピア独自の強み（本格フィンランドサウナ、那須連山の水風呂、ドッグランヴィラ、手ぶらBBQ）/g, '塩原温泉 赤沢温泉旅館の独自の強み（天然ぬる湯、自然に過ごす猫たちの見守り、箒川のせせらぎ）')
-        .replace(/那須ユートピア美野沢の全データ（サウナ・ヴィラ・BBQ・アート）/g, '塩原温泉 赤沢温泉旅館の全データ（ぬる湯・自然に過ごす猫の見守り・温泉・お食事）')
-        .replace(/那須ユートピア美野沢の全データ/g, '塩原温泉 赤沢温泉旅館の全データ')
-        .replace(/CUBERU・REKKA フィンランド式バレルサウナ\(完全貸切 90分\)/g, '源泉かけ流し天然ぬる湯（38〜40℃・加温加水なし）')
-        .replace(/REKKA 水風呂\(那須連山伏流水かけ流し・15℃\)/g, '箒川を望む露天風呂・静養空間')
-        .replace(/150㎡ドッグラン付きヴィラ\(小型〜中型犬 4頭まで同伴可\)/g, '自然に過ごす猫たちの静かな見守り（※猫と遊ぶなら徒歩10分の猫カフェへ）')
-        .replace(/地元食材 BBQ グリル\(ガス・炭火両対応\)/g, '赤沢風 鹿×豚ジンギスカン料理')
-        .replace(/ヴィラ A\(ドッグラン 150㎡ 付き・定員 6名\)/g, '箒川を望む和室（定員 5名）')
-        .replace(/ヴィラ B\(サウナ・定員 8名\)/g, '特別和室（静養・湯治向け）')
-        .replace(/「那須高原和牛BBQセット」「朝食焼き立てバゲット」/g, '「赤沢風 鹿×豚ジンギスカン」「地物川魚・季節の味覚」')
-        .replace(/サウナー・愛犬家・家族ファミリー・アート好きカップル/g, '温泉・長湯愛好家・静養・温泉治癒を求めるお客様（※猫と遊びたい方は徒歩10分猫カフェ案内）')
-        .replace(/Q1\. 貸切バレルサウナの利用時間は？/g, 'Q1. 塩原温泉 赤沢温泉旅館のぬる湯の特徴は？')
-        .replace(/A1\. 90分完全貸切制です。15:00〜22:00 \/ 7:00〜10:00からご希望の時間枠をお選びいただけます。/g, 'A1. 当館の温泉は加温・加水なしの38度〜40度天然ぬる湯です。副交感神経を優位にし、長湯を楽しみながら至福の静養・リセット体験が可能です。')
-    }
-
-    // 各施設専用の動的仕様書HTML (SPEC_A 〜 SPEC_FG) の生成
-    const isAkasawaSpec = item.folder.includes('akasawa');
+    // 赤沢温泉旅館専用の動的仕様書HTML (SPEC_A 〜 SPEC_FG) の生成
+    const isAkasawaSpec = true;
 
     const specA = isAkasawaSpec ? `
       1. <strong>1行結論＋ベネフィット記載</strong>: 【塩原温泉 源泉かけ流しぬる湯＆自然に過ごす猫を見守る静養宿】至福の長湯と癒やし体験。<br>
@@ -796,95 +780,8 @@ akasawaAppReplacements.forEach(app => {
   replaceInAkasawaDir(destDir);
 });
 
-// 6.5. 那須ユートピア美野沢 専用 9アプリアプリの自動複製・完全テキスト＆RAG置換
-console.log('Generating Nasu Utopia dedicated AI sub-apps with deep fine-grained text replacements...');
 
-const appReplacements = [
-  { subpath: 'chat', src: path.join(__dirname, 'apps', 'nasu-utopia-chat') },
-  { subpath: 'ml', src: path.join(__dirname, 'apps', 'akasawa-ml', 'public') },
-  { subpath: 'sns', src: path.join(__dirname, 'apps', 'akasawa-sns', 'public') },
-  { subpath: 'review', src: path.join(__dirname, 'apps', 'akasawa-review', 'public') },
-  { subpath: 'blog', src: path.join(__dirname, 'apps', 'akasawa-blog', 'public') },
-  { subpath: 'ota', src: path.join(__dirname, 'apps', 'akasawa-ota', 'public') },
-  { subpath: 'plan', src: path.join(__dirname, 'apps', 'akasawa-plan', 'public') },
-  { subpath: 'video', src: path.join(__dirname, 'apps', 'endo-sns', 'public') },
-  { subpath: 'dp', src: path.join(__dirname, 'apps', 'akasawa-dp', 'apps', 'admin', 'dist') },
-  { subpath: 'rag', src: path.join(__dirname, 'apps', 'akasawa-rag', 'public') }
-];
 
-appReplacements.forEach(app => {
-  const destDir = path.join(distDir, 'nasu-utopia', app.subpath);
-  if (fs.existsSync(app.src)) {
-    copyFolderSync(app.src, destDir);
-  }
-
-  // 細部まで100%全置換する辞書マップ（徹底完全補強）
-  const replacementRules = [
-    [/赤沢温泉旅館/g, '那須ユートピア美野沢'],
-    [/赤沢温泉/g, '那須ユートピア美野沢'],
-    [/赤沢風/g, '那須ユートピア風'],
-    [/赤沢/g, '那須ユートピア'],
-    [/塩原/g, '那須町'],
-    [/箒川/g, '那須連山'],
-    [/Akasawa Onsen Ryokan/g, 'Nasu Utopia Minosawa'],
-    [/Akasawa Onsen/g, 'Nasu Utopia'],
-    [/Akasawa/g, 'Nasu Utopia'],
-    [/akazawa-onsen/g, 'nasu-utopia'],
-    [/akazawa/g, 'nasu-utopia'],
-    [/猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿/g, 'アート×サウナ×大自然で五感を解き放つ、旧美野沢小学校リノベーションリゾート'],
-    [/猫とぬる湯と渓流にほどける/g, '「ととのう」の、その先へ。アート×サウナ×大自然'],
-    [/静養型ウェルネスの小宿/g, '廃校アートリノベーションリゾート'],
-    [/サウナ・水風呂旅館/g, 'サウナ＆ヴィラリゾート'],
-    [/ぬる湯/g, '本格フィンランドサウナ（CUBERU / Rekka）と那須連山の水風呂'],
-    [/渓流のせせらぎ/g, '那須連山の豊かな大自然'],
-    [/渓流/g, '那須の大自然'],
-    [/金目鯛の姿煮/g, '那須特製 手ぶら本格BBQ'],
-    [/金目鯛/g, '手ぶら本格BBQ'],
-    [/当館自慢の創作料理/g, '当館自慢の手ぶらBBQ＆サウナ飯'],
-    [/創作料理/g, '手ぶら本格BBQ'],
-    [/創作コース/g, '手ぶら本格BBQコース'],
-    [/創作和食/g, '地元の新鮮食材BBQ'],
-    [/伊豆/g, '那須高原'],
-    [/遠藤正俊/g, '支配人'],
-    [/遠藤氏/g, '支配人'],
-    [/遠藤/g, '支配人'],
-    [/1\. 🌲 安定を捨てて、50代で自分の生き方に舵を切った決断と思考法/g, '1. 🔥 「ととのう」の、その先へ (CUBERUサウナ / 薪サウナRekka / 那須伏流水水風呂)'],
-    [/2\. ⏳ 「他人の価値観」で生きるのをやめ、人生の軸を取り戻す技術/g, '2. 🏫 廃校をアートとサウナで再生したストーリー (旧美野沢小学校リノベーション)'],
-    [/3\. 🌍 世界中で大自然を見て気づいた、現代人が疲弊していく本当の原因/g, '3. 🍖 那須高原和牛と星空の手ぶら本格BBQ (地物野菜・焚き火体験)'],
-    [/4\. 💡 なぜ価格競争や数字の比較に巻き込まれると不幸になるのか？/g, '4. 🐶 愛犬とノーリードで過ごすプライベートヴィラ (150㎡専用ドッグラン)'],
-    [/5\. 🌿 「何もしない時間」を意図的に作れない現代人が余白を取り戻す方法/g, '5. 🌿 大自然の音とアートに浸る、大人の究極のデジタルデトックス'],
-    [/安定を捨てて生き方を変えた理由/g, 'ととのうのその先へサウナ体験'],
-    [/他人の価値観で生きるのをやめる/g, '廃校アートサウナ再生ストーリー'],
-    [/世界中で大自然を見て気づいた人間社会のバグ/g, '那須高原和牛手ぶらBBQ'],
-    [/価格競争・数字の競争から抜け出す思考/g, '愛犬と過ごすドッグランヴィラ'],
-    [/余白と休息を意識的に作るマインドセット/g, '大自然とアートのデジタルデトックス'],
-    [/看板猫/g, '現代アート作品'],
-    [/看板ネコ/g, '現代アート作品'],
-    [/猫/g, 'アート'],
-    [/露天風呂/g, 'プライベートサウナ＆外気浴'],
-    [/大浴場/g, 'コンクリートサウナCUBERU＆薪サウナRekka'],
-    [/自家源泉100%/g, '那須連山の極流水風呂'],
-    [/温泉/g, 'サウナ・水風呂']
-  ];
-
-  const replaceInDir = (dir) => {
-    if (!fs.existsSync(dir)) return;
-    fs.readdirSync(dir).forEach(file => {
-      const fullPath = path.join(dir, file);
-      if (fs.lstatSync(fullPath).isDirectory()) {
-        if (file !== 'node_modules' && file !== '.git') replaceInDir(fullPath);
-      } else if (/\.(html|js|json|md|css|txt|ts|tsx)$/.test(file)) {
-        let content = fs.readFileSync(fullPath, 'utf8');
-        replacementRules.forEach(([rule, value]) => {
-          content = content.replace(rule, value);
-        });
-        fs.writeFileSync(fullPath, content, 'utf8');
-      }
-    });
-  };
-
-  replaceInDir(destDir);
-});
 
 
 
@@ -907,7 +804,13 @@ if (fs.existsSync(ceoFuncs)) {
 const mlFuncs = path.join(__dirname, 'apps', 'akasawa-ml', 'netlify', 'functions');
 if (fs.existsSync(mlFuncs)) {
   fs.readdirSync(mlFuncs).forEach(file => {
-    fs.copyFileSync(path.join(mlFuncs, file), path.join(functionsDir, file));
+    const srcPath = path.join(mlFuncs, file);
+    const destPath = path.join(functionsDir, file);
+    if (fs.lstatSync(srcPath).isDirectory()) {
+      copyFolderSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
   });
 }
 
@@ -1063,14 +966,9 @@ This platform hosts AI-optimized knowledge bases and autonomous management agent
 All information is structured using Schema.org Hotel specification and emotional 'Reason to Buy' frameworks.
 
 ## Key Facilities & Tenants
-1. Nasu Utopia Minosawa (那須ユートピア美野沢):
-   - Concept: Old elementary school art renovation, private barrel sauna (CUBERU/Rekka), dog-run villa (150m2), hands-free BBQ.
-   - Address: 318 Minowa, Nasu-machi, Nasu-gun, Tochigi, Japan.
-   - Access: 20 min drive from JR Nasushiobara Station. Free parking for 30 cars.
-   - URL: https://hotel-ai.netlify.app/nasu-utopia/
-
-2. Akazawa Onsen Ryokan (赤沢温泉旅館):
+1. Akazawa Onsen Ryokan (赤沢温泉旅館):
    - Concept: 100% free-flowing lukewarm spring (38-40C), resident cats, mountain stream views, authentic quiet relaxation.
+   - Address: 1149 Shiobara, Nasushiobara-shi, Tochigi, Japan.
    - URL: https://hotel-ai.netlify.app/akasawa/
 
 ## AI Crawling Guidelines
@@ -1113,10 +1011,8 @@ const redirectsContent = `# Netlify Serverless Functions 保護 (最優先リダ
 
 # ダイナミックプライシング 静的アセット保護 (最優先)
 /akasawa/dp/assets/*     /akasawa/dp/assets/:splat     200
-/nasu-utopia/dp/assets/* /nasu-utopia/dp/assets/:splat 200
 
 # ダイナミックプライシング SPA ルーティング
-/nasu-utopia/dp/*  /nasu-utopia/dp/index.html  200
 /akasawa/dp/*      /akasawa/dp/index.html      200
 /akasawa-dp/*      /akasawa-dp/index.html      200
 
@@ -1126,7 +1022,6 @@ const redirectsContent = `# Netlify Serverless Functions 保護 (最優先リダ
 
 # 施設別ポータルルーティング
 /akasawa      /akasawa/index.html      200
-/nasu-utopia  /nasu-utopia/index.html  200
 `;
 fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
 

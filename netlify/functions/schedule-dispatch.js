@@ -1,3 +1,5 @@
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+
 let getDb = null;
 let admin = null;
 try {
@@ -12,10 +14,22 @@ try {
   } catch (e2) {}
 }
 
-// ユーザー指示: RESEND_API_KEYS1〜7は使用せず、単一の RESEND_API_KEY のみを使用
-function getResendApiKey() {
-  const key = process.env.RESEND_API_KEY;
-  return key ? key.trim() : '';
+function getSesClient() {
+  const accessKeyId = (process.env.AWS_ACCESS_KEY || '').trim();
+  const secretAccessKey = (process.env.AWS_SECRET_KEY || '').trim();
+  const region = (process.env.AWS_REGION_KEY || 'ap-northeast-1').trim();
+
+  if (!accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  return new SESClient({
+    region,
+    credentials: {
+      accessKeyId,
+      secretAccessKey
+    }
+  });
 }
 
 exports.handler = async (event) => {
@@ -36,13 +50,13 @@ exports.handler = async (event) => {
       return json(400, { ok: false, error: 'customers or payloads array is required' });
     }
 
-    const resendKey = getResendApiKey();
-    const from = process.env.MAIL_FROM || '赤沢温泉旅館 <info@mail.akasawaonsen.com>';
-    if ((channel === 'email' || channel === 'both') && !resendKey) {
-      return json(400, { ok: false, error: 'RESEND_API_KEY が設定されていません。' });
+    const hasAwsCreds = !!(process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY);
+    const senderEmail = (process.env.SENDER_EMAIL || process.env.MAIL_FROM || '').trim();
+    if ((channel === 'email' || channel === 'both') && (!hasAwsCreds || !senderEmail)) {
+      return json(400, { ok: false, error: 'AWS認証情報(AWS_ACCESS_KEY, AWS_SECRET_KEY)または送信元アドレス(SENDER_EMAIL)が設定されていません。' });
     }
 
-    console.log(`[schedule-dispatch] RESEND_API_KEY 単一キーにて即時一括配信開始: 対象総数 ${targetList.length} 件`);
+    console.log(`[schedule-dispatch] Amazon SES にて即時配信開始: 対象総数 ${targetList.length} 件`);
 
     // 全件のメッセージ本文を展開
     const allPayloads = targetList.map(t => {
@@ -61,7 +75,7 @@ exports.handler = async (event) => {
 
     let sendResult = { count: 0, failedNames: [] };
     if (channel === 'email' || channel === 'both') {
-      sendResult = await sendEmailSingleKeyBatch(allPayloads, resendKey, from, scenario);
+      sendResult = await sendEmailBatchSES(allPayloads, senderEmail, scenario);
     }
 
     const totalSuccessCount = sendResult.count || 0;
@@ -103,8 +117,8 @@ function wrapLinksWithTracking(text, cid, scenario) {
   });
 }
 
-// 単一RESEND_API_KEYでの全件一括送信処理
-async function sendEmailSingleKeyBatch(payloads, resendKey, from, scenario) {
+// Amazon SES での全件送信処理
+async function sendEmailBatchSES(payloads, from, scenario) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validPayloads = payloads.filter(p => {
     if (!p.email) return false;
@@ -114,74 +128,73 @@ async function sendEmailSingleKeyBatch(payloads, resendKey, from, scenario) {
 
   if (validPayloads.length === 0) return { type: 'email', count: 0, failedNames: [] };
 
-  const keyCapacity = 100; // Resend Batch API の最大100件/リクエスト
-  const chunks = [];
-  for (let i = 0; i < validPayloads.length; i += keyCapacity) {
-    chunks.push(validPayloads.slice(i, i + keyCapacity));
+  const sesClient = getSesClient();
+  if (!sesClient) {
+    return { type: 'email', count: 0, failedNames: ['AWS SES クライアントが初期化できませんでした'] };
   }
 
   let totalSent = 0;
   const failedNames = [];
 
-  // レートリミット制限（429）を回避しながら高速送信するため、適度な並列度（最大5並列）でチャンクを送信
-  const concurrency = 4;
-  for (let i = 0; i < chunks.length; i += concurrency) {
-    const currentBatchChunks = chunks.slice(i, i + concurrency);
+  // 並行数を5に設定
+  const concurrency = 5;
+  for (let i = 0; i < validPayloads.length; i += concurrency) {
+    const chunk = validPayloads.slice(i, i + concurrency);
 
-    const batchPromises = currentBatchChunks.map(async (chunk) => {
-      const chunkRequests = chunk.map(p => {
-        const cid = (p.email || 'guest').trim().toLowerCase();
-        const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
-        const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
-        const htmlBody = `
-          <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
-          <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
-        `;
+    const promises = chunk.map(async (p) => {
+      const cid = (p.email || 'guest').trim().toLowerCase();
+      const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
+      const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
+      const htmlBody = `
+        <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
+        <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />
+      `;
 
-        const req = {
-          from,
-          to: p.email,
-          subject: p.subject,
-          text: wrappedMessage,
-          html: htmlBody
-        };
-        if (process.env.REPLY_TO) req.reply_to = process.env.REPLY_TO;
-        return req;
-      });
+      const sendEmailParams = {
+        Source: from,
+        Destination: {
+          ToAddresses: [p.email.trim()]
+        },
+        Message: {
+          Subject: {
+            Data: p.subject || '赤沢温泉旅館からのお知らせ',
+            Charset: 'UTF-8'
+          },
+          Body: {
+            Text: {
+              Data: wrappedMessage,
+              Charset: 'UTF-8'
+            },
+            Html: {
+              Data: htmlBody,
+              Charset: 'UTF-8'
+            }
+          }
+        }
+      };
+
+      if (process.env.REPLY_TO) {
+        sendEmailParams.ReplyToAddresses = [process.env.REPLY_TO.trim()];
+      }
 
       try {
-        const res = await fetch('https://api.resend.com/emails/batch', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${resendKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(chunkRequests)
-        });
-
-        let data = await res.json();
-
-        if (res.ok) {
-          totalSent += chunkRequests.length;
-        } else {
-          console.warn('[schedule-dispatch] Resend single key batch error:', data);
-          chunk.forEach(p => failedNames.push(`${p.email} (${data.message || '送信失敗'})`));
-        }
+        const command = new SendEmailCommand(sendEmailParams);
+        await sesClient.send(command);
+        totalSent++;
       } catch (err) {
-        console.warn('[schedule-dispatch] Resend fetch error:', err.message);
-        chunk.forEach(p => failedNames.push(`${p.email} (${err.message})`));
+        console.warn(`[schedule-dispatch] SES送信エラー (${p.email}):`, err.message);
+        failedNames.push(`${p.email} (${err.message})`);
       }
     });
 
-    await Promise.all(batchPromises);
+    await Promise.all(promises);
 
-    // 短時間の過密アクセスによるレート制限(429)を防ぐため、ごくわずかなインターバル(120ms)を設ける
-    if (i + concurrency < chunks.length) {
-      await new Promise(r => setTimeout(r, 120));
+    if (i + concurrency < validPayloads.length) {
+      await new Promise(r => setTimeout(r, 100));
     }
   }
 
-  return { type: 'email', count: totalSent, usedKeys: [{ key: 'RESEND_API_KEY', count: totalSent, from }], failedNames };
+  return { type: 'email', count: totalSent, provider: 'amazon-ses', failedNames };
 }
 
 function json(statusCode, body) {

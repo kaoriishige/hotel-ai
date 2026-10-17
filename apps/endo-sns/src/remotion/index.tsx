@@ -21,7 +21,8 @@ export const RemotionVideo: React.FC = () => {
           voiceUrl: '',
           bgmUrl: '',
           backgroundUrl: '',
-          flipBackgroundHorizontal: false
+          flipBackgroundHorizontal: false,
+          colorFilter: 'normal' as const
         }}
         calculateMetadata={async ({ props }) => {
           const fps = 30;
@@ -68,7 +69,8 @@ export const RemotionVideo: React.FC = () => {
           video2Volume: 1.0,
           showBranding: true,
           video1FlipHorizontal: false,
-          video2FlipHorizontal: false
+          video2FlipHorizontal: false,
+          colorFilter: 'normal' as const
         }}
         calculateMetadata={async ({ props }) => {
           const dur1 = props.duration1InFrames || 450;

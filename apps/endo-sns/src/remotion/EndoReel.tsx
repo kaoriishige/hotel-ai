@@ -10,6 +10,7 @@ export interface EndoReelProps {
   backgroundUrl?: string; // 背景映像または画像のURL（単一）
   backgroundUrls?: string[]; // 背景映像または画像のURL配列
   flipBackgroundHorizontal?: boolean; // 背景の左右反転（車を左側通行にする）
+  colorFilter?: 'normal' | 'sepia' | 'grayscale'; // 色調フィルター（セピア・モノクロ）
 }
 
 export const EndoReel = ({
@@ -19,7 +20,8 @@ export const EndoReel = ({
   bgmUrl = 'https://assets.mixkit.co/active_storage/sfx/2433/2433-84.wav',
   backgroundUrl,
   backgroundUrls,
-  flipBackgroundHorizontal = false
+  flipBackgroundHorizontal = false,
+  colorFilter = 'normal'
 }: EndoReelProps) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -149,6 +151,13 @@ export const EndoReel = ({
   // 背景がビデオかどうか
   const isVideo = currentBgUrl.endsWith('.mp4') || currentBgUrl.includes('video') || currentBgUrl.includes('preview');
 
+  const getFilterStyle = (filter?: 'normal' | 'sepia' | 'grayscale') => {
+    if (filter === 'sepia') return 'sepia(0.85) contrast(1.1) brightness(0.95)';
+    if (filter === 'grayscale') return 'grayscale(1) contrast(1.15) brightness(0.95)';
+    return 'none';
+  };
+  const filterStyle = getFilterStyle(colorFilter);
+
   // 1文字ずつのフェードイン用
   const chars: string[] = currentLineText.split('');
 
@@ -168,6 +177,7 @@ export const EndoReel = ({
             width: '100%',
             height: '100%',
             opacity: 0.75, // 可視性を上げるため少し明るく
+            filter: filterStyle,
             transform: flipBackgroundHorizontal ? 'scale(1.05) scaleX(-1)' : 'scale(1.05)'
           }}
           loop
@@ -181,6 +191,7 @@ export const EndoReel = ({
             width: '100%',
             height: '100%',
             opacity: 0.75, // 可視性を上げるため少し明るく
+            filter: filterStyle,
             transform: flipBackgroundHorizontal ? 'scale(1.05) scaleX(-1)' : 'scale(1.05)'
           }}
         />

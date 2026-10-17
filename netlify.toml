@@ -17,17 +17,6 @@
   node_bundler = "esbuild"
   external_node_modules = ["firebase-admin", "googleapis"]
 
-# 那須ユートピア美野沢 ダイナミックプライシング (React SPA ルーティング)
-[[redirects]]
-  from = "/nasu-utopia/dp"
-  to = "/nasu-utopia/dp/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/nasu-utopia/dp/*"
-  to = "/nasu-utopia/dp/index.html"
-  status = 200
-
 # 赤沢温泉旅館 ダイナミックプライシング (React SPA ルーティング)
 [[redirects]]
   from = "/akasawa/dp"
@@ -64,10 +53,5 @@
 [[redirects]]
   from = "/akasawa"
   to = "/akasawa/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/nasu-utopia"
-  to = "/nasu-utopia/index.html"
   status = 200
 

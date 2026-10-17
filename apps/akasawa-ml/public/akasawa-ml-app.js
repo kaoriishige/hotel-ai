@@ -329,12 +329,54 @@ function initOptOutModal() {
     });
   }
 
+  // サーバーの最新オプトアウトリストとフロントエンドの顧客データを同期
+  async function syncOptOutsFromServer() {
+    try {
+      const res = await fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list' })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.ok || !Array.isArray(data.optouts)) return;
+
+      const optSet = new Set(data.optouts.map(o => (o.email || o.cid || '').toLowerCase()).filter(Boolean));
+      if (optSet.size === 0) return;
+
+      let changed = false;
+      if (state.customers && state.customers.length > 0) {
+        state.customers.forEach(c => {
+          const em = (c.email || '').toLowerCase();
+          const cid = (c.id || '').toLowerCase();
+          if ((em && optSet.has(em)) || (cid && optSet.has(cid))) {
+            if (!c.unsubscribed) {
+              c.unsubscribed = true;
+              changed = true;
+            }
+          }
+        });
+      }
+
+      if (changed) {
+        persist();
+        render();
+        preview();
+      }
+    } catch (e) {
+      console.warn('オプトアウト同期エラー:', e.message);
+    }
+  }
+
+  // グローバルに公開（CSV取込後等にも呼び出せるようにする）
+  window.syncOptOutsFromServer = syncOptOutsFromServer;
+
   async function openModal() {
     if (!modal || !tableBody) return;
     modal.style.display = 'flex';
     tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">読み込み中...</td></tr>';
 
-    // Firestoreからオプトアウトリストを取得
+    // サーバーからオプトアウトリストを取得
     let serverList = [];
     try {
       const res = await fetch('/api/unsubscribe', {
@@ -381,6 +423,11 @@ function initOptOutModal() {
 
     const items = Array.from(combinedMap.values());
 
+    const summaryEl = document.getElementById('optOutCountSummary');
+    if (summaryEl) {
+      summaryEl.textContent = `登録件数: ${items.length} 件`;
+    }
+
     if (items.length === 0) {
       tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--accent-2);">現在、配信停止（オプトアウト）されているメールアドレスはありません。</td></tr>';
       return;
@@ -403,6 +450,72 @@ function initOptOutModal() {
     el.viewOptOutBtn.addEventListener('click', openModal);
   }
 
+  // 手動オプトアウト登録ボタン
+  const manualAddBtn = document.getElementById('manualOptOutAddBtn');
+  const manualInput = document.getElementById('manualOptOutInput');
+  const manualReason = document.getElementById('manualOptOutReason');
+
+  if (manualAddBtn && manualInput) {
+    manualAddBtn.addEventListener('click', async () => {
+      const rawText = manualInput.value.trim();
+      if (!rawText) {
+        alert('登録するメールアドレスを入力してください。');
+        return;
+      }
+
+      // カンマ、空白、改行で分割
+      const emails = rawText.split(/[\s,]+/).map(s => s.trim().toLowerCase()).filter(s => s.includes('@'));
+      if (emails.length === 0) {
+        alert('有効なメールアドレスが入力されていません。');
+        return;
+      }
+
+      const reason = (manualReason && manualReason.value.trim()) ? manualReason.value.trim() : '手動登録（配信停止希望）';
+
+      manualAddBtn.disabled = true;
+      manualAddBtn.textContent = '登録中...';
+
+      try {
+        const res = await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'unsubscribe',
+            emails: emails,
+            reason: reason
+          })
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || '登録に失敗しました');
+
+        // ローカル顧客リストにも反映
+        if (state.customers) {
+          const emailSet = new Set(emails);
+          state.customers.forEach(c => {
+            if (c.email && emailSet.has(c.email.toLowerCase())) {
+              c.unsubscribed = true;
+            }
+          });
+        }
+
+        persist();
+        render();
+        preview();
+
+        manualInput.value = '';
+        if (manualReason) manualReason.value = '';
+        alert(`✅ ${emails.length} 件のメールアドレスを配信停止リストに登録しました！\n今後の一斉配信・送信から全自動で遮断・除外されます。`);
+        openModal();
+      } catch (err) {
+        alert('登録エラー: ' + err.message);
+      } finally {
+        manualAddBtn.disabled = false;
+        manualAddBtn.textContent = '登録する';
+      }
+    });
+  }
+
   // 復活ボタンのイベントデリゲーション
   if (tableBody) {
     tableBody.addEventListener('click', async (e) => {
@@ -418,7 +531,7 @@ function initOptOutModal() {
       btn.textContent = '解除中...';
 
       try {
-        // 1. API で Firestore から削除
+        // 1. API で削除
         await fetch('/api/unsubscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -879,6 +992,15 @@ async function dispatchMessages() {
         foundLog.unreachedDetails = totalFailed > 0 ? `送信成功: ${totalSent}件 / 失敗: ${totalFailed}件` : '全件即時送信完了';
         persist();
         renderLogs();
+
+        // サーバー側へも配信履歴を確実に永続化保存
+        try {
+          fetch('/api/get-dispatch-logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(foundLog)
+          }).catch(() => {});
+        } catch (e) {}
       }
 
       persist();
@@ -1308,14 +1430,24 @@ function downloadSampleCsv() {
 }
 
 function normalizeCustomer(input) {
-  const email = (input.email || '').trim();
+  const email = (input.email || '').trim().toLowerCase();
   const lineUserId = (input.lineUserId || '').trim();
 
-  // 既存のリスト内に、同一メールアドレスまたはLINE IDで配信停止になっている人がいるか確認
+  // 1. 既存の顧客リスト内に同一メールアドレスまたはLINE IDで配信停止になっている人がいるか確認
   const isAlreadyUnsubscribed = (typeof state !== 'undefined' && state.customers) && state.customers.some(c => 
     c.unsubscribed && 
-    ((email && c.email === email) || (lineUserId && c.lineUserId === lineUserId))
+    ((email && (c.email || '').toLowerCase() === email) || (lineUserId && c.lineUserId === lineUserId))
   );
+
+  // 2. サーバーから取得済みのオプトアウトリストに存在するか確認
+  const isServerOptOut = (typeof window !== 'undefined' && window._serverOptOutEmails && email) 
+    ? window._serverOptOutEmails.has(email) 
+    : false;
+
+  // 3. 過去バウンス（宛先不明・不達659件）リストに存在するか確認
+  const isBouncedEmail = (typeof window !== 'undefined' && window._bouncedEmails && email)
+    ? window._bouncedEmails.has(email)
+    : false;
 
   const inputUnsubscribed = input.unsubscribed === true || 
     String(input.unsubscribed || '').toLowerCase() === 'true' || 
@@ -1338,7 +1470,8 @@ function normalizeCustomer(input) {
     checkOutDate: input.checkOutDate || '',
     reservationId: (input.reservationId || '').trim(),
     stayCount: Number(input.stayCount || 0),
-    unsubscribed: isAlreadyUnsubscribed || inputUnsubscribed,
+    unsubscribed: isAlreadyUnsubscribed || isServerOptOut || isBouncedEmail || inputUnsubscribed,
+    isBounced: isBouncedEmail,
     importFileName: input.importFileName || '',
     importedAt: input.importedAt || '',
     bookedPlanName: input.bookedPlanName || '',
@@ -2400,7 +2533,7 @@ function initUnreachedFeature() {
   });
 
   // メールアドレスを unsubscribed: true に昇格させるヘルパー
-  function markEmailsAsOptOut(emails) {
+  async function markEmailsAsOptOut(emails) {
     const emailSet = new Set(emails.map(e => e.trim().toLowerCase()));
     let updatedCount = 0;
 
@@ -2430,65 +2563,29 @@ function initUnreachedFeature() {
       }
     });
 
-    persist();
-    render();
-    alert(`計 ${emails.length} 件の未到着アドレスを「もう送らなくていいリスト（配信停止）」へ登録いたしました！`);
-  }
-}
-
-// 毎朝08:00 自動スケジュール配信の稼働状況取得・更新
-let currentActiveScheduleId = null;
-
-async function checkScheduleStatus() {
-  if (!el.scheduleStatusCard) return;
-  try {
-    const res = await fetch('/api/get-schedule-status');
-    const data = await res.json();
-    if (data.ok && Array.isArray(data.schedules)) {
-      const activeSched = data.schedules.find(s => s.status === 'active' && s.remainingCount > 0);
-      if (activeSched) {
-        currentActiveScheduleId = activeSched.id;
-        el.scheduleStatusCard.style.display = 'block';
-        if (el.scheduleRemainingCount) el.scheduleRemainingCount.textContent = activeSched.remainingCount;
-        if (el.scheduleDetailsText) {
-          el.scheduleDetailsText.innerHTML = `「${escapeHtml(activeSched.title)}」: 本日分送信済。残り <strong style="color:#ffd700;">${activeSched.remainingCount}</strong> 件を、<strong>朝 08:00</strong>に全件一括配信します。`;
-        }
-        return;
-      }
-    }
-    el.scheduleStatusCard.style.display = 'none';
-  } catch (e) {
-    console.warn('Failed to check schedule status:', e);
-  }
-}
-
-if (el.cancelScheduleBtn) {
-  el.cancelScheduleBtn.addEventListener('click', async () => {
-    if (!currentActiveScheduleId) return;
-    if (!confirm('現在予約中の「毎朝08:00 自動配信スケジュール」を停止しますか？\n（停止した後は自動配信されなくなります）')) return;
-
+    // サーバーのオプトアウトリストにも確実に永続保存
     try {
-      el.cancelScheduleBtn.disabled = true;
-      el.cancelScheduleBtn.textContent = '停止中...';
-      const res = await fetch('/api/get-schedule-status', {
+      await fetch('/api/unsubscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel', scheduleId: currentActiveScheduleId })
+        body: JSON.stringify({
+          action: 'unsubscribe',
+          emails: emails,
+          reason: '未到着（バウンス）一覧からの配信停止移動'
+        })
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || '停止に失敗しました');
-
-      alert('毎朝08:00の自動配信スケジュールを停止しました。');
-      el.scheduleStatusCard.style.display = 'none';
-      currentActiveScheduleId = null;
-    } catch (err) {
-      alert(`停止エラー: ${err.message}`);
-    } finally {
-      el.cancelScheduleBtn.disabled = false;
-      el.cancelScheduleBtn.textContent = '⏹️ 自動配信を停止';
+    } catch (e) {
+      console.warn('サーバーへのオプトアウト永続保存エラー:', e);
     }
-  });
+
+    persist();
+    render();
+    alert(`計 ${emails.length} 件の未到着アドレスを「もう送らなくていいリスト（配信停止）」へ永続登録いたしました！`);
+  }
 }
+
+// 毎朝08:00 自動スケジュール配信の残骸は削除済
+let currentActiveScheduleId = null;
 
 async function syncServerOptOuts() {
   try {
@@ -2498,7 +2595,7 @@ async function syncServerOptOuts() {
       body: JSON.stringify({ action: 'list' })
     });
     const data = await res.json();
-    if (data.ok && Array.isArray(data.optouts)) {
+    if (data.ok && Array.isArray(data.optouts) && data.optouts.length > 0) {
       const serverOptOutEmails = new Set(data.optouts.map(o => (o.email || '').trim().toLowerCase()).filter(Boolean));
       const serverOptOutCids = new Set(data.optouts.map(o => (o.cid || '').trim()).filter(Boolean));
 
@@ -2508,8 +2605,9 @@ async function syncServerOptOuts() {
         const cId = (c.id || '').trim();
         const shouldBeUnsub = (cEm && serverOptOutEmails.has(cEm)) || (cId && serverOptOutCids.has(cId));
 
-        if (c.unsubscribed !== shouldBeUnsub) {
-          c.unsubscribed = shouldBeUnsub;
+        // サーバーにオプトアウト登録されている場合は絶対に true に倒す（サーバー空データで勝手に解除しない安全設計）
+        if (shouldBeUnsub && !c.unsubscribed) {
+          c.unsubscribed = true;
           changed = true;
         }
       });
@@ -2525,14 +2623,94 @@ async function syncServerOptOuts() {
   }
 }
 
+async function syncServerDispatchLogs() {
+  try {
+    const res = await fetch('/api/get-dispatch-logs');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
+        const existingMap = new Map();
+        (state.logs || []).forEach(l => existingMap.set(l.id, l));
+        data.logs.forEach(l => {
+          if (!existingMap.has(l.id)) {
+            existingMap.set(l.id, l);
+          }
+        });
+        state.logs = Array.from(existingMap.values());
+        persist();
+        renderLogs();
+        renderAnalytics();
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to sync server dispatch logs:', e);
+  }
+}
+
+// オプトアウトおよびバウンスキャッシュの初期化
+window._serverOptOutEmails = new Set();
+window._bouncedEmails = new Set();
+
+async function initSuppressionCaches() {
+  try {
+    const unsubRes = await fetch('/api/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'list' })
+    });
+    if (unsubRes.ok) {
+      const data = await unsubRes.json();
+      if (data.ok && Array.isArray(data.optouts)) {
+        data.optouts.forEach(o => {
+          if (o.email) window._serverOptOutEmails.add(String(o.email).trim().toLowerCase());
+        });
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const unreachedRes = await fetch('/api/get-unreached');
+    if (unreachedRes.ok) {
+      const data = await unreachedRes.json();
+      if (data.ok && Array.isArray(data.emails)) {
+        data.emails.forEach(item => {
+          const em = item.to || item.email;
+          if (em) window._bouncedEmails.add(String(em).trim().toLowerCase());
+        });
+      }
+    }
+  } catch (e) {}
+
+  // 既存リストに即時反映
+  let changed = false;
+  if (state.customers && state.customers.length > 0) {
+    state.customers.forEach(c => {
+      const em = (c.email || '').trim().toLowerCase();
+      if (em && (window._serverOptOutEmails.has(em) || window._bouncedEmails.has(em))) {
+        if (!c.unsubscribed) {
+          c.unsubscribed = true;
+          changed = true;
+        }
+      }
+    });
+    if (changed) {
+      persist();
+      render();
+      preview();
+    }
+  }
+}
+
 render();
 setMode('csv');
 initUnreachedFeature();
 initOptOutModal();
-checkScheduleStatus();
 preview();
 fetchCampaignStats();
+initSuppressionCaches();
 syncServerOptOuts();
+syncServerDispatchLogs();
 setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
 setInterval(syncServerOptOuts, 30000);   // 30秒ごとに最新のオプトアウト台帳と自動同期
+setInterval(syncServerDispatchLogs, 20000); // 20秒ごとに最新の配信履歴を自動同期
 

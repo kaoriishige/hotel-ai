@@ -1,0 +1,53 @@
+[
+  {
+    "id": "log_sched_1789004891352",
+    "customerName": "【一斉配信】赤沢温泉旅館534メール7名前あり.csv (5,049件)",
+    "scenario": "custom",
+    "channel": "email",
+    "subject": "【夏の特別御案内】暑い夏、赤沢温泉旅館の「ぬる湯」で心と体をリセット！",
+    "time": "2026-07-23 13:31:28",
+    "totalCount": 5049,
+    "successCount": 4721,
+    "unreachedCount": 328,
+    "provider": "resend",
+    "status": "success",
+    "openCount": 1824,
+    "clickCount": 642,
+    "message": "赤沢温泉旅館534メール7名前あり.csv より5,049件への一斉配信が完了しました。\n（成功: 4,721件 / 不達・バウンス: 328件）",
+    "unreachedDetails": "全328件の不達・バウンスが検出されました。「未到着リスト」モーダルより詳細一覧をご確認いただけます。"
+  },
+  {
+    "id": "log_sched_1788245963517",
+    "customerName": "【一斉配信】赤沢温泉旅館CSVメールアドレス名前なし.csv (5,045件)",
+    "scenario": "custom",
+    "channel": "email",
+    "subject": "【夏の特別御案内】暑い夏、赤沢温泉旅館の「ぬる湯」で心と体をリセット！",
+    "time": "2026-07-22 14:41:07",
+    "totalCount": 5045,
+    "successCount": 4714,
+    "unreachedCount": 331,
+    "provider": "resend",
+    "status": "success",
+    "openCount": 1795,
+    "clickCount": 618,
+    "message": "赤沢温泉旅館CSVメールアドレス名前なし.csv より5,045件への一斉配信が完了しました。\n（成功: 4,714件 / 不達・バウンス: 331件）",
+    "unreachedDetails": "全331件の不達・バウンスが検出されました。「未到着リスト」モーダルより詳細一覧をご確認いただけます。"
+  },
+  {
+    "id": "log_init_batch_001",
+    "customerName": "【一斉配信】お盆前のおすすめプランと涼やかな温泉のご案内 (1,906件)",
+    "scenario": "special_plan",
+    "channel": "email",
+    "subject": "【赤沢温泉旅館】お盆前のおすすめプランと涼やかな温泉のご案内",
+    "time": "2026-07-21 07:38:24",
+    "totalCount": 1906,
+    "successCount": 1906,
+    "unreachedCount": 0,
+    "provider": "resend",
+    "status": "success",
+    "openCount": 892,
+    "clickCount": 315,
+    "message": "赤沢温泉旅館過去宿泊顧客 1,906件への特別プラン案内メール一斉配信が完了しました。",
+    "unreachedDetails": ""
+  }
+]

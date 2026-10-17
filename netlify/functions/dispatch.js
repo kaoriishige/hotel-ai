@@ -1,3 +1,36 @@
+const fs = require('fs');
+const path = require('path');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+
+// オプトアウトおよびバウンス（不達）の抑制リスト読み込み
+function getSuppressedEmails() {
+  const optouts = new Set();
+  const bounces = new Set();
+
+  try {
+    const optPath = path.join(__dirname, 'data', 'optouts.json');
+    if (fs.existsSync(optPath)) {
+      const list = JSON.parse(fs.readFileSync(optPath, 'utf8') || '[]');
+      list.forEach(item => {
+        if (item.email) optouts.add(String(item.email).trim().toLowerCase());
+      });
+    }
+  } catch (e) {}
+
+  try {
+    const bouncePath = path.join(__dirname, 'data', 'undelivered_raw.json');
+    if (fs.existsSync(bouncePath)) {
+      const list = JSON.parse(fs.readFileSync(bouncePath, 'utf8') || '[]');
+      list.forEach(item => {
+        const em = item.email || item.recipient || item.to;
+        if (em) bounces.add(String(em).trim().toLowerCase());
+      });
+    }
+  } catch (e) {}
+
+  return { optouts, bounces };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return json(405, { ok: false, error: 'Method not allowed' });
@@ -6,6 +39,19 @@ exports.handler = async (event) => {
   try {
     const { customer, scenario, channel, subject, message } = JSON.parse(event.body || '{}');
     if (!customer) return json(400, { ok: false, error: 'customer is required' });
+
+    // 顧客オブジェクト自体に unsubscribed フラグがある場合
+    if (customer.unsubscribed) {
+      return json(200, {
+        ok: true,
+        scenario,
+        channel,
+        results: {
+          email: { type: 'email', status: 'skipped', reason: '配信停止（オプトアウト）済みの顧客のため送信を遮断しました' }
+        },
+        mode: runtimeMode()
+      });
+    }
 
     const results = {};
     if (channel === 'email' || channel === 'both') {
@@ -21,23 +67,68 @@ exports.handler = async (event) => {
   }
 };
 
-function getIndividualResendApiKeys() {
-  const k = process.env.RESEND_API_KEY;
-  return k && k.trim() ? [k.trim()] : [];
+function getSesClient() {
+  const accessKeyId = (process.env.AWS_ACCESS_KEY || '').trim();
+  const secretAccessKey = (process.env.AWS_SECRET_KEY || '').trim();
+  const region = (process.env.AWS_REGION_KEY || 'ap-northeast-1').trim();
+
+  if (!accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  return new SESClient({
+    region,
+    credentials: {
+      accessKeyId,
+      secretAccessKey
+    }
+  });
 }
 
 async function sendEmail(customer, subject, message) {
   if (!customer.email) return { type: 'email', status: 'skipped', reason: 'email missing' };
 
-  const apiKeys = getIndividualResendApiKeys();
-  const from = process.env.MAIL_FROM;
-  if (apiKeys.length === 0 || !from) {
-    return { type: 'email', status: 'mock', to: customer.email, subject, note: '環境変数(RESEND_API_KEYS / MAIL_FROM)未設定のためモック送信' };
+  const cleanEmail = String(customer.email).trim().toLowerCase();
+  const { optouts, bounces } = getSuppressedEmails();
+
+  // === 【安全ガード1】オプトアウト済みの宛先への送信をサーバー側で完全遮断 ===
+  if (optouts.has(cleanEmail)) {
+    console.warn(`[dispatch:BLOCKED] オプトアウト済みの宛先への送信を遮断しました: ${cleanEmail}`);
+    return {
+      type: 'email',
+      status: 'skipped',
+      reason: '【送信遮断】配信停止（オプトアウト）希望済みアドレスのため、送信を行いませんでした',
+      to: cleanEmail
+    };
+  }
+
+  // === 【安全ガード2】過去バウンス（不達）宛先への送信をサーバー側で完全遮断 ===
+  if (bounces.has(cleanEmail)) {
+    console.warn(`[dispatch:BLOCKED] 過去バウンス（不達）アドレスへの送信を遮断しました: ${cleanEmail}`);
+    return {
+      type: 'email',
+      status: 'skipped',
+      reason: '【送信遮断】過去に不達（バウンス）となった無効アドレスのため、送信を行いませんでした',
+      to: cleanEmail
+    };
+  }
+
+  const sesClient = getSesClient();
+  const senderEmail = (process.env.SENDER_EMAIL || process.env.MAIL_FROM || '').trim();
+
+  if (!sesClient || !senderEmail) {
+    return {
+      type: 'email',
+      status: 'mock',
+      to: customer.email,
+      subject,
+      note: '環境変数(AWS_ACCESS_KEY / AWS_SECRET_KEY / SENDER_EMAIL)未設定のためモック送信'
+    };
   }
 
   const cid = customer.customerId || customer.id || (customer.email ? customer.email.split('@')[0] : 'guest');
   const trackingPixelUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=crm`;
-  
+
   // 本文中のURLを自動的にクリック追跡URL（/api/track-click）に変換
   const htmlBody = (message || '')
     .replace(/&/g, '&amp;')
@@ -50,55 +141,49 @@ async function sendEmail(customer, subject, message) {
     })
     + `<br/><br/><img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
 
-  const payload = {
-    from,
-    to: customer.email,
-    subject,
-    text: message,
-    html: htmlBody
+  const sendEmailParams = {
+    Source: senderEmail,
+    Destination: {
+      ToAddresses: [customer.email.trim()]
+    },
+    Message: {
+      Subject: {
+        Data: subject || '赤沢温泉旅館からのお知らせ',
+        Charset: 'UTF-8'
+      },
+      Body: {
+        Text: {
+          Data: message || '',
+          Charset: 'UTF-8'
+        },
+        Html: {
+          Data: htmlBody,
+          Charset: 'UTF-8'
+        }
+      }
+    }
   };
 
   if (process.env.REPLY_TO) {
-    payload.reply_to = process.env.REPLY_TO;
+    sendEmailParams.ReplyToAddresses = [process.env.REPLY_TO.trim()];
   }
 
-  let lastError = null;
-  for (let i = 0; i < apiKeys.length; i++) {
-    const currentKey = apiKeys[i];
-    try {
-      const resendController = new AbortController();
-      const resendTimeout = setTimeout(() => resendController.abort(), 5000);
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${currentKey}`,
-          'Content-Type': 'application/json'
-        },
-        signal: resendController.signal,
-        body: JSON.stringify(payload)
-      });
-      clearTimeout(resendTimeout);
+  try {
+    const command = new SendEmailCommand(sendEmailParams);
+    const response = await sesClient.send(command);
 
-      const data = await res.json();
-      if (!res.ok) {
-        lastError = new Error(`Resend APIエラー (Key #${i + 1}): ${data.message || JSON.stringify(data)}`);
-        continue; // 次のキーで再試行
-      }
-      return { 
-        type: 'email', 
-        status: 'sent', 
-        to: customer.email, 
-        provider: 'resend', 
-        keyNum: i + 1, 
-        emailId: data.id, 
-        data 
-      };
-    } catch (err) {
-      lastError = err;
-    }
+    return {
+      type: 'email',
+      status: 'sent',
+      to: customer.email,
+      provider: 'amazon-ses',
+      messageId: response.MessageId,
+      response
+    };
+  } catch (err) {
+    console.error('Amazon SES 送信エラー:', err);
+    throw new Error(`Amazon SES 送信エラー: ${err.message}`);
   }
-
-  throw lastError || new Error('すべてのResend APIキーで送信に失敗しました');
 }
 
 async function sendLine(customer, message) {
@@ -129,7 +214,7 @@ async function sendLine(customer, message) {
 }
 
 function runtimeMode() {
-  return getIndividualResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  return (process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY) || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {

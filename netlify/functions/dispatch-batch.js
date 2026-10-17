@@ -1,3 +1,36 @@
+const fs = require('fs');
+const path = require('path');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+
+// オプトアウトおよびバウンス（不達）の抑制リスト読み込み
+function getSuppressedEmails() {
+  const optouts = new Set();
+  const bounces = new Set();
+
+  try {
+    const optPath = path.join(__dirname, 'data', 'optouts.json');
+    if (fs.existsSync(optPath)) {
+      const list = JSON.parse(fs.readFileSync(optPath, 'utf8') || '[]');
+      list.forEach(item => {
+        if (item.email) optouts.add(String(item.email).trim().toLowerCase());
+      });
+    }
+  } catch (e) {}
+
+  try {
+    const bouncePath = path.join(__dirname, 'data', 'undelivered_raw.json');
+    if (fs.existsSync(bouncePath)) {
+      const list = JSON.parse(fs.readFileSync(bouncePath, 'utf8') || '[]');
+      list.forEach(item => {
+        const em = item.email || item.recipient || item.to;
+        if (em) bounces.add(String(em).trim().toLowerCase());
+      });
+    }
+  } catch (e) {}
+
+  return { optouts, bounces };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return json(405, { ok: false, error: 'Method not allowed' });
@@ -45,26 +78,25 @@ exports.handler = async (event) => {
     });
     payloads = uniquePayloads;
 
-    // === 事前バリデーション (予測可能なエラーがある場合は、Resend送信を含め1件も送信せずに手前で即時エラー終了する) ===
+    // === 事前バリデーション＆オプトアウト/バウンス完全遮断 ===
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const apiKeys = getResendApiKeys();
-    const from = process.env.MAIL_FROM;
+    const hasAwsCreds = !!(process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY);
+    const senderEmail = (process.env.SENDER_EMAIL || process.env.MAIL_FROM || '').trim();
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
-    if ((channel === 'email' || channel === 'both') && (apiKeys.length === 0 || !from)) {
-      return json(400, { ok: false, error: 'メール配信用APIキー(RESEND_API_KEYS1〜5)または送信元アドレス(MAIL_FROM)が設定されていません。送信処理は一切開始されていません。' });
+    if ((channel === 'email' || channel === 'both') && (!hasAwsCreds || !senderEmail)) {
+      return json(400, { ok: false, error: 'AWS認証情報(AWS_ACCESS_KEY, AWS_SECRET_KEY)または送信元アドレス(SENDER_EMAIL)が設定されていません。送信処理は開始されていません。' });
     }
     if ((channel === 'line' || channel === 'both') && !lineToken) {
-      return json(400, { ok: false, error: 'LINE配信用のアクセストークン(LINE_CHANNEL_ACCESS_TOKEN)が設定されていません。送信処理は一切開始されていません。' });
+      return json(400, { ok: false, error: 'LINE配信用のアクセストークン(LINE_CHANNEL_ACCESS_TOKEN)が設定されていません。送信処理は開始されていません。' });
     }
 
-    const invalidEmails = [];
-    const invalidLineUsers = [];
-    const invalidMessages = [];
-    const invalidSubjects = [];
+    const { optouts, bounces } = getSuppressedEmails();
 
     const validPayloads = [];
     const skippedInvalidPayloads = [];
+    const skippedOptOuts = [];
+    const skippedBounces = [];
 
     payloads.forEach((p, idx) => {
       const name = p.customerName || `No.${idx + 1}`;
@@ -86,225 +118,199 @@ exports.handler = async (event) => {
           isInvalid = true;
           reason = 'メールアドレスが空欄';
         } else {
-          const cleanEmail = String(p.email).trim();
-          const isFormatValid = emailRegex.test(cleanEmail);
-          const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@') || cleanEmail.includes('@.') || cleanEmail.startsWith('.');
-          if (!isFormatValid || hasRfcViolation) {
+          const cleanEmail = String(p.email).trim().toLowerCase();
+
+          // 1. オプトアウト（配信停止）チェック
+          if (p.unsubscribed === true || optouts.has(cleanEmail)) {
             isInvalid = true;
-            reason = `${p.email} (無効またはRFC規格違反)`;
+            reason = '【安全遮断】配信停止（オプトアウト）登録済み';
+            skippedOptOuts.push(`${name} <${cleanEmail}>`);
+          }
+          // 2. 過去バウンス（不達）チェック
+          else if (bounces.has(cleanEmail)) {
+            isInvalid = true;
+            reason = '【安全遮断】過去バウンス（不達）無効アドレス';
+            skippedBounces.push(`${name} <${cleanEmail}>`);
+          } else {
+            const isFormatValid = emailRegex.test(cleanEmail);
+            const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@') || cleanEmail.includes('@.') || cleanEmail.startsWith('.');
+            if (!isFormatValid || hasRfcViolation) {
+              isInvalid = true;
+              reason = `${p.email} (無効またはRFC規格違反)`;
+            }
           }
         }
       }
       if (channel === 'line' || channel === 'both') {
         if (!p.lineUserId) {
           isInvalid = true;
-          reason = 'LINE ID未設定';
+          reason = reason ? `${reason} / LINE ID未連携` : 'LINE ID未連携';
         }
       }
 
       if (isInvalid) {
-        skippedInvalidPayloads.push(`・${name}: ${reason}`);
+        skippedInvalidPayloads.push(`${name}: ${reason}`);
       } else {
         validPayloads.push(p);
       }
     });
 
-    if (validPayloads.length === 0) {
-      return json(400, { 
-        ok: false, 
-        error: '有効な送信先（メールアドレス）が1件もありませんでした。',
-        details: skippedInvalidPayloads.join('\n')
-      });
-    }
-
     const results = {};
     let hasErrors = false;
 
     if (channel === 'email' || channel === 'both') {
-      try {
-        const emailRes = await sendEmailBatch(validPayloads);
-        results.email = emailRes;
-        if (skippedInvalidPayloads.length > 0) {
-          results.email.failedCount = (results.email.failedCount || 0) + skippedInvalidPayloads.length;
-          results.email.failedNames = [...(results.email.failedNames || []), ...skippedInvalidPayloads];
-        }
-      } catch (err) {
-        results.email = { status: 'failed', error: err.message };
+      results.email = await sendEmailBatchSES(validPayloads);
+      if (results.email.failedNames && results.email.failedNames.length > 0) {
         hasErrors = true;
       }
+      if (skippedInvalidPayloads.length > 0) {
+        results.email.skippedNames = (results.email.skippedNames || []).concat(skippedInvalidPayloads);
+      }
+      results.email.skippedOptOuts = skippedOptOuts;
+      results.email.skippedBounces = skippedBounces;
     }
+
     if (channel === 'line' || channel === 'both') {
-      try {
-        const lineRes = await sendLineBatch(payloads);
-        results.line = lineRes;
-        if (lineRes.failedNames && lineRes.failedNames.length > 0) {
-          hasErrors = true;
-        }
-      } catch (err) {
-        results.line = { status: 'failed', error: err.message };
+      results.line = await sendLineBatch(validPayloads);
+      if (results.line.failedNames && results.line.failedNames.length > 0) {
         hasErrors = true;
       }
     }
 
-    // 処理自体は完了したため200を返し、各チャネルの成否と詳細をresultsオブジェクトに入れて応答する
     return json(200, { ok: true, scenario, channel, results, hasErrors, mode: runtimeMode() });
   } catch (error) {
     return json(500, { ok: false, error: error.message, mode: runtimeMode() });
   }
 };
 
-function getResendApiKeys() {
-  const k = process.env.RESEND_API_KEY;
-  return k && k.trim() ? [k.trim()] : [];
+function getSesClient() {
+  const accessKeyId = (process.env.AWS_ACCESS_KEY || '').trim();
+  const secretAccessKey = (process.env.AWS_SECRET_KEY || '').trim();
+  const region = (process.env.AWS_REGION_KEY || 'ap-northeast-1').trim();
+
+  if (!accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  return new SESClient({
+    region,
+    credentials: {
+      accessKeyId,
+      secretAccessKey
+    }
+  });
 }
 
-async function sendEmailBatch(payloads) {
-  // 英数字・主要記号のみを許可する厳格なメールアドレス正規表現
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  
-  const validPayloads = payloads.filter(p => {
-    if (!p.email) return false;
-    const cleanEmail = String(p.email).trim();
-    
-    // 1. 厳格な書式チェック
-    if (!emailRegex.test(cleanEmail)) return false;
-    // 2. 日本の古いキャリアメール等に多いRFC違反（ドット連続「..」や@直前のドット「.@」）を排除
-    if (cleanEmail.includes('..') || cleanEmail.includes('.@')) return false;
-    
-    return true;
-  });
+async function sendEmailBatchSES(payloads) {
+  const sesClient = getSesClient();
+  const senderEmail = (process.env.SENDER_EMAIL || process.env.MAIL_FROM || '').trim();
 
-  const skippedNames = payloads.filter(p => {
-    if (!p.email) return true;
-    const cleanEmail = String(p.email).trim();
-    const isFormatValid = emailRegex.test(cleanEmail);
-    const hasRfcViolation = cleanEmail.includes('..') || cleanEmail.includes('.@');
-    return !isFormatValid || hasRfcViolation;
-  }).map(p => {
-    return `${p.customerName || '宛名なし'} (無効またはRFC違反アドレス: ${p.email || '空欄'})`;
-  });
-
-  const apiKeys = getResendApiKeys();
-  const from = process.env.MAIL_FROM;
-
-  console.log(`[sendEmailBatch] 送信要求: ${payloads.length}件, 有効: ${validPayloads.length}件, 利用可能APIキー数: ${apiKeys.length}個`);
-
-  if (apiKeys.length === 0 || !from) {
-    return { 
-      type: 'email', 
-      status: 'mock', 
-      count: validPayloads.length,
-      sample: validPayloads.slice(0, 2),
-      skippedNames
+  if (!sesClient || !senderEmail) {
+    return {
+      type: 'email',
+      status: 'mock',
+      count: payloads.length,
+      sample: payloads.slice(0, 2),
+      skippedNames: []
     };
   }
 
-  const batchRequests = validPayloads.map(p => {
-    const cid = p.customerId || (p.email ? p.email.split('@')[0] : 'guest');
-    const trackingPixelUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=crm`;
-    const htmlBody = (p.message || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\n/g, '<br/>')
-      .replace(/(https?:\/\/[^\s<]+)/g, (url) => {
-        const trackingClickUrl = `https://hotel-ai.netlify.app/api/track-click?cid=${encodeURIComponent(cid)}&channel=email&url=${encodeURIComponent(url)}`;
-        return `<a href="${trackingClickUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;">${url}</a>`;
-      })
-      + `<br/><br/><img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
-
-    const req = {
-      from,
-      to: p.email,
-      subject: p.subject,
-      text: p.message,
-      html: htmlBody
-    };
-    if (process.env.REPLY_TO) {
-      req.reply_to = process.env.REPLY_TO;
-    }
-    return req;
-  });
-
-  if (batchRequests.length === 0) {
-    return { type: 'email', status: 'skipped', reason: 'no valid emails in payload', skippedNames };
-  }
-
-  // 1つのAPIキーにつき100件まで送信。APIキー数×100件（5キーなら500件）を順次ローテーション送信
-  const keyCapacity = 100;
-  let keyIndex = 0;
   let sentCount = 0;
   const failedNames = [];
   const responsesData = [];
-  const usedKeysSummary = [];
 
-  const currentKey = apiKeys[0];
-  for (let i = 0; i < batchRequests.length; i += keyCapacity) {
-    const chunkRequests = batchRequests.slice(i, i + keyCapacity);
-    console.log(`[sendEmailBatch] RESEND_API_KEY で ${chunkRequests.length} 件送信開始 (${i + 1}〜${Math.min(i + keyCapacity, batchRequests.length)} / ${batchRequests.length})`);
+  // 並行数を5に設定し、SESのレートリミットを考慮しながら送信
+  const concurrency = 5;
+  for (let i = 0; i < payloads.length; i += concurrency) {
+    const chunk = payloads.slice(i, i + concurrency);
 
-    try {
-      const res = await fetch('https://api.resend.com/emails/batch', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${currentKey}`,
-          'Content-Type': 'application/json'
+    const promises = chunk.map(async (p) => {
+      const cid = p.customerId || (p.email ? p.email.split('@')[0] : 'guest');
+      const trackingPixelUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=crm`;
+      const htmlBody = (p.message || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br/>')
+        .replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+          const trackingClickUrl = `https://hotel-ai.netlify.app/api/track-click?cid=${encodeURIComponent(cid)}&channel=email&url=${encodeURIComponent(url)}`;
+          return `<a href="${trackingClickUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;">${url}</a>`;
+        })
+        + `<br/><br/><img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
+
+      const sendEmailParams = {
+        Source: senderEmail,
+        Destination: {
+          ToAddresses: [p.email.trim()]
         },
-        body: JSON.stringify(chunkRequests)
-      });
+        Message: {
+          Subject: {
+            Data: p.subject || '赤沢温泉旅館からのお知らせ',
+            Charset: 'UTF-8'
+          },
+          Body: {
+            Text: {
+              Data: p.message || '',
+              Charset: 'UTF-8'
+            },
+            Html: {
+              Data: htmlBody,
+              Charset: 'UTF-8'
+            }
+          }
+        }
+      };
 
-      const data = await res.json();
-      if (!res.ok) {
-        console.error('[sendEmailBatch] 送信失敗:', data);
-        chunkRequests.forEach(r => failedNames.push(`${r.to} (${data.message || '送信エラー'})`));
-      } else {
-        sentCount += chunkRequests.length;
-        responsesData.push(data);
-        usedKeysSummary.push({ keyNum: 1, count: chunkRequests.length });
+      if (process.env.REPLY_TO) {
+        sendEmailParams.ReplyToAddresses = [process.env.REPLY_TO.trim()];
       }
-    } catch (err) {
-      console.error('[sendEmailBatch] 例外発生:', err.message);
-      chunkRequests.forEach(r => failedNames.push(`${r.to} (${err.message})`));
-    }
 
-    if (i + keyCapacity < batchRequests.length) {
-      await new Promise(r => setTimeout(r, 120));
+      try {
+        const command = new SendEmailCommand(sendEmailParams);
+        const res = await sesClient.send(command);
+        sentCount++;
+        responsesData.push({ to: p.email, messageId: res.MessageId });
+      } catch (err) {
+        console.error(`[sendEmailBatchSES] 送信失敗 (${p.email}):`, err.message);
+        failedNames.push(`${p.email} (${err.message})`);
+      }
+    });
+
+    await Promise.all(promises);
+
+    // 短時間での過密アクセスを緩和
+    if (i + concurrency < payloads.length) {
+      await new Promise(r => setTimeout(r, 100));
     }
   }
-  
-  return { 
-    type: 'email', 
-    status: failedNames.length > 0 && sentCount === 0 ? 'failed' : 'sent', 
-    provider: 'resend-multi-keys', 
+
+  return {
+    type: 'email',
+    status: failedNames.length > 0 && sentCount === 0 ? 'failed' : 'sent',
+    provider: 'amazon-ses',
     count: sentCount,
-    usedKeys: usedKeysSummary,
     data: responsesData,
-    skippedNames,
     failedNames
   };
 }
 
 async function sendLineBatch(payloads) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  const validPayloads = payloads.filter(p => p.lineUserId);
-  const skippedNames = payloads.filter(p => !p.lineUserId).map(p => `${p.customerName || '宛名なし'} (${p.email || '連絡先なし'})`);
-
   if (!token) {
-    return { 
-      type: 'line', 
-      status: 'mock', 
-      count: validPayloads.length,
-      skippedNames
+    return {
+      type: 'line',
+      status: 'mock',
+      count: payloads.length,
+      sample: payloads.slice(0, 2)
     };
   }
 
-  if (validPayloads.length === 0) {
-    return { type: 'line', status: 'skipped', reason: 'no valid lineUserIds in payload', skippedNames };
-  }
-
-  const results = [];
+  let sentCount = 0;
   const failedNames = [];
-  for (const p of validPayloads) {
+
+  for (const p of payloads) {
+    if (!p.lineUserId) continue;
+
     try {
       const res = await fetch('https://api.line.me/v2/bot/message/push', {
         method: 'POST',
@@ -317,30 +323,31 @@ async function sendLineBatch(payloads) {
           messages: [{ type: 'text', text: p.message.slice(0, 4900) }]
         })
       });
-      
-      if (!res.ok) {
-        const err = await res.text();
-        results.push({ to: p.lineUserId, success: false, error: err });
-        failedNames.push(`${p.customerName || '宛名なし'} (${p.lineUserId})`);
+
+      if (res.ok) {
+        sentCount++;
       } else {
-        results.push({ to: p.lineUserId, success: true });
+        const errData = await res.text();
+        failedNames.push(`${p.customerName || p.lineUserId}: LINEエラー(${res.status}) ${errData}`);
       }
-    } catch (e) {
-      results.push({ to: p.lineUserId, success: false, error: e.message });
-      failedNames.push(`${p.customerName || '宛名なし'} (${p.lineUserId})`);
+    } catch (err) {
+      failedNames.push(`${p.customerName || p.lineUserId}: 送信例外 ${err.message}`);
     }
+
+    await new Promise(r => setTimeout(r, 50));
   }
 
-  const successCount = results.filter(r => r.success).length;
-  if (successCount === 0 && results.length > 0) {
-    throw new Error(`LINE batch send completely failed. First error: ${results[0].error}`);
-  }
-
-  return { type: 'line', status: 'sent', provider: 'line', count: successCount, total: results.length, details: results, skippedNames, failedNames };
+  return {
+    type: 'line',
+    status: failedNames.length > 0 && sentCount === 0 ? 'failed' : 'sent',
+    provider: 'line',
+    count: sentCount,
+    failedNames
+  };
 }
 
 function runtimeMode() {
-  return getResendApiKeys().length > 0 || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  return (process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY) || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {

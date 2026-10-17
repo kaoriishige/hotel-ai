@@ -1,0 +1,10 @@
+[
+  {
+    "id": "optout_resend_alatomo",
+    "email": "alatomo@hotmail.com",
+    "cid": null,
+    "reason": "メール受信者による迷惑メール報告・配信拒否 (Resend Complaint 2026-09-10)",
+    "unsubscribedAt": "2026-09-10T04:05:11.030Z",
+    "source": "resend_complaint"
+  }
+]

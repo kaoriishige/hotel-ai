@@ -24,6 +24,7 @@ export interface ConcatenatedReelProps {
   showBranding?: boolean; // オーナー哲学ブランド透かしを表示するか
   video1FlipHorizontal?: boolean; // 動画1の左右反転（左側通行ミラー）
   video2FlipHorizontal?: boolean; // 動画2の左右反転（左側通行ミラー）
+  colorFilter?: 'normal' | 'sepia' | 'grayscale'; // 色調フィルター（セピア・モノクロ）
 }
 
 export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
@@ -39,10 +40,18 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
   video2Volume = 1.0,
   showBranding = true,
   video1FlipHorizontal = false,
-  video2FlipHorizontal = false
+  video2FlipHorizontal = false,
+  colorFilter = 'normal'
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
+
+  const getFilterStyle = (filter?: 'normal' | 'sepia' | 'grayscale') => {
+    if (filter === 'sepia') return 'sepia(0.85) contrast(1.1) brightness(0.95)';
+    if (filter === 'grayscale') return 'grayscale(1) contrast(1.15) brightness(0.95)';
+    return 'none';
+  };
+  const filterStyle = getFilterStyle(colorFilter);
 
   // アセットURLの解決ヘルパー
   const resolveAssetUrl = (url: string | undefined) => {
@@ -82,6 +91,7 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
             transitionType={transitionType}
             transitionDuration={transDuration}
             flipHorizontal={video1FlipHorizontal}
+            filterStyle={filterStyle}
           />
         </Series.Sequence>
 
@@ -99,6 +109,7 @@ export const ConcatenatedReel: React.FC<ConcatenatedReelProps> = ({
             transitionType={transitionType}
             transitionDuration={transDuration}
             flipHorizontal={video2FlipHorizontal}
+            filterStyle={filterStyle}
           />
         </Series.Sequence>
       </Series>
@@ -174,6 +185,7 @@ interface VideoClipProps {
   transitionType: 'cut' | 'fade' | 'crossfade';
   transitionDuration: number;
   flipHorizontal?: boolean;
+  filterStyle?: string;
 }
 
 const VideoClip: React.FC<VideoClipProps> = ({
@@ -184,7 +196,8 @@ const VideoClip: React.FC<VideoClipProps> = ({
   isLast,
   transitionType,
   transitionDuration,
-  flipHorizontal = false
+  flipHorizontal = false,
+  filterStyle = 'none'
 }) => {
   const frame = useCurrentFrame();
 
@@ -233,6 +246,7 @@ const VideoClip: React.FC<VideoClipProps> = ({
           width: '100%',
           height: '100%',
           objectFit: 'cover',
+          filter: filterStyle,
           transform: flipHorizontal ? 'scaleX(-1)' : 'none'
         }}
       />
