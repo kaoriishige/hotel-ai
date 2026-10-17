@@ -2446,19 +2446,14 @@ function initUnreachedFeature() {
     }
   });
 
-  // APIまたはバックエンドから未到着リストを取得（タイムアウト付き）
+  // APIまたはバックエンドから未到着リストを取得（静的フォールバック付き）
   async function fetchUnreachedData() {
     summaryText.innerText = 'データを同期取得中...';
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-      const res = await fetch('/.netlify/functions/get-unreached', { signal: controller.signal });
-      clearTimeout(timeoutId);
-
+      const res = await fetch('/api/get-unreached');
       if (res.ok) {
         const result = await res.json();
-        if (result.ok && Array.isArray(result.data)) {
+        if (result.ok && Array.isArray(result.data) && result.data.length > 0) {
           state.unreached = result.data;
           persist();
           renderUnreachedTable();
@@ -2466,8 +2461,28 @@ function initUnreachedFeature() {
         }
       }
     } catch (e) {
-      console.warn('Netlify function fetch failed/timed out, using current state:', e);
+      console.warn('API get-unreached failed, trying static fallback:', e);
     }
+
+    // 静的ファイルからの確実な復元フォールバック
+    try {
+      const paths = ['data/undelivered_raw.json', '/akasawa/ml/data/undelivered_raw.json', './data/undelivered_raw.json'];
+      for (const p of paths) {
+        try {
+          const r = await fetch(p);
+          if (r.ok) {
+            const list = await r.json();
+            if (Array.isArray(list) && list.length > 0) {
+              state.unreached = list;
+              persist();
+              renderUnreachedTable();
+              return;
+            }
+          }
+        } catch (e2) {}
+      }
+    } catch (err) {}
+
     if (!state.unreached) state.unreached = [];
     renderUnreachedTable();
   }
@@ -2667,15 +2682,41 @@ let currentActiveScheduleId = null;
 
 async function syncServerOptOuts() {
   try {
-    const res = await fetch('/api/unsubscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'list' })
-    });
-    const data = await res.json();
-    if (data.ok && Array.isArray(data.optouts) && data.optouts.length > 0) {
-      const serverOptOutEmails = new Set(data.optouts.map(o => (o.email || '').trim().toLowerCase()).filter(Boolean));
-      const serverOptOutCids = new Set(data.optouts.map(o => (o.cid || '').trim()).filter(Boolean));
+    let optouts = [];
+    try {
+      const res = await fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.optouts) && data.optouts.length > 0) {
+          optouts = data.optouts;
+        }
+      }
+    } catch (e) {}
+
+    // 静的ファイルからのフォールバック取得
+    if (optouts.length === 0) {
+      const paths = ['data/optouts.json', '/akasawa/ml/data/optouts.json', './data/optouts.json'];
+      for (const p of paths) {
+        try {
+          const r = await fetch(p);
+          if (r.ok) {
+            const list = await r.json();
+            if (Array.isArray(list) && list.length > 0) {
+              optouts = list;
+              break;
+            }
+          }
+        } catch (e2) {}
+      }
+    }
+
+    if (optouts.length > 0) {
+      const serverOptOutEmails = new Set(optouts.map(o => (o.email || '').trim().toLowerCase()).filter(Boolean));
+      const serverOptOutCids = new Set(optouts.map(o => (o.cid || '').trim()).filter(Boolean));
 
       let changed = false;
       state.customers.forEach(c => {
@@ -2683,7 +2724,6 @@ async function syncServerOptOuts() {
         const cId = (c.id || '').trim();
         const shouldBeUnsub = (cEm && serverOptOutEmails.has(cEm)) || (cId && serverOptOutCids.has(cId));
 
-        // サーバーにオプトアウト登録されている場合は絶対に true に倒す（サーバー空データで勝手に解除しない安全設計）
         if (shouldBeUnsub && !c.unsubscribed) {
           c.unsubscribed = true;
           changed = true;
@@ -2703,22 +2743,46 @@ async function syncServerOptOuts() {
 
 async function syncServerDispatchLogs() {
   try {
-    const res = await fetch('/api/get-dispatch-logs');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
-        const existingMap = new Map();
-        (state.logs || []).forEach(l => existingMap.set(l.id, l));
-        data.logs.forEach(l => {
-          if (!existingMap.has(l.id)) {
-            existingMap.set(l.id, l);
-          }
-        });
-        state.logs = Array.from(existingMap.values());
-        persist();
-        renderLogs();
-        renderAnalytics();
+    let logs = [];
+    try {
+      const res = await fetch('/api/get-dispatch-logs');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
+          logs = data.logs;
+        }
       }
+    } catch (e) {}
+
+    // 静的ファイルからのフォールバック取得
+    if (logs.length === 0) {
+      const paths = ['data/dispatch_logs.json', '/akasawa/ml/data/dispatch_logs.json', './data/dispatch_logs.json'];
+      for (const p of paths) {
+        try {
+          const r = await fetch(p);
+          if (r.ok) {
+            const list = await r.json();
+            if (Array.isArray(list) && list.length > 0) {
+              logs = list;
+              break;
+            }
+          }
+        } catch (e2) {}
+      }
+    }
+
+    if (logs.length > 0) {
+      const existingMap = new Map();
+      (state.logs || []).forEach(l => existingMap.set(l.id, l));
+      logs.forEach(l => {
+        if (!existingMap.has(l.id)) {
+          existingMap.set(l.id, l);
+        }
+      });
+      state.logs = Array.from(existingMap.values());
+      persist();
+      renderLogs();
+      renderAnalytics();
     }
   } catch (e) {
     console.warn('Failed to sync server dispatch logs:', e);
@@ -2738,7 +2802,7 @@ async function initSuppressionCaches() {
     });
     if (unsubRes.ok) {
       const data = await unsubRes.json();
-      if (data.ok && Array.isArray(data.optouts)) {
+      if (data.ok && Array.isArray(data.optouts) && data.optouts.length > 0) {
         data.optouts.forEach(o => {
           if (o.email) window._serverOptOutEmails.add(String(o.email).trim().toLowerCase());
         });
@@ -2746,18 +2810,56 @@ async function initSuppressionCaches() {
     }
   } catch (e) {}
 
+  if (window._serverOptOutEmails.size === 0) {
+    try {
+      const paths = ['data/optouts.json', '/akasawa/ml/data/optouts.json', './data/optouts.json'];
+      for (const p of paths) {
+        const r = await fetch(p);
+        if (r.ok) {
+          const list = await r.json();
+          if (Array.isArray(list)) {
+            list.forEach(o => {
+              if (o.email) window._serverOptOutEmails.add(String(o.email).trim().toLowerCase());
+            });
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
   try {
     const unreachedRes = await fetch('/api/get-unreached');
     if (unreachedRes.ok) {
       const data = await unreachedRes.json();
-      if (data.ok && Array.isArray(data.emails)) {
-        data.emails.forEach(item => {
+      const list = (data.data || data.emails || []);
+      if (data.ok && Array.isArray(list) && list.length > 0) {
+        list.forEach(item => {
           const em = item.to || item.email;
           if (em) window._bouncedEmails.add(String(em).trim().toLowerCase());
         });
       }
     }
   } catch (e) {}
+
+  if (window._bouncedEmails.size === 0) {
+    try {
+      const paths = ['data/undelivered_raw.json', '/akasawa/ml/data/undelivered_raw.json', './data/undelivered_raw.json'];
+      for (const p of paths) {
+        const r = await fetch(p);
+        if (r.ok) {
+          const list = await r.json();
+          if (Array.isArray(list)) {
+            list.forEach(item => {
+              const em = item.to || item.email;
+              if (em) window._bouncedEmails.add(String(em).trim().toLowerCase());
+            });
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+  }
 
   // 既存リストに即時反映
   let changed = false;

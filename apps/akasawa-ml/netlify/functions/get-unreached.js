@@ -16,6 +16,11 @@ exports.handler = async (event) => {
   try {
     let undeliveredList = [];
 
+    let fallbackUndelivered = [];
+    try {
+      fallbackUndelivered = require('./data/undelivered_raw.json');
+    } catch (e) {}
+
     // 1. 同梱された undelivered_raw.json の探索
     const candidatePaths = [
       path.join(__dirname, 'data', 'undelivered_raw.json'),
@@ -40,6 +45,10 @@ exports.handler = async (event) => {
           console.warn(`[get-unreached] ${p} の読み込みエラー:`, e.message);
         }
       }
+    }
+
+    if (undeliveredList.length === 0 && Array.isArray(fallbackUndelivered) && fallbackUndelivered.length > 0) {
+      undeliveredList = fallbackUndelivered;
     }
 
     return {

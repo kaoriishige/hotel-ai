@@ -16,6 +16,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["firebase-admin", "googleapis"]
+  included_files = ["netlify/functions/data/**"]
 
 # 赤沢温泉旅館 ダイナミックプライシング (React SPA ルーティング)
 [[redirects]]

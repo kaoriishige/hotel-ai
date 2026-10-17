@@ -15,6 +15,11 @@ try {
   } catch (e2) {}
 }
 
+let fallbackLogs = [];
+try {
+  fallbackLogs = require('./data/dispatch_logs.json');
+} catch (e) {}
+
 const CANDIDATE_FILES = [
   path.join(__dirname, 'data', 'dispatch_logs.json'),
   path.join(__dirname, '..', '..', 'public', 'data', 'dispatch_logs.json'),
@@ -32,7 +37,7 @@ function loadLocalLogs() {
       } catch (e) {}
     }
   }
-  return [];
+  return Array.isArray(fallbackLogs) && fallbackLogs.length > 0 ? fallbackLogs : [];
 }
 
 function saveLocalLog(newLog) {

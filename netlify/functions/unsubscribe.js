@@ -15,11 +15,22 @@ try {
   } catch (e2) {}
 }
 
+let fallbackOptouts = [];
+try {
+  fallbackOptouts = require('./data/optouts.json');
+} catch (e) {}
+
 const LOCAL_OPTOUTS_FILE = path.join(__dirname, 'data', 'optouts.json');
 const PUBLIC_OPTOUTS_FILE = path.join(__dirname, '..', '..', 'public', 'data', 'optouts.json');
 
 function loadLocalOptouts() {
   const map = new Map();
+  if (Array.isArray(fallbackOptouts)) {
+    fallbackOptouts.forEach(item => {
+      const k = (item.email || item.cid || item.id || '').toLowerCase();
+      if (k) map.set(k, item);
+    });
+  }
   [LOCAL_OPTOUTS_FILE, PUBLIC_OPTOUTS_FILE].forEach(file => {
     if (fs.existsSync(file)) {
       try {
