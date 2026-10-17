@@ -68,26 +68,9 @@ exports.handler = async (event) => {
 };
 
 function getSesClient() {
-  const accessKeyId = (
-    process.env.SES_ACCESS_KEY ||
-    process.env.SES_AWS_ACCESS_KEY ||
-    process.env.AWS_ACCESS_KEY ||
-    ''
-  ).trim();
-
-  const secretAccessKey = (
-    process.env.SES_SECRET_KEY ||
-    process.env.SES_AWS_SECRET_KEY ||
-    process.env.AWS_SECRET_KEY ||
-    ''
-  ).trim();
-
-  const region = (
-    process.env.SES_REGION ||
-    process.env.SES_AWS_REGION ||
-    process.env.AWS_REGION_KEY ||
-    'ap-northeast-1'
-  ).trim();
+  const accessKeyId = (process.env.SES_ACCESS_KEY || '').trim();
+  const secretAccessKey = (process.env.SES_SECRET_KEY || '').trim();
+  const region = (process.env.SES_REGION || 'ap-northeast-1').trim();
 
   if (!accessKeyId || !secretAccessKey) {
     return null;
@@ -139,7 +122,7 @@ async function sendEmail(customer, subject, message) {
       status: 'mock',
       to: customer.email,
       subject,
-      note: '環境変数(AWS_ACCESS_KEY / AWS_SECRET_KEY / SENDER_EMAIL)未設定のためモック送信'
+      note: '環境変数(SES_ACCESS_KEY / SES_SECRET_KEY / SENDER_EMAIL)未設定のためモック送信'
     };
   }
 
@@ -231,8 +214,7 @@ async function sendLine(customer, message) {
 }
 
 function runtimeMode() {
-  const hasAws = (process.env.SES_ACCESS_KEY || process.env.SES_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY) &&
-                 (process.env.SES_SECRET_KEY || process.env.SES_AWS_SECRET_KEY || process.env.AWS_SECRET_KEY);
+  const hasAws = process.env.SES_ACCESS_KEY && process.env.SES_SECRET_KEY;
   return hasAws || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
