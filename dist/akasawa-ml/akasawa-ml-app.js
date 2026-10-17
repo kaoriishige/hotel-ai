@@ -285,7 +285,23 @@ el.csvFile.addEventListener('change', async e => {
     }
   });
 
-  state.customers = [...validRows, ...state.customers];
+  // 重複排除マージ (同一メールアドレスまたはLINE IDは最新データで上書き統合しつつ、配信停止状態は永久保持)
+  const customerMap = new Map();
+  (state.customers || []).forEach(c => {
+    const key = (c.email || c.lineUserId || c.id || '').trim().toLowerCase();
+    if (key) customerMap.set(key, c);
+  });
+  validRows.forEach(c => {
+    const key = (c.email || c.lineUserId || c.id || '').trim().toLowerCase();
+    if (key) {
+      const existing = customerMap.get(key);
+      if (existing && existing.unsubscribed) {
+        c.unsubscribed = true; // 既存の配信停止設定は絶対に保持
+      }
+      customerMap.set(key, c);
+    }
+  });
+  state.customers = Array.from(customerMap.values());
   persist();
   render();
 
@@ -1535,11 +1551,73 @@ function splitCsvLine(line) {
   return result;
 }
 
+// === 大容量 IndexedDB 永続化ストレージ (数万件のCSVデータをブラウザに半永久記憶) ===
+const IDB_NAME = 'AkasawaCrmStorage';
+const IDB_VERSION = 1;
+const IDB_STORE = 'crm_data';
+
+function openCrmDatabase() {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined') {
+      return reject(new Error('IndexedDB not supported'));
+    }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(key) {
+  try {
+    const db = await openCrmDatabase();
+    return new Promise((resolve) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function idbSet(key, value) {
+  try {
+    const db = await openCrmDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.put(value, key);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn('IDB write failed:', e);
+  }
+}
+
 function persist() {
-  localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify(state.customers));
-  localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(state.logs));
-  if (state.unreached) {
-    localStorage.setItem(STORAGE_KEYS.unreached, JSON.stringify(state.unreached));
+  // 1. IndexedDB に大容量保存 (容量制限なし・5MBの壁を突破)
+  idbSet('customers', state.customers);
+  idbSet('logs', state.logs);
+  if (state.unreached) idbSet('unreached', state.unreached);
+
+  // 2. localStorage にも可能な範囲でセーフティ保存 (5MB超過例外の安全キャッチ)
+  try {
+    localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify((state.customers || []).slice(0, 1500)));
+    localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify((state.logs || []).slice(0, 100)));
+    if (state.unreached) {
+      localStorage.setItem(STORAGE_KEYS.unreached, JSON.stringify(state.unreached));
+    }
+  } catch (e) {
+    console.info('localStorage容量上限(5MB)到達: IndexedDBにて大容量永続保存中');
   }
 }
 
@@ -2701,6 +2779,33 @@ async function initSuppressionCaches() {
   }
 }
 
+// IndexedDB から大容量顧客データを完全復元
+async function loadLargeDataFromIndexedDB() {
+  try {
+    const idbCustomers = await idbGet('customers');
+    const idbLogs = await idbGet('logs');
+    let needsRender = false;
+
+    if (Array.isArray(idbCustomers) && idbCustomers.length > (state.customers || []).length) {
+      state.customers = idbCustomers;
+      needsRender = true;
+      console.log(`[IndexedDB] ${idbCustomers.length} 件の顧客データを完全復元しました`);
+    }
+
+    if (Array.isArray(idbLogs) && idbLogs.length > (state.logs || []).length) {
+      state.logs = idbLogs;
+      needsRender = true;
+    }
+
+    if (needsRender) {
+      render();
+      preview();
+    }
+  } catch (e) {
+    console.warn('IndexedDB復元警告:', e);
+  }
+}
+
 render();
 setMode('csv');
 initUnreachedFeature();
@@ -2708,6 +2813,7 @@ initOptOutModal();
 preview();
 fetchCampaignStats();
 initSuppressionCaches();
+loadLargeDataFromIndexedDB();
 syncServerOptOuts();
 syncServerDispatchLogs();
 setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
