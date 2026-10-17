@@ -1,5 +1,4 @@
-# Netlify Serverless Functions 保護 (最優先リダイレクト)
-/.netlify/functions/*  /.netlify/functions/:splat  200
+# Netlify Serverless Functions リダイレクト
 /api/*                 /.netlify/functions/:splat  200
 
 # ダイナミックプライシング 静的アセット保護 (最優先)

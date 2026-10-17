@@ -15,9 +15,26 @@ try {
 }
 
 function getSesClient() {
-  const accessKeyId = (process.env.AWS_ACCESS_KEY || '').trim();
-  const secretAccessKey = (process.env.AWS_SECRET_KEY || '').trim();
-  const region = (process.env.AWS_REGION_KEY || 'ap-northeast-1').trim();
+  const accessKeyId = (
+    process.env.SES_ACCESS_KEY ||
+    process.env.SES_AWS_ACCESS_KEY ||
+    process.env.AWS_ACCESS_KEY ||
+    ''
+  ).trim();
+
+  const secretAccessKey = (
+    process.env.SES_SECRET_KEY ||
+    process.env.SES_AWS_SECRET_KEY ||
+    process.env.AWS_SECRET_KEY ||
+    ''
+  ).trim();
+
+  const region = (
+    process.env.SES_REGION ||
+    process.env.SES_AWS_REGION ||
+    process.env.AWS_REGION_KEY ||
+    'ap-northeast-1'
+  ).trim();
 
   if (!accessKeyId || !secretAccessKey) {
     return null;
@@ -50,10 +67,13 @@ exports.handler = async (event) => {
       return json(400, { ok: false, error: 'customers or payloads array is required' });
     }
 
-    const hasAwsCreds = !!(process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY);
+    const hasAwsCreds = !!(
+      (process.env.SES_ACCESS_KEY || process.env.SES_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY) &&
+      (process.env.SES_SECRET_KEY || process.env.SES_AWS_SECRET_KEY || process.env.AWS_SECRET_KEY)
+    );
     const senderEmail = (process.env.SENDER_EMAIL || process.env.MAIL_FROM || '').trim();
     if ((channel === 'email' || channel === 'both') && (!hasAwsCreds || !senderEmail)) {
-      return json(400, { ok: false, error: 'AWS認証情報(AWS_ACCESS_KEY, AWS_SECRET_KEY)または送信元アドレス(SENDER_EMAIL)が設定されていません。' });
+      return json(400, { ok: false, error: 'AWS SES認証情報(SES_ACCESS_KEY, SES_SECRET_KEY等)または送信元アドレス(SENDER_EMAIL)が設定されていません。' });
     }
 
     console.log(`[schedule-dispatch] Amazon SES にて即時配信開始: 対象総数 ${targetList.length} 件`);

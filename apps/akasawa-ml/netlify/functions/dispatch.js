@@ -68,9 +68,26 @@ exports.handler = async (event) => {
 };
 
 function getSesClient() {
-  const accessKeyId = (process.env.AWS_ACCESS_KEY || '').trim();
-  const secretAccessKey = (process.env.AWS_SECRET_KEY || '').trim();
-  const region = (process.env.AWS_REGION_KEY || 'ap-northeast-1').trim();
+  const accessKeyId = (
+    process.env.SES_ACCESS_KEY ||
+    process.env.SES_AWS_ACCESS_KEY ||
+    process.env.AWS_ACCESS_KEY ||
+    ''
+  ).trim();
+
+  const secretAccessKey = (
+    process.env.SES_SECRET_KEY ||
+    process.env.SES_AWS_SECRET_KEY ||
+    process.env.AWS_SECRET_KEY ||
+    ''
+  ).trim();
+
+  const region = (
+    process.env.SES_REGION ||
+    process.env.SES_AWS_REGION ||
+    process.env.AWS_REGION_KEY ||
+    'ap-northeast-1'
+  ).trim();
 
   if (!accessKeyId || !secretAccessKey) {
     return null;
@@ -214,7 +231,9 @@ async function sendLine(customer, message) {
 }
 
 function runtimeMode() {
-  return (process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY) || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
+  const hasAws = (process.env.SES_ACCESS_KEY || process.env.SES_AWS_ACCESS_KEY || process.env.AWS_ACCESS_KEY) &&
+                 (process.env.SES_SECRET_KEY || process.env.SES_AWS_SECRET_KEY || process.env.AWS_SECRET_KEY);
+  return hasAws || process.env.LINE_CHANNEL_ACCESS_TOKEN ? 'live_or_partial' : 'mock';
 }
 
 function json(statusCode, body) {

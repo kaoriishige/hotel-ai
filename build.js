@@ -1005,8 +1005,7 @@ fs.writeFileSync(path.join(distDir, 'llms.txt'), llmsContent, 'utf8');
 fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsContent, 'utf8');
 
 // dist/_redirects の自動生成 (Netlify Functions の保護 ＆ SPAルーティング)
-const redirectsContent = `# Netlify Serverless Functions 保護 (最優先リダイレクト)
-/.netlify/functions/*  /.netlify/functions/:splat  200
+const redirectsContent = `# Netlify Serverless Functions リダイレクト
 /api/*                 /.netlify/functions/:splat  200
 
 # ダイナミックプライシング 静的アセット保護 (最優先)
