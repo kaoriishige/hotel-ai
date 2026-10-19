@@ -1,4 +1,5 @@
 let currentMode = 'csv';
+let isStorageInitialized = false;
 
 const STORAGE_KEYS = {
   customers: 'akasawa_demo_customers',
@@ -302,6 +303,7 @@ el.csvFile.addEventListener('change', async e => {
     }
   });
   state.customers = Array.from(customerMap.values());
+  await idbSet('customers', state.customers);
   persist();
   render();
 
@@ -1640,6 +1642,10 @@ async function idbSet(key, value) {
 }
 
 function persist() {
+  if (!isStorageInitialized) {
+    console.warn('[persist] 初期ストレージ復元前の不要な上書き保存をブロックしました');
+    return;
+  }
   // 1. IndexedDB に大容量保存 (容量制限なし・5MBの壁を突破)
   idbSet('customers', state.customers);
   idbSet('logs', state.logs);
@@ -2917,44 +2923,45 @@ async function initSuppressionCaches() {
   }
 }
 
-// IndexedDB から大容量顧客データを完全復元
-async function loadLargeDataFromIndexedDB() {
+// IndexedDB から大容量顧客データを完全復元し、初期化を確実に完了させる
+async function initStorageAndRender() {
   try {
     const idbCustomers = await idbGet('customers');
     const idbLogs = await idbGet('logs');
-    let needsRender = false;
+    const idbUnreached = await idbGet('unreached');
 
-    if (Array.isArray(idbCustomers) && idbCustomers.length > (state.customers || []).length) {
+    if (Array.isArray(idbCustomers) && idbCustomers.length > 0) {
       state.customers = idbCustomers;
-      needsRender = true;
-      console.log(`[IndexedDB] ${idbCustomers.length} 件の顧客データを完全復元しました`);
+      console.log(`[IndexedDB] 顧客データ ${idbCustomers.length} 件を完全復元しました`);
     }
 
-    if (Array.isArray(idbLogs) && idbLogs.length > (state.logs || []).length) {
+    if (Array.isArray(idbLogs) && idbLogs.length > 0) {
       state.logs = idbLogs;
-      needsRender = true;
     }
 
-    if (needsRender) {
-      render();
-      preview();
+    if (Array.isArray(idbUnreached) && idbUnreached.length > 0) {
+      state.unreached = idbUnreached;
     }
   } catch (e) {
     console.warn('IndexedDB復元警告:', e);
+  } finally {
+    isStorageInitialized = true;
   }
+
+  render();
+  setMode('csv');
+  initUnreachedFeature();
+  initOptOutModal();
+  preview();
+  fetchCampaignStats();
+  initSuppressionCaches();
+  syncServerOptOuts();
+  syncServerDispatchLogs();
 }
 
-render();
-setMode('csv');
-initUnreachedFeature();
-initOptOutModal();
-preview();
-fetchCampaignStats();
-initSuppressionCaches();
-loadLargeDataFromIndexedDB();
-syncServerOptOuts();
-syncServerDispatchLogs();
+initStorageAndRender();
 setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
 setInterval(syncServerOptOuts, 30000);   // 30秒ごとに最新のオプトアウト台帳と自動同期
 setInterval(syncServerDispatchLogs, 20000); // 20秒ごとに最新の配信履歴を自動同期
+
 
