@@ -1059,6 +1059,7 @@ async function dispatchMessages() {
 
       persist();
       renderCustomers();
+      renderConversionDashboard();
 
       let finishMsg = `🎉 全【${totalSent}件】のメール一括配信が完了いたしました！`;
       if (totalFailed > 0) {
@@ -1154,6 +1155,7 @@ async function dispatchMessages() {
       persist();
       renderCustomers();
       renderLogs();
+      renderConversionDashboard();
       
       if (emailResult.status === 'mock') {
         alert(`⚠️ 個別配信（モック/テスト）が完了しました。\n※Netlify環境変数に「RESEND_API_KEYS1〜5」が設定されていないため、実際のメール送信は行われていません。Netlifyの環境変数の設定をご確認ください。`);
