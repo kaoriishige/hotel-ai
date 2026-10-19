@@ -39,7 +39,7 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { payloads, customers, channel, scenario, customSubject, customMessage, scheduleTitle } = body;
+    const { payloads, customers, channel, scenario, customSubject, customMessage, scheduleTitle, logId } = body;
 
     let targetList = [];
     if (Array.isArray(customers) && customers.length > 0) {
@@ -75,7 +75,7 @@ exports.handler = async (event) => {
 
     let sendResult = { count: 0, failedNames: [] };
     if (channel === 'email' || channel === 'both') {
-      sendResult = await sendEmailBatchSES(allPayloads, senderEmail, scenario);
+      sendResult = await sendEmailBatchSES(allPayloads, senderEmail, scenario, logId);
     }
 
     const totalSuccessCount = sendResult.count || 0;
@@ -98,7 +98,7 @@ exports.handler = async (event) => {
 };
 
 // URLクリック追跡の自動ラッピング
-function wrapLinksWithTracking(text, cid, scenario) {
+function wrapLinksWithTracking(text, cid, scenario, logId) {
   if (!text) return text;
   const baseUrl = 'https://hotel-ai.netlify.app/api/track-click';
   const urlRegex = /(https?:\/\/[^\s\n\r<>"']+)/g;
@@ -113,12 +113,13 @@ function wrapLinksWithTracking(text, cid, scenario) {
     else if (lUrl.includes('bbq') || lUrl.includes('course')) detectedPlan = 'bbq';
     else if (lUrl.includes('hp') || lUrl.includes('official') || lUrl.includes('basic')) detectedPlan = 'hp';
 
-    return `${baseUrl}?cid=${encodeURIComponent(cid || 'guest')}&campaign=${encodeURIComponent(scenario || 'crm')}&plan=${detectedPlan}&channel=email&url=${encodeURIComponent(matchUrl)}`;
+    const logParam = logId ? `&logId=${encodeURIComponent(logId)}` : '';
+    return `${baseUrl}?cid=${encodeURIComponent(cid || 'guest')}&campaign=${encodeURIComponent(scenario || 'crm')}&plan=${detectedPlan}&channel=email${logParam}&url=${encodeURIComponent(matchUrl)}`;
   });
 }
 
 // Amazon SES での全件送信処理
-async function sendEmailBatchSES(payloads, from, scenario) {
+async function sendEmailBatchSES(payloads, from, scenario, logId) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validPayloads = payloads.filter(p => {
     if (!p.email) return false;
@@ -143,8 +144,9 @@ async function sendEmailBatchSES(payloads, from, scenario) {
 
     const promises = chunk.map(async (p) => {
       const cid = (p.email || 'guest').trim().toLowerCase();
-      const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario);
-      const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email`;
+      const wrappedMessage = wrapLinksWithTracking(p.message, cid, scenario, logId);
+      const logParam = logId ? `&logId=${encodeURIComponent(logId)}` : '';
+      const trackOpenUrl = `https://hotel-ai.netlify.app/api/track-open?cid=${encodeURIComponent(cid)}&campaign=${encodeURIComponent(scenario || 'custom')}&channel=email${logParam}`;
       const htmlBody = `
         <div style="font-family: sans-serif; font-size: 15px; line-height: 1.7; color: #333; white-space: pre-wrap;">${wrappedMessage}</div>
         <img src="${trackOpenUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />

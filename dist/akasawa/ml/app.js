@@ -972,7 +972,8 @@ async function dispatchMessages() {
               scenario: state.scenario,
               customSubject: templateSubject,
               customMessage: templateMessage,
-              scheduleTitle: logTitle
+              scheduleTitle: logTitle,
+              logId: logId
             })
           });
         } catch (fetchErr) {
@@ -1984,6 +1985,7 @@ async function fetchCampaignStats() {
       const data = await res.json();
       if (data.ok && data.stats) {
         remoteCampaignStats = data.stats;
+        remoteCampaignStats.debugEvents = data.debugEvents || [];
         renderConversionDashboard();
       }
     }
@@ -2028,22 +2030,64 @@ function renderConversionDashboard() {
   let remoteBookings = 0;
   let remoteRevenue = 0;
 
+  // イベント配列から指定ログの成果を高精度に抽出するヘルパー
+  function extractStatsForLog(targetLog, logId) {
+    let opens = 0;
+    let clicks = 0;
+    let bookings = 0;
+    let revenue = 0;
+
+    const logStat = (remoteCampaignStats && remoteCampaignStats.logsStats && remoteCampaignStats.logsStats[logId]) || {};
+    opens = logStat.opens || 0;
+    clicks = logStat.clicks || 0;
+    bookings = logStat.bookings || 0;
+    revenue = logStat.revenue || 0;
+
+    // debugEvents がある場合、ログ作成時刻や宛先からマッチング補正
+    if (remoteCampaignStats && Array.isArray(remoteCampaignStats.debugEvents) && targetLog) {
+      const logTime = targetLog.createdAt ? new Date(targetLog.createdAt).getTime() : 0;
+      const logIdx = state.logs.findIndex(l => l.id === targetLog.id);
+      const prevLog = logIdx > 0 ? state.logs[logIdx - 1] : null;
+      const nextTime = prevLog && prevLog.createdAt ? new Date(prevLog.createdAt).getTime() : Infinity;
+
+      const matchedEvents = remoteCampaignStats.debugEvents.filter(e => {
+        if (e.logId && e.logId === targetLog.id) return true;
+        if (!e.logId && e.createdAt) {
+          const evTime = new Date(e.createdAt).getTime();
+          return evTime >= (logTime - 300000) && evTime <= nextTime;
+        }
+        return false;
+      });
+
+      const uniqueOpens = new Set(matchedEvents.filter(e => e.type === 'open').map(e => e.cid));
+      const uniqueClicks = new Set(matchedEvents.filter(e => e.type === 'click').map(e => e.cid));
+      opens = Math.max(opens, uniqueOpens.size);
+      clicks = Math.max(clicks, uniqueClicks.size);
+    }
+
+    return { opens, clicks, bookings, revenue };
+  }
+
   if (filterMode === 'latest' && state.logs.length > 0) {
     const latestLog = state.logs[0];
-    const logStat = (remoteCampaignStats && remoteCampaignStats.logsStats && remoteCampaignStats.logsStats[latestLog.id]) || {};
-    totalOpens = (latestLog.openCount || 0) + (logStat.opens || 0);
-    totalClicks = (latestLog.clickCount || 0) + (logStat.clicks || 0);
-    remoteBookings = logStat.bookings || 0;
-    remoteRevenue = logStat.revenue || 0;
+    const extracted = extractStatsForLog(latestLog, latestLog.id);
+    totalOpens = Math.max((latestLog.openCount || 0), extracted.opens);
+    totalClicks = Math.max((latestLog.clickCount || 0), extracted.clicks);
+    remoteBookings = extracted.bookings;
+    remoteRevenue = extracted.revenue;
+    latestLog.openCount = totalOpens;
+    latestLog.clickCount = totalClicks;
   } else if (filterMode.startsWith('log_')) {
     const logId = filterMode.replace('log_', '');
     const targetLog = state.logs.find(l => l.id === logId);
-    const logStat = (remoteCampaignStats && remoteCampaignStats.logsStats && remoteCampaignStats.logsStats[logId]) || {};
     if (targetLog) {
-      totalOpens = (targetLog.openCount || 0) + (logStat.opens || 0);
-      totalClicks = (targetLog.clickCount || 0) + (logStat.clicks || 0);
-      remoteBookings = logStat.bookings || 0;
-      remoteRevenue = logStat.revenue || 0;
+      const extracted = extractStatsForLog(targetLog, logId);
+      totalOpens = Math.max((targetLog.openCount || 0), extracted.opens);
+      totalClicks = Math.max((targetLog.clickCount || 0), extracted.clicks);
+      remoteBookings = extracted.bookings;
+      remoteRevenue = extracted.revenue;
+      targetLog.openCount = totalOpens;
+      targetLog.clickCount = totalClicks;
     }
   } else {
     // 累計通算
