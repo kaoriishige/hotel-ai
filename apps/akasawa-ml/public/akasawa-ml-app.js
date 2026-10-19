@@ -940,60 +940,96 @@ async function dispatchMessages() {
       const templateSubject = el.customSubject.value.trim() || sampleMsg.subject;
       const templateMessage = el.customMessage.value.trim() || sampleMsg.body;
 
-      // /api/schedule-dispatch へ送信 (本日即時送信 + 残り毎朝08:00自動配信キュー登録)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      // /api/schedule-dispatch へ安全なチャンク（25件）単位で順次送信（Netlify Functionsのタイムアウトを完全防止）
+      let totalSent = 0;
+      let totalFailed = 0;
+      const allSentTargets = [];
+      const CHUNK_SIZE = 25;
+      const totalChunks = Math.ceil(lightweightCustomers.length / CHUNK_SIZE);
 
-      let res;
-      try {
-        res = await fetch('/api/schedule-dispatch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            customers: lightweightCustomers,
-            channel,
-            scenario: state.scenario,
-            customSubject: templateSubject,
-            customMessage: templateMessage,
-            scheduleTitle: logTitle
-          })
-        });
-      } catch (fetchErr) {
-        clearTimeout(timeoutId);
-        if (fetchErr.name === 'AbortError') {
-          throw new Error('一括配信リクエストがタイムアウトしました（30秒）。ネットワーク状態をご確認ください。');
+      for (let cIdx = 0; cIdx < totalChunks; cIdx++) {
+        const start = cIdx * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, lightweightCustomers.length);
+        const chunkCustomers = lightweightCustomers.slice(start, end);
+        const chunkOriginalTargets = targets.slice(start, end);
+
+        el.dispatchBtn.textContent = `🚀 配信中... (${end} / ${lightweightCustomers.length} 件)`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+        let res;
+        try {
+          res = await fetch('/api/schedule-dispatch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              customers: chunkCustomers,
+              channel,
+              scenario: state.scenario,
+              customSubject: templateSubject,
+              customMessage: templateMessage,
+              scheduleTitle: logTitle
+            })
+          });
+        } catch (fetchErr) {
+          clearTimeout(timeoutId);
+          if (fetchErr.name === 'AbortError') {
+            throw new Error(`一括配信が一時中断しました (${start + 1}件目〜${end}件目の処理中にタイムアウト)。ネットワークをご確認ください。`);
+          }
+          throw new Error(`通信エラー (${start + 1}件目〜): ${fetchErr.message}`);
         }
-        throw new Error(`通信エラー: ${fetchErr.message}`);
-      }
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      const rawText = await res.text();
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (parseErr) {
-        throw new Error(`サーバーから無効な応答が返りました（HTTP ${res.status}）。Netlifyログをご確認ください。`);
-      }
+        const rawText = await res.text();
+        let result;
+        try {
+          result = JSON.parse(rawText);
+        } catch (parseErr) {
+          throw new Error(`サーバーから無効な応答が返りました（HTTP ${res.status}）。`);
+        }
 
-      if (!res.ok || !result.ok) {
-        const errMsg = result.error || JSON.stringify(result);
-        const foundLog = state.logs.find(l => l.id === logId);
-        if (foundLog) {
-          foundLog.status = 'error';
-          foundLog.unreachedDetails = `送信エラー: ${errMsg}`;
+        if (!res.ok || !result.ok) {
+          const errMsg = result.error || JSON.stringify(result);
+          const foundLog = state.logs.find(l => l.id === logId);
+          if (foundLog) {
+            foundLog.status = 'error';
+            foundLog.unreachedDetails = `送信エラー (${start + 1}件目〜): ${errMsg}`;
+            persist();
+            renderLogs();
+          }
+          throw new Error(errMsg);
+        }
+
+        const chunkSent = result.todaySentCount || 0;
+        const chunkFailed = result.todayFailedCount || 0;
+        totalSent += chunkSent;
+        totalFailed += chunkFailed;
+
+        // 成功した顧客を選択解除＆記録
+        const sentInThisChunk = chunkOriginalTargets.slice(0, chunkSent);
+        sentInThisChunk.forEach(c => {
+          removeFromSelected(c.id);
+          allSentTargets.push(c);
+        });
+
+        // 進行状況をリアルタイムでログに反映
+        const currentLog = state.logs.find(l => l.id === logId);
+        if (currentLog) {
+          currentLog.todaySentCount = totalSent;
+          currentLog.unreachedCount = totalFailed;
           persist();
           renderLogs();
         }
-        throw new Error(errMsg);
+
+        // チャンク間にわずかな待機（50ms）
+        if (end < lightweightCustomers.length) {
+          await new Promise(r => setTimeout(r, 50));
+        }
       }
 
-      const totalSent = result.todaySentCount || 0;
-      const totalFailed = result.todayFailedCount || 0;
-
-      // 送信成功した顧客を選択解除
-      const sentTargets = targets.slice(0, totalSent);
-      sentTargets.forEach(c => removeFromSelected(c.id));
+      const sentTargets = allSentTargets;
 
       const foundLog = state.logs.find(l => l.id === logId);
       if (foundLog) {
