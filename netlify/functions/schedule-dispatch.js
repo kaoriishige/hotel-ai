@@ -151,7 +151,7 @@ async function sendEmailBatchSES(payloads, from, scenario) {
       `;
 
       const sendEmailParams = {
-        Source: from,
+        Source: formatSender(from),
         Destination: {
           ToAddresses: [p.email.trim()]
         },
@@ -204,3 +204,26 @@ function json(statusCode, body) {
     body: JSON.stringify(body)
   };
 }
+
+/**
+ * 送信元（From）アドレスをRFC 2047（MIME Base64）形式で整形
+ * 受信者画面で「赤沢温泉旅館」と明瞭に表示されるようにする
+ */
+function formatSender(rawSender, defaultName = '赤沢温泉旅館') {
+  if (!rawSender) return '';
+  const trimmed = rawSender.trim();
+  let name = (process.env.SENDER_NAME || '').trim() || defaultName;
+  let email = trimmed;
+
+  const angleMatch = trimmed.match(/^(.*?)(?:<([^>]+)>)$/);
+  if (angleMatch) {
+    const parsedName = angleMatch[1].replace(/["']/g, '').trim();
+    if (parsedName) name = parsedName;
+    email = angleMatch[2].trim();
+  }
+
+  // 表示名を RFC 2047 (MIME Base64) エンコードしてSESに渡す
+  const encodedName = `=?UTF-8?B?${Buffer.from(name, 'utf-8').toString('base64')}?=`;
+  return `${encodedName} <${email}>`;
+}
+
