@@ -2071,8 +2071,10 @@ function renderConversionDashboard() {
   if (filterMode === 'latest' && state.logs.length > 0) {
     const latestLog = state.logs[0];
     const extracted = extractStatsForLog(latestLog, latestLog.id);
-    totalOpens = Math.max((latestLog.openCount || 0), extracted.opens);
-    totalClicks = Math.max((latestLog.clickCount || 0), extracted.clicks);
+    const todayOpens = remoteCampaignStats ? (remoteCampaignStats.todayOpens || 0) : 0;
+    const todayClicks = remoteCampaignStats ? (remoteCampaignStats.todayClicks || 0) : 0;
+    totalOpens = Math.max((latestLog.openCount || 0), extracted.opens, todayOpens);
+    totalClicks = Math.max((latestLog.clickCount || 0), extracted.clicks, todayClicks);
     remoteBookings = extracted.bookings;
     remoteRevenue = extracted.revenue;
     latestLog.openCount = totalOpens;
@@ -2082,8 +2084,11 @@ function renderConversionDashboard() {
     const targetLog = state.logs.find(l => l.id === logId);
     if (targetLog) {
       const extracted = extractStatsForLog(targetLog, logId);
-      totalOpens = Math.max((targetLog.openCount || 0), extracted.opens);
-      totalClicks = Math.max((targetLog.clickCount || 0), extracted.clicks);
+      const isLatest = state.logs[0] && state.logs[0].id === logId;
+      const todayOpens = (isLatest && remoteCampaignStats) ? (remoteCampaignStats.todayOpens || 0) : 0;
+      const todayClicks = (isLatest && remoteCampaignStats) ? (remoteCampaignStats.todayClicks || 0) : 0;
+      totalOpens = Math.max((targetLog.openCount || 0), extracted.opens, todayOpens);
+      totalClicks = Math.max((targetLog.clickCount || 0), extracted.clicks, todayClicks);
       remoteBookings = extracted.bookings;
       remoteRevenue = extracted.revenue;
       targetLog.openCount = totalOpens;
@@ -3006,8 +3011,8 @@ async function initStorageAndRender() {
 }
 
 initStorageAndRender();
-setInterval(fetchCampaignStats, 10000); // 10秒ごとに最新の開封・クリックデータを自動同期
-setInterval(syncServerOptOuts, 30000);   // 30秒ごとに最新のオプトアウト台帳と自動同期
-setInterval(syncServerDispatchLogs, 20000); // 20秒ごとに最新の配信履歴を自動同期
+setInterval(fetchCampaignStats, 60000); // 60秒ごとに最新の開封・クリックデータを自動同期（クォータ保護）
+setInterval(syncServerOptOuts, 60000);   // 60秒ごとに最新のオプトアウト台帳と自動同期
+setInterval(syncServerDispatchLogs, 60000); // 60秒ごとに最新の配信履歴を自動同期
 
 
