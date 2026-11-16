@@ -1,4 +1,5 @@
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const { getSuppressedEmails } = require('./_lib-ml/suppression');
 
 let getDb = null;
 let admin = null;
@@ -69,7 +70,8 @@ exports.handler = async (event) => {
         lineUserId: t.lineUserId,
         subject: subj,
         message: msg,
-        customerName: name
+        customerName: name,
+        unsubscribed: !!t.unsubscribed
       };
     });
 
@@ -121,13 +123,28 @@ function wrapLinksWithTracking(text, cid, scenario, logId) {
 // Amazon SES での全件送信処理
 async function sendEmailBatchSES(payloads, from, scenario, logId) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const { optouts, bounces } = await getSuppressedEmails();
+  const skippedSuppressed = [];
+
   const validPayloads = payloads.filter(p => {
     if (!p.email) return false;
     const cleanEmail = String(p.email).trim();
-    return emailRegex.test(cleanEmail) && !cleanEmail.includes('..') && !cleanEmail.includes('.@') && !cleanEmail.includes('@.') && !cleanEmail.startsWith('.');
+    const lowerEmail = cleanEmail.toLowerCase();
+    if (!emailRegex.test(cleanEmail) || cleanEmail.includes('..') || cleanEmail.includes('.@') || cleanEmail.includes('@.') || cleanEmail.startsWith('.')) {
+      return false;
+    }
+    if (p.unsubscribed || optouts.has(lowerEmail) || bounces.has(lowerEmail)) {
+      skippedSuppressed.push(lowerEmail);
+      return false;
+    }
+    return true;
   });
 
-  if (validPayloads.length === 0) return { type: 'email', count: 0, failedNames: [] };
+  if (skippedSuppressed.length > 0) {
+    console.warn(`[schedule-dispatch:BLOCKED] オプトアウト/バウンス済み ${skippedSuppressed.length} 件の送信をサーバー側で遮断しました`);
+  }
+
+  if (validPayloads.length === 0) return { type: 'email', count: 0, failedNames: [], skippedSuppressedCount: skippedSuppressed.length };
 
   const sesClient = getSesClient();
   if (!sesClient) {
