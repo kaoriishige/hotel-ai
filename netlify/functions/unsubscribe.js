@@ -175,6 +175,7 @@ exports.handler = async (event) => {
     const localList = loadLocalOptouts();
     const addedList = [];
     const firestorePromises = [];
+    const firestoreErrors = [];
 
     if (inputEmails.length > 0) {
       inputEmails.forEach(emStr => {
@@ -206,6 +207,7 @@ exports.handler = async (event) => {
               timestamp: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true }).catch(err => {
               console.warn('[unsubscribe] Firestore保存エラー:', err.message);
+              firestoreErrors.push(err.message);
             })
           );
         }
@@ -235,6 +237,7 @@ exports.handler = async (event) => {
             timestamp: admin.firestore.FieldValue.serverTimestamp()
           }, { merge: true }).catch(err => {
             console.warn('[unsubscribe] Firestore保存エラー(CID):', err.message);
+            firestoreErrors.push(err.message);
           })
         );
       }
@@ -245,6 +248,18 @@ exports.handler = async (event) => {
     }
 
     saveLocalOptouts(localList);
+
+    if (firestoreErrors.length > 0) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          ok: false,
+          error: `データベース(Firestore)への配信停止保存に失敗しました: ${firestoreErrors[0]}`,
+          added: addedList
+        })
+      };
+    }
 
     console.log(`[unsubscribe] 配信停止受付完了: count=${addedList.length}`);
 

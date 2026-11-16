@@ -1,35 +1,5 @@
-const fs = require('fs');
-const path = require('path');
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
-
-// オプトアウトおよびバウンス（不達）の抑制リスト読み込み
-function getSuppressedEmails() {
-  const optouts = new Set();
-  const bounces = new Set();
-
-  try {
-    const optPath = path.join(__dirname, 'data', 'optouts.json');
-    if (fs.existsSync(optPath)) {
-      const list = JSON.parse(fs.readFileSync(optPath, 'utf8') || '[]');
-      list.forEach(item => {
-        if (item.email) optouts.add(String(item.email).trim().toLowerCase());
-      });
-    }
-  } catch (e) {}
-
-  try {
-    const bouncePath = path.join(__dirname, 'data', 'undelivered_raw.json');
-    if (fs.existsSync(bouncePath)) {
-      const list = JSON.parse(fs.readFileSync(bouncePath, 'utf8') || '[]');
-      list.forEach(item => {
-        const em = item.email || item.recipient || item.to;
-        if (em) bounces.add(String(em).trim().toLowerCase());
-      });
-    }
-  } catch (e) {}
-
-  return { optouts, bounces };
-}
+const { getSuppressedEmails } = require('./_lib-ml/suppression');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -91,7 +61,7 @@ exports.handler = async (event) => {
       return json(400, { ok: false, error: 'LINE配信用のアクセストークン(LINE_CHANNEL_ACCESS_TOKEN)が設定されていません。送信処理は開始されていません。' });
     }
 
-    const { optouts, bounces } = getSuppressedEmails();
+    const { optouts, bounces } = await getSuppressedEmails();
 
     const validPayloads = [];
     const skippedInvalidPayloads = [];
