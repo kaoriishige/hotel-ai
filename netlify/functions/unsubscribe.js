@@ -174,6 +174,7 @@ exports.handler = async (event) => {
 
     const localList = loadLocalOptouts();
     const addedList = [];
+    const firestorePromises = [];
 
     if (inputEmails.length > 0) {
       inputEmails.forEach(emStr => {
@@ -197,14 +198,16 @@ exports.handler = async (event) => {
         }
         addedList.push(optOutRecord);
 
-        // Firestore に保存（可能な場合）
+        // Firestore に保存（確実に完了を待機）
         if (db && admin) {
-          try {
+          firestorePromises.push(
             db.collection('optouts').doc(optOutRecord.id).set({
               ...optOutRecord,
               timestamp: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(() => {});
-          } catch (e) {}
+            }, { merge: true }).catch(err => {
+              console.warn('[unsubscribe] Firestore保存エラー:', err.message);
+            })
+          );
         }
       });
     } else if (cid) {
@@ -224,6 +227,21 @@ exports.handler = async (event) => {
         localList.push(optOutRecord);
       }
       addedList.push(optOutRecord);
+
+      if (db && admin) {
+        firestorePromises.push(
+          db.collection('optouts').doc(optOutRecord.id).set({
+            ...optOutRecord,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(err => {
+            console.warn('[unsubscribe] Firestore保存エラー(CID):', err.message);
+          })
+        );
+      }
+    }
+
+    if (firestorePromises.length > 0) {
+      await Promise.all(firestorePromises);
     }
 
     saveLocalOptouts(localList);

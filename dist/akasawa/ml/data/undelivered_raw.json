@@ -1,5 +1,85 @@
 [
   {
+    "id": "ses_bounce_796f7368692e32313238",
+    "to": "yoshi.2128.417.107.3031@ezweb.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:30:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_6e6167616d696e654079",
+    "to": "nagamine@yamasa.com",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:27:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_6275656e61732e6e6f2d",
+    "to": "buenas.no-1.l.2.o@docomo.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:23:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_796d64787264626d6831",
+    "to": "ymdxrdbmh1wfzdccwbbt@docomo.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:29:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_6d6172626f3431323131",
+    "to": "marbo41211@yahoo.co.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:26:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_62656e74746d40692e73",
+    "to": "benttm@i.softbank.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:23:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_74616b61686174746f40",
+    "to": "takahatto@y3.dion.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:28:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_73686f6b6f2e32303037",
+    "to": "shoko.200731.you8.30.hina2.10@ezweb.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:28:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_67656e6b693130306261",
+    "to": "genki100baiazupanman_2gd_0622@docomo.ne.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:24:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
+    "id": "ses_bounce_74616b6973686974612e",
+    "to": "takishita.toru@obayashi.co.jp",
+    "status": "bounced",
+    "subject": "Amazon SES 配信（サプレッションリスト登録）",
+    "created_at": "2026-10-19 02:29:00.000+00",
+    "from": "赤沢温泉旅館 <info@mail.akasawaonsen.com>"
+  },
+  {
     "id": "6217b553-5720-4927-ae50-c379cf0601a8",
     "to": "yokoski@u01.gate01.com",
     "status": "bounced",

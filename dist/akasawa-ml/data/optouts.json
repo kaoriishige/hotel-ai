@@ -6,5 +6,253 @@
     "reason": "メール受信者による迷惑メール報告・配信拒否 (Resend Complaint 2026-09-10)",
     "unsubscribedAt": "2026-09-10T04:05:11.030Z",
     "source": "resend_complaint"
+  },
+  {
+    "id": "optout_ses_74616b6973686974612e746f",
+    "email": "takishita.toru@obayashi.co.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:29:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_67656e6b6931303062616961",
+    "email": "genki100baiazupanman_2gd_0622@docomo.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:24:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_73686f6b6f2e323030373331",
+    "email": "shoko.200731.you8.30.hina2.10@ezweb.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:28:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_74616b61686174746f407933",
+    "email": "takahatto@y3.dion.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:28:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_62656e74746d40692e736f66",
+    "email": "benttm@i.softbank.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:23:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_6d6172626f34313231314079",
+    "email": "marbo41211@yahoo.co.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:26:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_796d64787264626d68317766",
+    "email": "ymdxrdbmh1wfzdccwbbt@docomo.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:29:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_6275656e61732e6e6f2d312e",
+    "email": "buenas.no-1.l.2.o@docomo.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:23:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_6e6167616d696e654079616d",
+    "email": "nagamine@yamasa.com",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:27:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_ses_796f7368692e323132382e34",
+    "email": "yoshi.2128.417.107.3031@ezweb.ne.jp",
+    "cid": null,
+    "reason": "AWS SES サプレッションリスト（バウンス 2026-10-19）",
+    "unsubscribedAt": "2026-10-19T02:30:00.000Z",
+    "source": "aws_ses_suppression"
+  },
+  {
+    "id": "optout_resend_suppressed_67756d656d6940657a77",
+    "email": "gumemi@ezweb.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T04:31:22.132Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_6e6570755f747274735f",
+    "email": "nepu_trts_211@yahoo.co.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T04:14:33.319Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73746172726f6c6c3434",
+    "email": "starroll444@trio.plala.or.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:17.140Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7368696e656532393631",
+    "email": "shinee2961998@i.softbank.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:14.441Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7365655f796f755f696e",
+    "email": "see_you_in_the_heaven.abc@docomo.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.175Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_736361726c65742d7370",
+    "email": "scarlet-spell_knight.kxs@ezweb.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.159Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73633131347330373135",
+    "email": "sc114s0715@ezweb.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.156Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73653235303334332d33",
+    "email": "se250343-3714@tbz.t-com.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.155Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73616e6f696275393639",
+    "email": "sanoibu969_534@yahoo.co.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.148Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73656461746f40636f74",
+    "email": "sedato@cotton.ocn.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.145Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7361746f2e6d40676165",
+    "email": "sato.m@gaea.ocn.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.142Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7365612d6d6f6f6e2e31",
+    "email": "sea-moon.1ok69-303@ezweb.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.139Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7361743130313340646f",
+    "email": "sat1013@docomo.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.115Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7361746f72755f6e4072",
+    "email": "satoru_n@r8.dion.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.107Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73616e64353834324079",
+    "email": "sand5842@yahoo.co.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.096Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73616b7572616f686b75",
+    "email": "sakuraohkuma@yahoo.co.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.090Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73616b75726172697261",
+    "email": "sakurarira123@yahoo.co.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.083Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_73616b752e676c656e6c",
+    "email": "saku.glenlivet-12@docomo.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.082Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_732d616e646f406a6b39",
+    "email": "s-ando@jk9.so-net.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:57:13.078Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_7269652e313238304065",
+    "email": "rie.1280@ezweb.ne.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:35:08.206Z",
+    "source": "resend_suppressed"
+  },
+  {
+    "id": "optout_resend_suppressed_6d6172696368616e3130",
+    "email": "marichan1007@i.softbank.jp",
+    "cid": null,
+    "reason": "Resend 配信抑止（Suppressed 2026-07-23）",
+    "unsubscribedAt": "2026-07-23T03:34:20.124Z",
+    "source": "resend_suppressed"
   }
 ]
