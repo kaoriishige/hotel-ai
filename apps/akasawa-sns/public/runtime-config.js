@@ -1,11 +1,12 @@
 window.AKASAWA_CONFIG = {
   firebase: {
-    apiKey: "AIzaSyBypassFirebaseStorageUploadKey",
-    authDomain: "akasawadp.firebaseapp.com",
-    projectId: "akasawadp",
-    storageBucket: "akasawadp.firebasestorage.app",
-    messagingSenderId: "1084937499485",
-    appId: "1:1084937499485:web:e37025819f8cbd21a6f08a"
+    apiKey: "AIzaSyBarCB9UJf0HJujaP-xNF58BokixkGC8HE",
+    authDomain: "hotel-ai-3dcf8.firebaseapp.com",
+    projectId: "hotel-ai-3dcf8",
+    storageBucket: "hotel-ai-3dcf8.firebasestorage.app",
+    messagingSenderId: "64559060757",
+    appId: "1:64559060757:web:7af1a61d0232b82dc77b1c",
+    measurementId: "G-V1WFHP2R9E"
   },
   apiBase: "/api",
   defaults: {

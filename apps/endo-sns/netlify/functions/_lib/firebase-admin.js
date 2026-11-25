@@ -14,7 +14,7 @@ function safeParseServiceAccount(raw) {
     } catch (e2) {
       // 正規表現による private_key / client_email 直接抽出
       const clientEmail = raw.match(/"client_email":\s*"([^"]+)"/)?.[1];
-      const projectId = raw.match(/"project_id":\s*"([^"]+)"/)?.[1] || 'akasawadp';
+      const projectId = raw.match(/"project_id":\s*"([^"]+)"/)?.[1] || 'hotel-ai-3dcf8';
       
       const pkStart = raw.indexOf('-----BEGIN PRIVATE KEY-----');
       const pkEnd = raw.indexOf('-----END PRIVATE KEY-----');
@@ -55,7 +55,7 @@ function getApp() {
   if (admin.apps.length) return admin.app();
   return admin.initializeApp({
     credential: getCredential(),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'akasawadp.firebasestorage.app'
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'hotel-ai-3dcf8.firebasestorage.app'
   });
 }
 

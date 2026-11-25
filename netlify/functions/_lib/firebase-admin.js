@@ -13,7 +13,7 @@ function getApp() {
   if (admin.apps.length) return admin.app();
   return admin.initializeApp({
     credential: getCredential(),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'akasawadp.firebasestorage.app'
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'hotel-ai-3dcf8.firebasestorage.app'
   });
 }
 
