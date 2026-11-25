@@ -35,7 +35,7 @@ async function generateVoiceFromCartesia(text, filename) {
       output_format: {
         container: 'wav',
         encoding: 'pcm_s16le', // 標準的な16ビットPCM。再生エラーを防ぐため s16le にしておきます
-        sample_rate: 44100
+        sample_rate: 22050 // 音声用途に十分な音質を保ちつつBase64返却時の容量を最適化
       },
       language: 'ja'
     })
@@ -64,22 +64,27 @@ async function generateVoiceFromCartesia(text, filename) {
     console.error('Failed to save voice file locally:', err);
   }
 
-  // Firebase Storageへ保存
-  const bucket = getBucket();
-  const file = bucket.file(`voices/${filename}`);
-  await file.save(audioBuffer, {
-    metadata: {
-      contentType: 'audio/wav',
-      cacheControl: 'public, max-age=31536000'
-    }
-  });
+  // Firebase Storageへ保存（請求設定無効・未設定などで失敗した場合はBase64 Data URLへ自動フォールバック）
+  try {
+    const bucket = getBucket();
+    const file = bucket.file(`voices/${filename}`);
+    await file.save(audioBuffer, {
+      metadata: {
+        contentType: 'audio/wav',
+        cacheControl: 'public, max-age=31536000'
+      }
+    });
 
-  // 公開URLを取得可能にする
-  await file.makePublic().catch(err => {
-    console.warn('makePublic failed, attempting alternative metadata access', err);
-  });
+    // 公開URLを取得可能にする
+    await file.makePublic().catch(err => {
+      console.warn('makePublic failed, attempting alternative metadata access', err);
+    });
 
-  return `https://storage.googleapis.com/${bucket.name}/voices/${filename}`;
+    return `https://storage.googleapis.com/${bucket.name}/voices/${filename}`;
+  } catch (storageErr) {
+    console.warn('[cartesia-tts] Firebase Storage保存失敗のためBase64 Data URLで返却します:', storageErr.message);
+    return `data:audio/wav;base64,${audioBuffer.toString('base64')}`;
+  }
 }
 
 module.exports = { generateVoiceFromCartesia };
