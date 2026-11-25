@@ -337,7 +337,7 @@ if (generateRagBtn) {
   generateRagBtn.addEventListener('click', async () => {
     let theme = (customThemeInput ? customThemeInput.value.trim() : '') || (simpleTag ? simpleTag.value : '');
     if (!theme || theme === 'custom') {
-      alert('調査したい温泉名、地名、またはテーマを入力するか、上のクイック候補をクリックしてください。');
+      alert('調査したい地名またはテーマを入力するか、上のクイック候補をクリックしてください。');
       if (customThemeInput) customThemeInput.focus();
       return;
     }
@@ -399,7 +399,7 @@ if (generateRagBtn) {
       alert('エラー: ' + err.message);
       setMessage('生成に失敗しました: ' + err.message, true);
     } finally {
-      generateRagBtn.textContent = '🤖 このテーマ・温泉を深層調査して台本をAI出力する ➔';
+      generateRagBtn.textContent = '🤖 このテーマ・地名を深層調査して台本をAI出力する ➔';
       generateRagBtn.disabled = false;
     }
   });
