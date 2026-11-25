@@ -203,9 +203,25 @@ async function processAndPreviewAvatar(fileOrUrl) {
   }
 
   const previewImg = document.getElementById('avatarPreviewImg');
+  const facelessPlaceholder = document.getElementById('facelessPlaceholder');
   const previewTitle = document.getElementById('avatarPreviewTitle');
   const previewStatus = document.getElementById('avatarPreviewStatus');
   const activeFilterBadge = document.getElementById('activeFilterBadge');
+  const styleMode = document.querySelector('input[name="videoStyleMode"]:checked')?.value || 'faceless';
+
+  // 顔出しなしモードでカスタム風景画像が未選択の場合は顔写真を表示しない
+  if (styleMode === 'faceless' && !(fileOrUrl instanceof File) && !(currentRawAvatarFile instanceof File)) {
+    currentOptimizedAvatarBase64 = null;
+    if (previewImg) previewImg.style.display = 'none';
+    if (facelessPlaceholder) facelessPlaceholder.style.display = 'block';
+    if (previewTitle) previewTitle.textContent = '🌲 顔出しなし背景プレビュー';
+    if (previewStatus) {
+      previewStatus.textContent = '風景写真をアップロードすると9:16縦型に最適化されます（未選択でも深森グラデーション背景＋字幕で動画化できます）';
+      previewStatus.style.color = '#94a3b8';
+      previewStatus.style.fontWeight = 'normal';
+    }
+    return;
+  }
 
   const mode = document.querySelector('input[name="cropMode"]:checked')?.value || 'cover';
   const colorFilter = document.querySelector('input[name="colorFilter"]:checked')?.value || 'normal';
@@ -239,7 +255,11 @@ async function processAndPreviewAvatar(fileOrUrl) {
     const optimizedBase64 = await convertImageTo916Vertical(target, mode, colorFilter);
     currentOptimizedAvatarBase64 = optimizedBase64;
 
-    if (previewImg) previewImg.src = optimizedBase64;
+    if (previewImg) {
+      previewImg.src = optimizedBase64;
+      previewImg.style.display = 'block';
+    }
+    if (facelessPlaceholder) facelessPlaceholder.style.display = 'none';
 
     const isCustomFile = currentRawAvatarFile instanceof File;
     if (previewTitle) {
@@ -470,6 +490,296 @@ if (ownerComment) {
     if (durationBadge && text) {
       const sec = (text.length / 5.4).toFixed(1);
       durationBadge.textContent = `⏱️ 推定${sec}秒 (${text.length}文字)`;
+    }
+  });
+}
+
+// 制作スタイル切り替え（顔出しなし / 顔出しあり）
+function updateVideoStyleUI() {
+  const mode = document.querySelector('input[name="videoStyleMode"]:checked')?.value || 'faceless';
+  const facelessPanel = document.getElementById('facelessPanel');
+  const avatarPanel = document.getElementById('avatarPanel');
+  const step4Title = document.getElementById('step4Title');
+  const mediaFilesLabel = document.getElementById('mediaFilesLabel');
+  const mediaFilesHint = document.getElementById('mediaFilesHint');
+
+  if (mode === 'faceless') {
+    if (facelessPanel) facelessPanel.style.display = 'flex';
+    if (avatarPanel) avatarPanel.style.display = 'none';
+    if (step4Title) step4Title.textContent = '🎙️ 顔出しなしショート動画制作（クローン音声＋背景）';
+    if (mediaFilesLabel) mediaFilesLabel.textContent = '📸 背景用の風景・自然写真をアップロード (任意・横長写真も自動9:16対応):';
+    if (mediaFilesHint) mediaFilesHint.textContent = '💡 風景写真を選ぶと、ゆっくりズームするシネマティック背景＋遠藤正俊クローン音声で顔出しなしショート動画を生成します。';
+  } else {
+    if (facelessPanel) facelessPanel.style.display = 'none';
+    if (avatarPanel) avatarPanel.style.display = 'flex';
+    if (step4Title) step4Title.textContent = '🎥 AIアバター動画制作欄（顔出しあり）';
+    if (mediaFilesLabel) mediaFilesLabel.textContent = '📸 AIアバター用 新しい顔写真をアップロード (任意・横長写真も完全自動対応):';
+    if (mediaFilesHint) mediaFilesHint.textContent = '💡 どんなアスペクト比（横長・正方形など）の写真でも、自動で9:16の余白ゼロ縦型画像に変換してからHeyGenで動画化されます。';
+  }
+  updateAvatarPreviewAndCrop();
+}
+
+document.querySelectorAll('input[name="videoStyleMode"]').forEach(radio => {
+  radio.addEventListener('change', updateVideoStyleUI);
+});
+
+// ブラウザ内 Canvas + Web Audio API による顔出しなし9:16ショート動画合成
+async function renderFacelessShortVideo(audioUrl, bgImageBase64, hookStr, scriptStr) {
+  const width = 720;
+  const height = 1280;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  let bgImg = null;
+  if (bgImageBase64) {
+    bgImg = await new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = bgImageBase64;
+    });
+  }
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioRes = await fetch(audioUrl);
+  if (!audioRes.ok) throw new Error('音声データの読み込みに失敗しました');
+  const audioBuf = await audioCtx.decodeAudioData(await audioRes.arrayBuffer());
+  const durationSec = Math.max(3, audioBuf.duration + 0.5);
+
+  const dest = audioCtx.createMediaStreamDestination();
+  const source = audioCtx.createBufferSource();
+  source.buffer = audioBuf;
+  source.connect(dest);
+
+  const canvasStream = canvas.captureStream(30);
+  const combinedStream = new MediaStream([
+    ...canvasStream.getVideoTracks(),
+    ...dest.stream.getAudioTracks()
+  ]);
+
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+    ? 'video/webm;codecs=vp9,opus'
+    : 'video/webm';
+  const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 3500000 });
+  const chunks = [];
+  recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+
+  const wrapLines = (text, maxChars) => {
+    if (!text) return [];
+    const lines = [];
+    let current = '';
+    for (const ch of text) {
+      if (ch === '\n') {
+        if (current) lines.push(current);
+        current = '';
+      } else {
+        current += ch;
+        if (current.length >= maxChars) {
+          lines.push(current);
+          current = '';
+        }
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  };
+
+  // 縦書き・明朝体テロップ用（1列あたり最大12文字、最大4列）
+  const hookCols = wrapLines(hookStr, 12).slice(0, 4);
+  const minchoFontFamily = '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho", "Noto Serif JP", serif';
+
+  const drawVerticalTextColumn = (text, x, startY, charStep, fontSize) => {
+    const rotateChars = new Set(['ー', '―', '─', '〜', '～', '「', '」', '『', '』', '（', '）', '(', ')', '［', '］']);
+    const smallKana = new Set(['っ', 'ゃ', 'ゅ', 'ょ', 'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', 'ッ', 'ャ', 'ュ', 'ョ', 'ァ', 'ィ', 'ゥ', 'ェ', 'ォ']);
+    const punctChars = new Set(['、', '。', '，', '．']);
+
+    ctx.font = `600 ${fontSize}px ${minchoFontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    [...text].forEach((ch, i) => {
+      const cy = startY + i * charStep;
+      ctx.save();
+      if (rotateChars.has(ch)) {
+        ctx.translate(x, cy);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillText(ch, 0, 0);
+      } else if (punctChars.has(ch)) {
+        ctx.fillText(ch, x + fontSize * 0.28, cy - fontSize * 0.26);
+      } else if (smallKana.has(ch)) {
+        ctx.fillText(ch, x + fontSize * 0.1, cy - fontSize * 0.08);
+      } else {
+        ctx.fillText(ch, x, cy);
+      }
+      ctx.restore();
+    });
+  };
+
+  return await new Promise((resolve, reject) => {
+    let rafId = null;
+    const startTime = performance.now();
+
+    recorder.onstop = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      audioCtx.close().catch(() => {});
+      const blob = new Blob(chunks, { type: mimeType });
+      resolve(URL.createObjectURL(blob));
+    };
+    recorder.onerror = (err) => {
+      if (rafId) cancelAnimationFrame(rafId);
+      audioCtx.close().catch(() => {});
+      reject(err);
+    };
+
+    const drawFrame = () => {
+      const elapsed = (performance.now() - startTime) / 1000;
+      const progress = Math.min(1, elapsed / durationSec);
+
+      ctx.clearRect(0, 0, width, height);
+      if (bgImg) {
+        // ゆっくりズームするKen Burns効果
+        const scale = 1.0 + progress * 0.08;
+        const dw = width * scale;
+        const dh = height * scale;
+        const dx = (width - dw) / 2;
+        const dy = (height - dh) / 2;
+        ctx.drawImage(bgImg, dx, dy, dw, dh);
+        ctx.fillStyle = 'rgba(4, 12, 20, 0.35)';
+        ctx.fillRect(0, 0, width, height);
+      } else {
+        // 深森グラデーション背景
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, '#0a1f1c');
+        grad.addColorStop(0.5, '#0b1524');
+        grad.addColorStop(1, '#050a12');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      // ゴールドフレームと署名
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(28, 28, width - 56, height - 56);
+
+      ctx.fillStyle = '#fce79a';
+      ctx.font = `600 22px ${minchoFontFamily}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('遠藤正俊｜人生と自然の哲学', width / 2, 92);
+
+      // 冒頭フックテキスト（縦書き・明朝体・右から左へ列配置）
+      if (hookCols.length > 0) {
+        const fontSize = 42;
+        const charStep = 50;
+        const colStep = 66;
+        const maxLen = Math.max(...hookCols.map(c => [...c].length));
+        const totalCols = hookCols.length;
+        const boxW = totalCols * colStep + 56;
+        const boxH = maxLen * charStep + 56;
+        const boxX = (width - boxW) / 2;
+        const boxY = Math.max(150, (height - boxH) / 2);
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#fffef8';
+        const rightMostX = width / 2 + ((totalCols - 1) * colStep) / 2;
+        const startY = boxY + 28 + charStep / 2;
+        hookCols.forEach((colText, colIdx) => {
+          const colX = rightMostX - colIdx * colStep;
+          drawVerticalTextColumn(colText, colX, startY, charStep, fontSize);
+        });
+        ctx.restore();
+      }
+
+      if (elapsed < durationSec) {
+        rafId = requestAnimationFrame(drawFrame);
+      }
+    };
+
+    recorder.start(250);
+    source.start(0);
+    drawFrame();
+
+    setTimeout(() => {
+      if (recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+    }, Math.ceil(durationSec * 1000));
+  });
+}
+
+// 顔出しなしショート動画制作ボタン
+const generateFacelessVideoBtn = document.getElementById('generateFacelessVideoBtn');
+if (generateFacelessVideoBtn) {
+  generateFacelessVideoBtn.addEventListener('click', async () => {
+    const script = ownerComment.value.trim();
+    const hook = hookText ? hookText.value.trim() : '';
+    if (!script) {
+      alert('まず「ステップ2: 動画台本本文」を入力するか、「🤖 台本を完全AI出力」を行ってください。');
+      return;
+    }
+
+    const statusEl = document.getElementById('facelessStatusMessage');
+    const audioBox = document.getElementById('facelessAudioResult');
+    const audioPlayer = document.getElementById('facelessAudioPlayer');
+    const audioDownload = document.getElementById('facelessAudioDownloadLink');
+    const resultDiv = document.getElementById('avatarVideoResult');
+    const resultTitle = document.getElementById('avatarVideoResultTitle');
+    const videoEl = document.getElementById('avatarVideoPreview');
+    const downloadLink = document.getElementById('avatarVideoDownloadLink');
+
+    generateFacelessVideoBtn.disabled = true;
+    generateFacelessVideoBtn.textContent = '⏳ クローン音声を生成中...';
+    if (statusEl) statusEl.textContent = '🎙️ Cartesia API で遠藤正俊本人のクローン音声を生成しています...';
+
+    try {
+      const fullVoiceText = hook ? `${hook}。${script}` : script;
+      const res = await fetch('/.netlify/functions/generate-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: fullVoiceText,
+          voiceName: 'endo_faceless'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.audioUrl) {
+        throw new Error(data.error || 'クローン音声の生成に失敗しました');
+      }
+
+      if (audioPlayer) audioPlayer.src = data.audioUrl;
+      if (audioDownload) audioDownload.href = data.audioUrl;
+      if (audioBox) audioBox.style.display = 'block';
+
+      generateFacelessVideoBtn.textContent = '🎬 顔出しなしショート動画を合成中...';
+      if (statusEl) statusEl.textContent = '🌲 風景背景・字幕・クローン音声を合成しています（音声尺に合わせて数十秒かかります）...';
+
+      const bgBase64 = currentOptimizedAvatarBase64 || null;
+      const videoBlobUrl = await renderFacelessShortVideo(data.audioUrl, bgBase64, hook, script);
+
+      window.lastGeneratedAvatarVideoUrl = videoBlobUrl;
+      if (resultTitle) resultTitle.textContent = '✅ 顔出しなしショート動画が完成しました！';
+      if (videoEl) videoEl.src = videoBlobUrl;
+      if (downloadLink) {
+        downloadLink.href = videoBlobUrl;
+        downloadLink.download = `endo_faceless_short_${Date.now()}.webm`;
+      }
+      if (resultDiv) resultDiv.style.display = 'block';
+      if (statusEl) statusEl.textContent = '✅ 制作完了！プレビュー・ダウンロード、または動画接続スタジオへセットできます。';
+    } catch (err) {
+      console.error('顔出しなし動画生成エラー:', err);
+      if (statusEl) statusEl.textContent = '❌ エラー: ' + err.message;
+      alert('顔出しなし動画生成エラー: ' + err.message);
+    } finally {
+      generateFacelessVideoBtn.disabled = false;
+      generateFacelessVideoBtn.textContent = '🎙️ 顔出しなしショート動画を制作する（クローン音声＋背景）';
     }
   });
 }
