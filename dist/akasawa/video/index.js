@@ -1057,28 +1057,39 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
   };
 
   return await new Promise((resolve, reject) => {
-    let rafId = null;
+    let intervalId = null;
     let audioStartCtxTime = null;
     let perfStartTime = null;
     let stopped = false;
+    const statusElLive = document.getElementById('facelessStatusMessage');
 
     const finishRecording = () => {
       if (stopped) return;
       stopped = true;
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
       if (recorder.state !== 'inactive') {
         recorder.stop();
       }
     };
 
     recorder.onstop = () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
       audioCtx.close().catch(() => {});
       const blobType = videoExt === 'mp4' ? 'video/mp4' : mimeType;
       const blob = new Blob(chunks, { type: blobType });
       resolve({ url: URL.createObjectURL(blob), ext: videoExt, mimeType: blobType });
     };
     recorder.onerror = (err) => {
-      if (rafId) cancelAnimationFrame(rafId);
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
       audioCtx.close().catch(() => {});
       reject(err);
     };
@@ -1187,7 +1198,9 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       }
     };
 
+    let lastStatusSec = -1;
     const drawFrame = () => {
+      if (stopped) return;
       const ctxElapsed = audioStartCtxTime !== null ? (audioCtx.currentTime - audioStartCtxTime) : 0;
       const perfElapsed = perfStartTime !== null ? ((performance.now() - perfStartTime) / 1000) : 0;
       // AudioContextクロックを優先しつつ、未起動・遅延時はperformance.nowに安全フォールバック
@@ -1195,9 +1208,15 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
 
       renderAtTime(elapsed);
 
-      if (!stopped && elapsed < durationSec) {
-        rafId = requestAnimationFrame(drawFrame);
-      } else if (!stopped) {
+      const secInt = Math.floor(elapsed);
+      if (statusElLive && secInt !== lastStatusSec) {
+        lastStatusSec = secInt;
+        const curSubIdx = subtitleTimeline.findIndex(s => elapsed >= s.start && elapsed < s.end);
+        const subDisp = curSubIdx >= 0 ? curSubIdx + 1 : subtitleTimeline.length;
+        statusElLive.textContent = `🎬 動画合成中... ${elapsed.toFixed(0)}秒 / ${durationSec.toFixed(0)}秒（テロップ ${subDisp}/${subtitleTimeline.length}枚目）`;
+      }
+
+      if (elapsed >= durationSec) {
         finishRecording();
       }
     };
@@ -1214,6 +1233,9 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     audioStartCtxTime = audioCtx.currentTime + 0.03;
     source.start(audioStartCtxTime);
     drawFrame();
+
+    // requestAnimationFrameは別タブ移動時に停止するため、setInterval(33ms≒30fps)で確実に最後まで描画継続
+    intervalId = setInterval(drawFrame, 33);
 
     // 安全フォールバックタイマー
     setTimeout(finishRecording, Math.ceil((durationSec + 1.2) * 1000));
