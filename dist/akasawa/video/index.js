@@ -739,8 +739,143 @@ async function loadAudioArrayBuffer(audioDataUrl, audioUrl) {
   return await audioRes.arrayBuffer();
 }
 
-// ブラウザ内 Canvas + Web Audio API による顔出しなし9:16ショート動画合成（複数枚スライドショー対応）
-async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr, scriptStr) {
+// ハッシュタグ除去＋テロップ用フレーズ分割（元の入力漢字をそのまま保持）
+function stripHashtagsForVideo(s) {
+  return String(s || '')
+    .replace(/[#＃][^\s#＃、。！？\n]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function splitIntoSubtitleChunks(text, maxChunkLen = 26) {
+  const cleaned = stripHashtagsForVideo(text);
+  if (!cleaned) return [];
+
+  const rawSentences = cleaned
+    .split(/(?<=[。！？\n])/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  for (const sentence of rawSentences) {
+    if ([...sentence].length <= maxChunkLen) {
+      chunks.push(sentence);
+      continue;
+    }
+    const clauses = sentence.split(/(?<=、)/).map(s => s.trim()).filter(Boolean);
+    let buf = '';
+    for (const clause of clauses) {
+      if (!buf) {
+        buf = clause;
+      } else if ([...(buf + clause)].length <= maxChunkLen) {
+        buf += clause;
+      } else {
+        chunks.push(buf);
+        buf = clause;
+      }
+      while ([...buf].length > maxChunkLen + 4) {
+        const chars = [...buf];
+        chunks.push(chars.slice(0, maxChunkLen).join(''));
+        buf = chars.slice(maxChunkLen).join('');
+      }
+    }
+    if (buf) chunks.push(buf);
+  }
+
+  const merged = [];
+  for (const ch of chunks) {
+    if (merged.length > 0 && [...ch].length < 6 && [...(merged[merged.length - 1] + ch)].length <= 32) {
+      merged[merged.length - 1] += ch;
+    } else {
+      merged.push(ch);
+    }
+  }
+  return merged;
+}
+
+function buildSubtitleEntries(hookTextVal, scriptTextVal) {
+  const entries = [];
+  const cleanHook = stripHashtagsForVideo(hookTextVal);
+  if (cleanHook) {
+    entries.push({ text: cleanHook, isHook: true });
+  }
+  const scriptChunks = splitIntoSubtitleChunks(scriptTextVal, 26);
+  for (const chunk of scriptChunks) {
+    entries.push({ text: chunk, isHook: false });
+  }
+  return entries;
+}
+
+// AudioBuffer の実波形から発話開始/終了と無音区間（息継ぎ・句読点の間）を検出
+function analyzeSpeechAndPauses(audioBuf) {
+  const sampleRate = audioBuf.sampleRate;
+  const channel = audioBuf.getChannelData(0);
+  const frameSec = 0.02; // 20ms窓
+  const frameSize = Math.max(1, Math.floor(sampleRate * frameSec));
+  const numFrames = Math.floor(channel.length / frameSize);
+
+  const rmsList = new Float32Array(numFrames);
+  let maxRms = 0;
+  for (let i = 0; i < numFrames; i++) {
+    let sum = 0;
+    const offset = i * frameSize;
+    for (let j = 0; j < frameSize; j++) {
+      const v = channel[offset + j];
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / frameSize);
+    rmsList[i] = rms;
+    if (rms > maxRms) maxRms = rms;
+  }
+
+  const silenceThreshold = Math.max(0.008, maxRms * 0.08);
+
+  // 発話の開始・終了を検出
+  let speechStartFrame = 0;
+  for (let i = 0; i < numFrames; i++) {
+    if (rmsList[i] > silenceThreshold) {
+      speechStartFrame = Math.max(0, i - 1);
+      break;
+    }
+  }
+  let speechEndFrame = numFrames - 1;
+  for (let i = numFrames - 1; i >= 0; i--) {
+    if (rmsList[i] > silenceThreshold) {
+      speechEndFrame = Math.min(numFrames - 1, i + 2);
+      break;
+    }
+  }
+
+  // 連続無音区間（息継ぎ・句読点ポーズ: 80ms以上）の中点を抽出
+  const pauses = [];
+  let inSilence = false;
+  let silStart = 0;
+  for (let i = speechStartFrame; i <= speechEndFrame; i++) {
+    const isSil = rmsList[i] <= silenceThreshold;
+    if (isSil && !inSilence) {
+      inSilence = true;
+      silStart = i;
+    } else if (!isSil && inSilence) {
+      const silFrames = i - silStart;
+      if (silFrames >= 4) { // 80ms以上のポーズ
+        pauses.push({
+          time: ((silStart + i) / 2) * frameSec,
+          duration: silFrames * frameSec
+        });
+      }
+      inSilence = false;
+    }
+  }
+
+  return {
+    speechStart: speechStartFrame * frameSec,
+    speechEnd: Math.max(speechStartFrame * frameSec + 0.5, speechEndFrame * frameSec),
+    pauses
+  };
+}
+
+// ブラウザ内 Canvas + Web Audio API による顔出しなし9:16ショート動画合成（複数枚スライドショー＋音声完全同期テロップ）
+async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr, scriptStr, segmentReadings = []) {
   const width = 720;
   const height = 1280;
   const canvas = document.createElement('canvas');
@@ -807,99 +942,63 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     return lines;
   };
 
-  // 縦書き・明朝体テロップ用：冒頭フック＋台本本文の全編を自然なフレーズに分割し、音声尺に同期させる
-  const stripHashtagsForVideo = (s) => String(s || '')
-    .replace(/[#＃][^\s#＃、。！？\n]+/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  const splitIntoSubtitleChunks = (text, maxChunkLen = 26) => {
-    const cleaned = stripHashtagsForVideo(text);
-    if (!cleaned) return [];
-
-    // まず文末記号（。！？改行）で文に分割
-    const rawSentences = cleaned
-      .split(/(?<=[。！？\n])/)
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    const chunks = [];
-    for (const sentence of rawSentences) {
-      if ([...sentence].length <= maxChunkLen) {
-        chunks.push(sentence);
-        continue;
-      }
-      // 長い文は読点（、）で区切ってまとめる
-      const clauses = sentence.split(/(?<=、)/).map(s => s.trim()).filter(Boolean);
-      let buf = '';
-      for (const clause of clauses) {
-        if (!buf) {
-          buf = clause;
-        } else if ([...(buf + clause)].length <= maxChunkLen) {
-          buf += clause;
-        } else {
-          chunks.push(buf);
-          buf = clause;
-        }
-        // 単一フレーズがまだ長い場合は文字数で安全分割
-        while ([...buf].length > maxChunkLen + 4) {
-          const chars = [...buf];
-          chunks.push(chars.slice(0, maxChunkLen).join(''));
-          buf = chars.slice(maxChunkLen).join('');
-        }
-      }
-      if (buf) chunks.push(buf);
-    }
-
-    // 短すぎる末尾・単独断片（6文字未満）は直前のチャンクに結合して見やすくする
-    const merged = [];
-    for (const ch of chunks) {
-      if (merged.length > 0 && [...ch].length < 6 && [...(merged[merged.length - 1] + ch)].length <= 32) {
-        merged[merged.length - 1] += ch;
-      } else {
-        merged.push(ch);
-      }
-    }
-    return merged;
+  // 縦書き・明朝体テロップ用：各テロップのひらがなモーラ数＋AudioBuffer実波形の息継ぎ無音スナップで完全同期
+  const calcMoraWeight = (readingStr, fallbackDisplayStr, isHook) => {
+    const src = (readingStr && readingStr.trim()) ? readingStr.trim() : fallbackDisplayStr;
+    // 拗音（ゃゅょ）は単独モーラではないため除外してモーラ数を正確に計算
+    const bodyChars = src.replace(/[、。！？「」『』\sゃゅょぁぃぅぇぉャュョァィゥェォ]/g, '');
+    const moraCount = [...bodyChars].length;
+    const periodCount = (src.match(/[。！？]/g) || []).length;
+    const commaCount = (src.match(/[、]/g) || []).length;
+    return Math.max(4, moraCount + periodCount * 4.0 + commaCount * 1.6 + (isHook ? 2.0 : 0));
   };
 
-  const buildSubtitleTimeline = (hookTextVal, scriptTextVal, voiceDurationSec, totalDurationSec) => {
-    const entries = [];
-    const cleanHook = stripHashtagsForVideo(hookTextVal);
-    if (cleanHook) {
-      entries.push({ text: cleanHook, isHook: true });
-    }
-    const scriptChunks = splitIntoSubtitleChunks(scriptTextVal, 26);
-    for (const chunk of scriptChunks) {
-      entries.push({ text: chunk, isHook: false });
-    }
+  const buildSubtitleTimeline = (hookTextVal, scriptTextVal, segReadings, audioBuffer, totalDurationSec) => {
+    const entries = buildSubtitleEntries(hookTextVal, scriptTextVal);
     if (entries.length === 0) return [];
 
-    const weights = entries.map(e => {
-      const len = [...e.text].length;
-      const periodCount = (e.text.match(/[。！？]/g) || []).length;
-      const commaCount = (e.text.match(/[、]/g) || []).length;
-      return Math.max(4, len + periodCount * 2.5 + commaCount * 1.0 + (e.isHook ? 2.5 : 0));
-    });
+    const { speechStart, speechEnd, pauses } = analyzeSpeechAndPauses(audioBuffer);
+    const activeSpeechDur = Math.max(1, speechEnd - speechStart);
+
+    const weights = entries.map((e, i) => calcMoraWeight(segReadings?.[i], e.text, e.isHook));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
 
-    let cursor = 0;
-    return entries.map((e, i) => {
-      const segLen = (weights[i] / totalWeight) * voiceDurationSec;
-      const start = cursor;
-      const end = (i === entries.length - 1) ? totalDurationSec : (cursor + segLen);
-      cursor += segLen;
-      return {
-        text: e.text,
-        isHook: e.isHook,
-        cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
-        start,
-        end
-      };
-    });
+    // 1. まずモーラ数比率で理想境界時刻を算出
+    const boundaries = [0];
+    let accWeight = 0;
+    for (let i = 0; i < entries.length - 1; i++) {
+      accWeight += weights[i];
+      const estimatedTime = speechStart + (accWeight / totalWeight) * activeSpeechDur;
+
+      // 2. 推定時刻の前後 ±1.15秒以内にある最も自然で深い無音区間（息継ぎ）へスナップ
+      const prevBound = boundaries[boundaries.length - 1];
+      let bestTime = estimatedTime;
+      let bestScore = -Infinity;
+      for (const p of pauses) {
+        const diff = Math.abs(p.time - estimatedTime);
+        if (diff <= 1.15 && p.time > prevBound + 0.65 && p.time < speechEnd - 0.5) {
+          // ポーズが長いほど＆推定時刻に近いほど高スコア
+          const score = p.duration * 2.4 - diff * 0.8;
+          if (score > bestScore) {
+            bestScore = score;
+            bestTime = p.time;
+          }
+        }
+      }
+      boundaries.push(bestTime);
+    }
+    boundaries.push(totalDurationSec);
+
+    return entries.map((e, i) => ({
+      text: e.text,
+      isHook: e.isHook,
+      cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
+      start: boundaries[i],
+      end: boundaries[i + 1]
+    }));
   };
 
-  const subtitleTimeline = buildSubtitleTimeline(hookStr, scriptStr, audioBuf.duration, durationSec);
+  const subtitleTimeline = buildSubtitleTimeline(hookStr, scriptStr, segmentReadings, audioBuf, durationSec);
   const minchoFontFamily = '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho", "Noto Serif JP", serif';
 
   const drawVerticalTextColumn = (text, x, startY, charStep, fontSize) => {
@@ -1096,10 +1195,13 @@ async function runFacelessVideoGeneration(spokenTextOverride = null) {
   }
 
   try {
-    const cleanScriptForVoice = script.replace(/[#＃][^\s#＃、。！？\n]+/g, '').trim();
-    const fullVoiceText = hook ? `${hook}。${cleanScriptForVoice}` : cleanScriptForVoice;
+    const subtitleEntries = buildSubtitleEntries(hook, script);
+    const subtitleSegments = subtitleEntries.map(e => e.text);
+    const cleanScriptForVoice = stripHashtagsForVideo(script);
+    const fullVoiceText = hook ? `${stripHashtagsForVideo(hook)}。${cleanScriptForVoice}` : cleanScriptForVoice;
     const reqBody = {
       text: fullVoiceText,
+      subtitleSegments,
       voiceName: 'endo_faceless'
     };
     if (spokenTextOverride && spokenTextOverride.trim()) {
@@ -1153,7 +1255,8 @@ async function runFacelessVideoGeneration(spokenTextOverride = null) {
       { audioDataUrl: data.audioDataUrl, audioUrl: data.audioUrl },
       bgImagesList,
       hook,
-      script
+      script,
+      Array.isArray(data.segmentReadings) ? data.segmentReadings : []
     );
 
     window.lastGeneratedAvatarVideoUrl = videoBlobUrl;
