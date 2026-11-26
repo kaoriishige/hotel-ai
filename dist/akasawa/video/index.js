@@ -807,8 +807,99 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     return lines;
   };
 
-  // 縦書き・明朝体テロップ用（1列あたり最大12文字、最大4列）
-  const hookCols = wrapLines(hookStr, 12).slice(0, 4);
+  // 縦書き・明朝体テロップ用：冒頭フック＋台本本文の全編を自然なフレーズに分割し、音声尺に同期させる
+  const stripHashtagsForVideo = (s) => String(s || '')
+    .replace(/[#＃][^\s#＃、。！？\n]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const splitIntoSubtitleChunks = (text, maxChunkLen = 26) => {
+    const cleaned = stripHashtagsForVideo(text);
+    if (!cleaned) return [];
+
+    // まず文末記号（。！？改行）で文に分割
+    const rawSentences = cleaned
+      .split(/(?<=[。！？\n])/)
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const chunks = [];
+    for (const sentence of rawSentences) {
+      if ([...sentence].length <= maxChunkLen) {
+        chunks.push(sentence);
+        continue;
+      }
+      // 長い文は読点（、）で区切ってまとめる
+      const clauses = sentence.split(/(?<=、)/).map(s => s.trim()).filter(Boolean);
+      let buf = '';
+      for (const clause of clauses) {
+        if (!buf) {
+          buf = clause;
+        } else if ([...(buf + clause)].length <= maxChunkLen) {
+          buf += clause;
+        } else {
+          chunks.push(buf);
+          buf = clause;
+        }
+        // 単一フレーズがまだ長い場合は文字数で安全分割
+        while ([...buf].length > maxChunkLen + 4) {
+          const chars = [...buf];
+          chunks.push(chars.slice(0, maxChunkLen).join(''));
+          buf = chars.slice(maxChunkLen).join('');
+        }
+      }
+      if (buf) chunks.push(buf);
+    }
+
+    // 短すぎる末尾・単独断片（6文字未満）は直前のチャンクに結合して見やすくする
+    const merged = [];
+    for (const ch of chunks) {
+      if (merged.length > 0 && [...ch].length < 6 && [...(merged[merged.length - 1] + ch)].length <= 32) {
+        merged[merged.length - 1] += ch;
+      } else {
+        merged.push(ch);
+      }
+    }
+    return merged;
+  };
+
+  const buildSubtitleTimeline = (hookTextVal, scriptTextVal, voiceDurationSec, totalDurationSec) => {
+    const entries = [];
+    const cleanHook = stripHashtagsForVideo(hookTextVal);
+    if (cleanHook) {
+      entries.push({ text: cleanHook, isHook: true });
+    }
+    const scriptChunks = splitIntoSubtitleChunks(scriptTextVal, 26);
+    for (const chunk of scriptChunks) {
+      entries.push({ text: chunk, isHook: false });
+    }
+    if (entries.length === 0) return [];
+
+    const weights = entries.map(e => {
+      const len = [...e.text].length;
+      const periodCount = (e.text.match(/[。！？]/g) || []).length;
+      const commaCount = (e.text.match(/[、]/g) || []).length;
+      return Math.max(4, len + periodCount * 2.5 + commaCount * 1.0 + (e.isHook ? 2.5 : 0));
+    });
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+
+    let cursor = 0;
+    return entries.map((e, i) => {
+      const segLen = (weights[i] / totalWeight) * voiceDurationSec;
+      const start = cursor;
+      const end = (i === entries.length - 1) ? totalDurationSec : (cursor + segLen);
+      cursor += segLen;
+      return {
+        text: e.text,
+        isHook: e.isHook,
+        cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
+        start,
+        end
+      };
+    });
+  };
+
+  const subtitleTimeline = buildSubtitleTimeline(hookStr, scriptStr, audioBuf.duration, durationSec);
   const minchoFontFamily = '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho", "Noto Serif JP", serif';
 
   const drawVerticalTextColumn = (text, x, startY, charStep, fontSize) => {
@@ -915,28 +1006,37 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       ctx.textBaseline = 'alphabetic';
       ctx.fillText('遠藤正俊｜人生と自然の哲学', width / 2, 92);
 
-      // 冒頭フックテキスト（縦書き・明朝体・右から左へ列配置）
-      if (hookCols.length > 0) {
-        const fontSize = 42;
-        const charStep = 50;
-        const colStep = 66;
-        const maxLen = Math.max(...hookCols.map(c => [...c].length));
-        const totalCols = hookCols.length;
+      // 全編テロップ（冒頭フック〜台本本文の最後まで音声に合わせて自動切り替え・縦書き明朝体）
+      const activeSub = subtitleTimeline.find(s => elapsed >= s.start && elapsed < s.end)
+        || (subtitleTimeline.length > 0 ? subtitleTimeline[subtitleTimeline.length - 1] : null);
+
+      if (activeSub && activeSub.cols.length > 0) {
+        const fadeEdge = 0.18;
+        const fadeIn = Math.min(1, Math.max(0, (elapsed - activeSub.start) / fadeEdge));
+        const fadeOut = Math.min(1, Math.max(0, (activeSub.end - elapsed) / fadeEdge));
+        const subAlpha = Math.min(fadeIn, fadeOut);
+
+        const fontSize = activeSub.isHook ? 42 : 38;
+        const charStep = activeSub.isHook ? 50 : 46;
+        const colStep = activeSub.isHook ? 66 : 60;
+        const maxLen = Math.max(...activeSub.cols.map(c => [...c].length));
+        const totalCols = activeSub.cols.length;
         const boxW = totalCols * colStep + 56;
         const boxH = maxLen * charStep + 56;
         const boxX = (width - boxW) / 2;
         const boxY = Math.max(150, (height - boxH) / 2);
 
+        ctx.save();
+        ctx.globalAlpha = subAlpha;
         ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.fillRect(boxX, boxY, boxW, boxH);
 
-        ctx.save();
         ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
         ctx.shadowBlur = 8;
-        ctx.fillStyle = '#fffef8';
+        ctx.fillStyle = activeSub.isHook ? '#fff8e1' : '#fffef8';
         const rightMostX = width / 2 + ((totalCols - 1) * colStep) / 2;
         const startY = boxY + 28 + charStep / 2;
-        hookCols.forEach((colText, colIdx) => {
+        activeSub.cols.forEach((colText, colIdx) => {
           const colX = rightMostX - colIdx * colStep;
           drawVerticalTextColumn(colText, colX, startY, charStep, fontSize);
         });
@@ -981,11 +1081,12 @@ if (generateFacelessVideoBtn) {
     const downloadLink = document.getElementById('avatarVideoDownloadLink');
 
     generateFacelessVideoBtn.disabled = true;
-    generateFacelessVideoBtn.textContent = '⏳ クローン音声を生成中...';
-    if (statusEl) statusEl.textContent = '🎙️ Cartesia API で遠藤正俊本人のクローン音声を生成しています...';
+    generateFacelessVideoBtn.textContent = '⏳ 漢字の読み方を調査＆クローン音声を生成中...';
+    if (statusEl) statusEl.textContent = '📖 難読漢字・地名の読み方を裏側で自動調査し、Cartesia API で遠藤正俊クローン音声を生成しています...';
 
     try {
-      const fullVoiceText = hook ? `${hook}。${script}` : script;
+      const cleanScriptForVoice = script.replace(/[#＃][^\s#＃、。！？\n]+/g, '').trim();
+      const fullVoiceText = hook ? `${hook}。${cleanScriptForVoice}` : cleanScriptForVoice;
       const res = await fetch('/.netlify/functions/generate-voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
