@@ -972,6 +972,25 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     return Math.max(4, moraCount + periodCount * 4.0 + commaCount * 1.6 + (isHook ? 2.0 : 0));
   };
 
+  // テロップ表示用整形：句読点（、。，．）を表示せず、末尾の「。」等は削除し、途中の句読点は全角空白に置換
+  const formatSubtitleDisplayText = (text) => {
+    return String(text || '')
+      .trim()
+      .replace(/^[、。，．]+/, '')
+      .replace(/[、。，．]+$/, '')
+      .replace(/[、。，．]+/g, '　')
+      .replace(/[ 　]{2,}/g, '　')
+      .trim();
+  };
+
+  const toDisplayCols = (text, maxChars) => {
+    const formatted = formatSubtitleDisplayText(text);
+    return wrapLines(formatted, maxChars)
+      .map(col => col.replace(/^[ 　]+|[ 　]+$/g, ''))
+      .filter(Boolean)
+      .slice(0, 4);
+  };
+
   const buildSubtitleTimeline = (hookTextVal, scriptTextVal, segReadings, whisperTimings, audioBuffer, totalDurationSec) => {
     const entries = buildSubtitleEntries(hookTextVal, scriptTextVal);
     if (entries.length === 0) return [];
@@ -981,7 +1000,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       return entries.map((e, i) => ({
         text: e.text,
         isHook: e.isHook,
-        cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
+        cols: toDisplayCols(e.text, e.isHook ? 11 : 12),
         start: i === 0 ? 0 : Math.max(0, Number(whisperTimings[i].start) || 0),
         end: i === entries.length - 1 ? totalDurationSec : Math.max(0.3, Number(whisperTimings[i].end) || totalDurationSec)
       }));
@@ -1020,7 +1039,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     return entries.map((e, i) => ({
       text: e.text,
       isHook: e.isHook,
-      cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
+      cols: toDisplayCols(e.text, e.isHook ? 11 : 12),
       start: boundaries[i],
       end: boundaries[i + 1]
     }));
