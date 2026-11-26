@@ -1060,86 +1060,140 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
   });
 }
 
-// 顔出しなしショート動画制作ボタン
-const generateFacelessVideoBtn = document.getElementById('generateFacelessVideoBtn');
-if (generateFacelessVideoBtn) {
-  generateFacelessVideoBtn.addEventListener('click', async () => {
-    const script = ownerComment.value.trim();
-    const hook = hookText ? hookText.value.trim() : '';
-    if (!script) {
-      alert('まず「ステップ2: 動画台本本文」を入力するか、「🤖 台本を完全AI出力」を行ってください。');
-      return;
+// 顔出しなしショート動画制作の実行関数（spokenTextOverride指定時はそのひらがなで再生成）
+async function runFacelessVideoGeneration(spokenTextOverride = null) {
+  const script = ownerComment.value.trim();
+  const hook = hookText ? hookText.value.trim() : '';
+  if (!script) {
+    alert('まず「ステップ2: 動画台本本文」を入力するか、「🤖 台本を完全AI出力」を行ってください。');
+    return;
+  }
+
+  const statusEl = document.getElementById('facelessStatusMessage');
+  const audioBox = document.getElementById('facelessAudioResult');
+  const audioPlayer = document.getElementById('facelessAudioPlayer');
+  const audioDownload = document.getElementById('facelessAudioDownloadLink');
+  const readingBadge = document.getElementById('facelessReadingBadge');
+  const checkedListEl = document.getElementById('facelessCheckedReadingsList');
+  const hiraganaInput = document.getElementById('facelessSpokenHiraganaInput');
+  const regenBtn = document.getElementById('regenerateWithEditedReadingBtn');
+  const resultDiv = document.getElementById('avatarVideoResult');
+  const resultTitle = document.getElementById('avatarVideoResultTitle');
+  const videoEl = document.getElementById('avatarVideoPreview');
+  const downloadLink = document.getElementById('avatarVideoDownloadLink');
+
+  if (generateFacelessVideoBtn) {
+    generateFacelessVideoBtn.disabled = true;
+    generateFacelessVideoBtn.textContent = spokenTextOverride
+      ? '⏳ 修正ひらがなでクローン音声を再生成中...'
+      : '⏳ 漢字の読み方を裏側調査＆ひらがな音声生成中...';
+  }
+  if (regenBtn) regenBtn.disabled = true;
+  if (statusEl) {
+    statusEl.textContent = spokenTextOverride
+      ? '🎙️ 修正したひらがな読みで遠藤正俊クローン音声を再生成しています...'
+      : '📖 難読漢字・地名の読み方を裏側で徹底調査してひらがな化し、Cartesia API で音声生成しています...';
+  }
+
+  try {
+    const cleanScriptForVoice = script.replace(/[#＃][^\s#＃、。！？\n]+/g, '').trim();
+    const fullVoiceText = hook ? `${hook}。${cleanScriptForVoice}` : cleanScriptForVoice;
+    const reqBody = {
+      text: fullVoiceText,
+      voiceName: 'endo_faceless'
+    };
+    if (spokenTextOverride && spokenTextOverride.trim()) {
+      reqBody.spokenTextOverride = spokenTextOverride.trim();
     }
 
-    const statusEl = document.getElementById('facelessStatusMessage');
-    const audioBox = document.getElementById('facelessAudioResult');
-    const audioPlayer = document.getElementById('facelessAudioPlayer');
-    const audioDownload = document.getElementById('facelessAudioDownloadLink');
-    const resultDiv = document.getElementById('avatarVideoResult');
-    const resultTitle = document.getElementById('avatarVideoResultTitle');
-    const videoEl = document.getElementById('avatarVideoPreview');
-    const downloadLink = document.getElementById('avatarVideoDownloadLink');
+    const res = await fetch('/.netlify/functions/generate-voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqBody)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.audioUrl) {
+      throw new Error(data.error || 'クローン音声の生成に失敗しました');
+    }
 
-    generateFacelessVideoBtn.disabled = true;
-    generateFacelessVideoBtn.textContent = '⏳ 漢字の読み方を調査＆クローン音声を生成中...';
-    if (statusEl) statusEl.textContent = '📖 難読漢字・地名の読み方を裏側で自動調査し、Cartesia API で遠藤正俊クローン音声を生成しています...';
-
-    try {
-      const cleanScriptForVoice = script.replace(/[#＃][^\s#＃、。！？\n]+/g, '').trim();
-      const fullVoiceText = hook ? `${hook}。${cleanScriptForVoice}` : cleanScriptForVoice;
-      const res = await fetch('/.netlify/functions/generate-voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: fullVoiceText,
-          voiceName: 'endo_faceless'
-        })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.audioUrl) {
-        throw new Error(data.error || 'クローン音声の生成に失敗しました');
+    const playableAudioSrc = data.audioDataUrl || data.audioUrl;
+    if (audioPlayer) audioPlayer.src = playableAudioSrc;
+    if (audioDownload) audioDownload.href = playableAudioSrc;
+    if (hiraganaInput && data.spokenText) hiraganaInput.value = data.spokenText;
+    if (readingBadge) {
+      const kanjiNote = data.remainingKanjiCount === 0 ? '漢字残存0文字' : `残存漢字${data.remainingKanjiCount}文字`;
+      readingBadge.textContent = `調査完了 (${data.readingResolvedBy || 'auto'} / ${kanjiNote})`;
+    }
+    if (checkedListEl) {
+      if (Array.isArray(data.checkedReadings) && data.checkedReadings.length > 0) {
+        checkedListEl.innerHTML = data.checkedReadings
+          .slice(0, 20)
+          .map(r => `<span style="font-size: 10px; background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; color: #cbd5e1; padding: 2px 6px; border-radius: 4px;">${r.word} → <strong style="color:#6ee7b7;">${r.reading}</strong></span>`)
+          .join('');
+      } else {
+        checkedListEl.innerHTML = '';
       }
+    }
+    if (audioBox) audioBox.style.display = 'block';
 
-      const playableAudioSrc = data.audioDataUrl || data.audioUrl;
-      if (audioPlayer) audioPlayer.src = playableAudioSrc;
-      if (audioDownload) audioDownload.href = playableAudioSrc;
-      if (audioBox) audioBox.style.display = 'block';
+    const bgImagesList = facelessBgItems.length > 0
+      ? facelessBgItems.map(item => item.optimizedBase64)
+      : (currentOptimizedAvatarBase64 ? [currentOptimizedAvatarBase64] : []);
 
-      const bgImagesList = facelessBgItems.length > 0
-        ? facelessBgItems.map(item => item.optimizedBase64)
-        : (currentOptimizedAvatarBase64 ? [currentOptimizedAvatarBase64] : []);
-
+    if (generateFacelessVideoBtn) {
       generateFacelessVideoBtn.textContent = '🎬 顔出しなしショート動画を合成中...';
-      if (statusEl) {
-        statusEl.textContent = bgImagesList.length >= 2
-          ? `🌲 ${bgImagesList.length}枚の背景画像をクロスフェード切り替えしながらクローン音声と合成しています（音声尺に合わせて数十秒かかります）...`
-          : '🌲 風景背景・字幕・クローン音声を合成しています（音声尺に合わせて数十秒かかります）...';
-      }
+    }
+    if (statusEl) {
+      statusEl.textContent = bgImagesList.length >= 2
+        ? `🌲 ${bgImagesList.length}枚の背景画像をクロスフェード切り替えしながらクローン音声と合成しています（音声尺に合わせて数十秒かかります）...`
+        : '🌲 風景背景・字幕・クローン音声を合成しています（音声尺に合わせて数十秒かかります）...';
+    }
 
-      const videoBlobUrl = await renderFacelessShortVideo(
-        { audioDataUrl: data.audioDataUrl, audioUrl: data.audioUrl },
-        bgImagesList,
-        hook,
-        script
-      );
+    const videoBlobUrl = await renderFacelessShortVideo(
+      { audioDataUrl: data.audioDataUrl, audioUrl: data.audioUrl },
+      bgImagesList,
+      hook,
+      script
+    );
 
-      window.lastGeneratedAvatarVideoUrl = videoBlobUrl;
-      if (resultTitle) resultTitle.textContent = '✅ 顔出しなしショート動画が完成しました！';
-      if (videoEl) videoEl.src = videoBlobUrl;
-      if (downloadLink) {
-        downloadLink.href = videoBlobUrl;
-        downloadLink.download = `endo_faceless_short_${Date.now()}.webm`;
-      }
-      if (resultDiv) resultDiv.style.display = 'block';
-      if (statusEl) statusEl.textContent = '✅ 制作完了！プレビュー・ダウンロード、または動画接続スタジオへセットできます。';
-    } catch (err) {
-      console.error('顔出しなし動画生成エラー:', err);
-      if (statusEl) statusEl.textContent = '❌ エラー: ' + err.message;
-      alert('顔出しなし動画生成エラー: ' + err.message);
-    } finally {
+    window.lastGeneratedAvatarVideoUrl = videoBlobUrl;
+    if (resultTitle) resultTitle.textContent = '✅ 顔出しなしショート動画が完成しました！';
+    if (videoEl) videoEl.src = videoBlobUrl;
+    if (downloadLink) {
+      downloadLink.href = videoBlobUrl;
+      downloadLink.download = `endo_faceless_short_${Date.now()}.webm`;
+    }
+    if (resultDiv) resultDiv.style.display = 'block';
+    if (statusEl) statusEl.textContent = '✅ 制作完了！プレビュー・ダウンロード、または動画接続スタジオへセットできます。';
+  } catch (err) {
+    console.error('顔出しなし動画生成エラー:', err);
+    if (statusEl) statusEl.textContent = '❌ エラー: ' + err.message;
+    alert('顔出しなし動画生成エラー: ' + err.message);
+  } finally {
+    if (generateFacelessVideoBtn) {
       generateFacelessVideoBtn.disabled = false;
       generateFacelessVideoBtn.textContent = '🎙️ 顔出しなしショート動画を制作する（クローン音声＋背景）';
     }
+    if (regenBtn) regenBtn.disabled = false;
+  }
+}
+
+// 顔出しなしショート動画制作ボタン
+const generateFacelessVideoBtn = document.getElementById('generateFacelessVideoBtn');
+if (generateFacelessVideoBtn) {
+  generateFacelessVideoBtn.addEventListener('click', () => runFacelessVideoGeneration(null));
+}
+
+const regenerateWithEditedReadingBtn = document.getElementById('regenerateWithEditedReadingBtn');
+if (regenerateWithEditedReadingBtn) {
+  regenerateWithEditedReadingBtn.addEventListener('click', () => {
+    const hiraganaInput = document.getElementById('facelessSpokenHiraganaInput');
+    const edited = hiraganaInput ? hiraganaInput.value.trim() : '';
+    if (!edited) {
+      alert('読み上げ用のひらがなテキストを入力してください。');
+      return;
+    }
+    runFacelessVideoGeneration(edited);
   });
 }
 

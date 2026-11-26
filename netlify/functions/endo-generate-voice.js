@@ -7,6 +7,7 @@ const { z } = require('zod');
 
 const schema = z.object({
   text: z.string().min(1, 'Text is required'),
+  spokenTextOverride: z.string().optional(),
   submissionId: z.string().optional(),
   voiceName: z.string().optional().default('Charon')
 });
@@ -19,9 +20,23 @@ exports.handler = async (event) => {
     const payload = schema.parse(parseBody(event));
     const filename = `voice_${payload.submissionId || Date.now()}_${payload.voiceName}.wav`;
 
-    // 裏側で漢字・難読地名・固有名詞の読み方を調査し、音声合成用の正確なかなテキストへ変換
-    const { spokenText, resolvedBy } = await resolveJapaneseReading(payload.text);
-    console.log(`[generate-voice] reading resolved by ${resolvedBy}: "${spokenText.substring(0, 40)}..."`);
+    // 裏側で漢字・難読地名・固有名詞の読み方を徹底調査し、漢字ゼロのひらがなテキストへ変換
+    let spokenText;
+    let resolvedBy;
+    let checkedReadings = [];
+    let remainingKanjiCount = 0;
+
+    if (payload.spokenTextOverride && payload.spokenTextOverride.trim()) {
+      spokenText = payload.spokenTextOverride.trim();
+      resolvedBy = 'manual_hiragana';
+    } else {
+      const resolved = await resolveJapaneseReading(payload.text);
+      spokenText = resolved.spokenText;
+      resolvedBy = resolved.resolvedBy;
+      checkedReadings = resolved.checkedReadings || [];
+      remainingKanjiCount = resolved.remainingKanjiCount || 0;
+    }
+    console.log(`[generate-voice] reading resolved by ${resolvedBy} (remainingKanji=${remainingKanjiCount}): "${spokenText.substring(0, 50)}..."`);
 
     // Cartesia の設定が存在する場合は Cartesia API で遠藤正俊クローン音声を生成し、
     // そうでない場合は従来どおり Gemini API で生成する
@@ -50,7 +65,15 @@ exports.handler = async (event) => {
       }
     }
 
-    return ok({ ok: true, audioUrl, audioDataUrl, spokenText, readingResolvedBy: resolvedBy });
+    return ok({
+      ok: true,
+      audioUrl,
+      audioDataUrl,
+      spokenText,
+      readingResolvedBy: resolvedBy,
+      checkedReadings,
+      remainingKanjiCount
+    });
   } catch (error) {
     console.error('Error generating voice:', error);
     if (error.name === 'ZodError') {

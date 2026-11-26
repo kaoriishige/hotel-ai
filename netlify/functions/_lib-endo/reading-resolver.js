@@ -1,6 +1,6 @@
 /**
- * 日本語テキストの難読漢字・地名・固有名詞・文脈依存漢字を裏側で調査し、
- * 音声合成エンジン(Cartesia TTS等)が読み間違えない正確な「かな読み上げテキスト」に変換するモジュール
+ * 日本語テキストの難読漢字・地名・固有名詞・文脈依存漢字を裏側で徹底調査し、
+ * 漢字残存ゼロの完全「ひらがな」読み上げテキストへ変換するモジュール
  */
 
 // 難読地名・固有名詞・よく誤読される語の確実な優先辞書（長い語から優先適用）
@@ -77,16 +77,33 @@ const READING_DICTIONARY = [
   ['疲弊', 'ひへい']
 ];
 
-const READING_SYSTEM_PROMPT = `あなたは日本の放送局のベテランアナウンサー兼、日本語アクセント・読み方監修者です。
-入力された日本語のナレーション台本を、音声合成エンジン（TTS）が絶対に漢字を読み間違えないようにするため、文脈と固有名詞（地名・人名・歴史用語・自然用語・数字の読み方）を正確に調査・判断したうえで、読み上げ専用の「ひらがな中心テキスト」に変換してください。
+const KANJI_REGEX = /[\u4E00-\u9FFF々〆ヵヶ]/g;
 
-【厳守ルール】
-1. すべての漢字（難読地名、人名、熟語、送り仮名を含む訓読み、同形異音語「行く＝いく/ゆく」「方＝ほう/かた」「一日＝いちにち/ついたち」「日本＝にほん/にっぽん」「風＝かぜ/ふう」「何＝なに/なん」など）を、文脈に合った正確な「ひらがな」に変換すること。
-2. 数字・単位・アルファベットも自然な日本語の読みに変換すること（例：50代→ごじゅうだい、3000年→さんぜんねん、pH2.1→ぴーえいちにてんいち、SNS→えすえぬえす、100%→ひゃくぱーせんと）。
-3. 外来語のカタカナ語（例：リセット、マインドセット、シルバー、ルートなど）はカタカナまたはひらがなで自然な読みに保つこと。
-4. 句読点（、。！？）や「」は、音声の自然な間（ポーズ）と抑揚を保つため、元の位置にそのまま残すこと。
-5. 元の文章の意味・語順・文末表現を勝手に変えたり、要約・追記したりしないこと。
-6. 出力は変換後の読み上げ用テキストのみを返すこと。解説・前置き・引用符・マークダウンは一切出力しないこと。`;
+const READING_INVESTIGATION_PROMPT = `あなたはNHK放送文化研究所レベルの日本語アクセント・読み方専門の監修者です。
+入力された日本語テキストを、音声合成（TTS）が1文字も読み間違えないようにするため、
+まず文中のすべての漢字語・地名・人名・歴史用語・自然用語・同形異音語・数字表現の正しい読み方を文脈から厳密に調査し、
+次にテキスト全文を「漢字ゼロの完全なひらがな（外来語のみカタカナまたはひらがな）」へ変換してください。
+
+【絶対厳守ルール】
+1. hiraganaText には漢字（例：山、川、人、日、一、々 等）を「1文字たりとも」残してはならない。すべてひらがなに変換すること。
+2. 同形異音語は必ず文脈から正確な読みを選ぶこと：
+   - 行く（いく / ゆく）、方（ほう / かた）、一日（いちにち / ついたち）、日本（にほん / にっぽん）、風（かぜ / ふう）、何（なに / なん）、人々（ひとびと）、日々（ひび）、様々（さまざま）、本来（ほんらい）、自然（しぜん）、人間（にんげん）、身体（からだ / しんたい）、大人（おとな）、今日（きょう）、明日（あした）、昨日（きのう）、今年（ことし）、一人（ひとり）、二人（ふたり）、一つ（ひとつ）等。
+3. 地名・固有名詞・難読語は正確な現地読み・辞書読みを調査して適用すること。
+4. 数字・単位・英字もすべて日本語の読み（ひらがな）にすること（例：50代→ごじゅうだい、3000年→さんぜんねん、100%→ひゃくぱーせんと、pH2.1→ぴーえいちにてんいち、SNS→えすえぬえす）。
+5. 句読点（、。！？）と「」は自然な間と抑揚を保つため、元の位置にそのまま残すこと。
+6. 元の文章の語順・意味・文末表現は一切変えないこと。
+
+必ず以下のJSON形式のみで返答してください：
+{
+  "checkedReadings": [
+    { "word": "元の漢字語", "reading": "調査した正しいひらがな読み" }
+  ],
+  "hiraganaText": "漢字を1文字も残さず完全ひらがな化した全文"
+}`;
+
+const STRICT_CLEANUP_PROMPT = `以下の日本語テキストに残っている漢字・数字・英字を、1文字も残さずすべて文脈に合った正確な「ひらがな」に変換してください。
+句読点（、。！？）と「」と元のひらがな・カタカナはそのまま残してください。
+変換後のテキストのみを出力してください（説明・記号・マークダウン禁止）。`;
 
 function stripHashtags(text) {
   return String(text || '')
@@ -105,9 +122,19 @@ function applyReadingDictionary(text) {
   return result;
 }
 
-async function resolveWithOpenAI(apiKey, text) {
+function countKanji(text) {
+  const matches = String(text || '').match(KANJI_REGEX);
+  return matches ? matches.length : 0;
+}
+
+function katakanaToHiraganaIfNeeded(text) {
+  // 外来語以外の不要な記号除去や空白整形のみ（カタカナは自然な発音のため維持）
+  return String(text || '').replace(/\r\n/g, '\n').trim();
+}
+
+async function callOpenAIJson(apiKey, model, systemPrompt, userText, timeoutMs = 12000) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -116,31 +143,65 @@ async function resolveWithOpenAI(apiKey, text) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        temperature: 0.1,
-        max_tokens: 1200,
+        model,
+        temperature: 0.0,
+        max_tokens: 1800,
+        response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: READING_SYSTEM_PROMPT },
-          { role: 'user', content: text }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userText }
         ]
       }),
       signal: controller.signal
     });
     if (!res.ok) {
-      throw new Error(`OpenAI HTTP ${res.status}`);
+      throw new Error(`OpenAI(${model}) HTTP ${res.status}`);
     }
     const data = await res.json();
-    const out = data?.choices?.[0]?.message?.content?.trim();
-    if (!out) throw new Error('OpenAI empty output');
-    return out;
+    const content = data?.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error(`OpenAI(${model}) empty output`);
+    return JSON.parse(content);
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function resolveWithGemini(apiKey, text) {
+async function callOpenAIText(apiKey, model, systemPrompt, userText, timeoutMs = 10000) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.0,
+        max_tokens: 1400,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userText }
+        ]
+      }),
+      signal: controller.signal
+    });
+    if (!res.ok) {
+      throw new Error(`OpenAI(${model}) HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error(`OpenAI(${model}) empty output`);
+    return content;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function callGeminiJson(apiKey, userText, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url, {
@@ -150,12 +211,13 @@ async function resolveWithGemini(apiKey, text) {
         contents: [
           {
             role: 'user',
-            parts: [{ text: `${READING_SYSTEM_PROMPT}\n\n【変換対象テキスト】\n${text}` }]
+            parts: [{ text: `${READING_INVESTIGATION_PROMPT}\n\n【変換対象テキスト】\n${userText}` }]
           }
         ],
         generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 1200
+          temperature: 0.0,
+          maxOutputTokens: 2048,
+          responseMimeType: 'application/json'
         }
       }),
       signal: controller.signal
@@ -166,52 +228,88 @@ async function resolveWithGemini(apiKey, text) {
     const data = await res.json();
     const out = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!out) throw new Error('Gemini empty output');
-    return out;
+    return JSON.parse(out);
   } finally {
     clearTimeout(timer);
   }
 }
 
 /**
- * 入力テキストの漢字読み方を裏側で調査・かな変換して返す
+ * 入力テキストの漢字読み方を裏側で徹底調査・完全ひらがな変換して返す
  * @param {string} rawText
- * @returns {Promise<{ spokenText: string, resolvedBy: string }>}
+ * @returns {Promise<{ spokenText: string, resolvedBy: string, checkedReadings: Array<{word:string, reading:string}>, remainingKanjiCount: number }>}
  */
 async function resolveJapaneseReading(rawText) {
   const cleaned = stripHashtags(rawText);
   if (!cleaned) {
-    return { spokenText: String(rawText || '').trim(), resolvedBy: 'raw' };
+    return { spokenText: String(rawText || '').trim(), resolvedBy: 'raw', checkedReadings: [], remainingKanjiCount: 0 };
   }
 
-  // まず固有名詞・難読地名辞書を確実に適用
+  // 1. まず固有名詞・難読地名辞書を適用
   const dictApplied = applyReadingDictionary(cleaned);
+  if (countKanji(dictApplied) === 0) {
+    return { spokenText: dictApplied, resolvedBy: 'dict', checkedReadings: [], remainingKanjiCount: 0 };
+  }
 
   const openaiKey = process.env.OPENAI_API_KEY || process.env.OPEN_AI_API;
   const geminiKey = process.env.GEMINI_API_KEY;
 
+  let hiraganaText = null;
+  let checkedReadings = [];
+  let resolvedBy = 'dict';
+
+  // 2. OpenAI gpt-4o（最高精度）で読み方調査＋ひらがな変換
   if (openaiKey) {
-    try {
-      const converted = await resolveWithOpenAI(openaiKey, dictApplied);
-      if (converted && converted.length >= Math.floor(cleaned.length * 0.5)) {
-        return { spokenText: applyReadingDictionary(converted), resolvedBy: 'openai+dict' };
+    for (const model of ['gpt-4o', 'gpt-4o-mini']) {
+      try {
+        const parsed = await callOpenAIJson(openaiKey, model, READING_INVESTIGATION_PROMPT, dictApplied);
+        if (parsed && typeof parsed.hiraganaText === 'string' && parsed.hiraganaText.trim().length >= Math.floor(cleaned.length * 0.5)) {
+          hiraganaText = katakanaToHiraganaIfNeeded(applyReadingDictionary(parsed.hiraganaText));
+          checkedReadings = Array.isArray(parsed.checkedReadings) ? parsed.checkedReadings : [];
+          resolvedBy = `${model}+dict`;
+          break;
+        }
+      } catch (err) {
+        console.warn(`[reading-resolver] ${model} 調査変換失敗:`, err.message);
       }
-    } catch (err) {
-      console.warn('[reading-resolver] OpenAI読み方変換失敗、フォールバックします:', err.message);
     }
   }
 
-  if (geminiKey) {
+  // 3. OpenAI が失敗した場合は Gemini で試行
+  if (!hiraganaText && geminiKey) {
     try {
-      const converted = await resolveWithGemini(geminiKey, dictApplied);
-      if (converted && converted.length >= Math.floor(cleaned.length * 0.5)) {
-        return { spokenText: applyReadingDictionary(converted), resolvedBy: 'gemini+dict' };
+      const parsed = await callGeminiJson(geminiKey, dictApplied);
+      if (parsed && typeof parsed.hiraganaText === 'string' && parsed.hiraganaText.trim().length >= Math.floor(cleaned.length * 0.5)) {
+        hiraganaText = katakanaToHiraganaIfNeeded(applyReadingDictionary(parsed.hiraganaText));
+        checkedReadings = Array.isArray(parsed.checkedReadings) ? parsed.checkedReadings : [];
+        resolvedBy = 'gemini-2.5-flash+dict';
       }
     } catch (err) {
-      console.warn('[reading-resolver] Gemini読み方変換失敗、辞書結果にフォールバックします:', err.message);
+      console.warn('[reading-resolver] Gemini 調査変換失敗:', err.message);
     }
   }
 
-  return { spokenText: dictApplied, resolvedBy: 'dict' };
+  let finalSpoken = hiraganaText || dictApplied;
+
+  // 4. 漢字が1文字でも残っていれば強制クリーンアップパスを実行して漢字ゼロを保証
+  if (countKanji(finalSpoken) > 0 && openaiKey) {
+    try {
+      const cleanedAgain = await callOpenAIText(openaiKey, 'gpt-4o', STRICT_CLEANUP_PROMPT, finalSpoken);
+      if (cleanedAgain && countKanji(cleanedAgain) < countKanji(finalSpoken)) {
+        finalSpoken = katakanaToHiraganaIfNeeded(applyReadingDictionary(cleanedAgain));
+        resolvedBy += '+strict-pass';
+      }
+    } catch (err) {
+      console.warn('[reading-resolver] 漢字残存クリーンアップ失敗:', err.message);
+    }
+  }
+
+  return {
+    spokenText: finalSpoken,
+    resolvedBy,
+    checkedReadings,
+    remainingKanjiCount: countKanji(finalSpoken)
+  };
 }
 
-module.exports = { resolveJapaneseReading, applyReadingDictionary, stripHashtags };
+module.exports = { resolveJapaneseReading, applyReadingDictionary, stripHashtags, countKanji };
