@@ -95,7 +95,7 @@ async function generateVoiceFromCartesia(text, filename, options = {}) {
   }
 
   if (options.returnDetails) {
-    return { audioUrl, audioDataUrl: audioDataUrl || audioUrl };
+    return { audioUrl, audioDataUrl: audioDataUrl || audioUrl, audioBuffer };
   }
   return audioUrl;
 }

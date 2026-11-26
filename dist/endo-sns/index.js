@@ -874,8 +874,26 @@ function analyzeSpeechAndPauses(audioBuf) {
   };
 }
 
-// ブラウザ内 Canvas + Web Audio API による顔出しなし9:16ショート動画合成（複数枚スライドショー＋音声完全同期テロップ）
-async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr, scriptStr, segmentReadings = []) {
+function pickBestVideoMimeType() {
+  const candidates = [
+    { mimeType: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
+    { mimeType: 'video/mp4;codecs=avc1,mp4a.40.2', ext: 'mp4' },
+    { mimeType: 'video/mp4;codecs=h264,aac', ext: 'mp4' },
+    { mimeType: 'video/mp4', ext: 'mp4' },
+    { mimeType: 'video/webm;codecs=vp9,opus', ext: 'webm' },
+    { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm' },
+    { mimeType: 'video/webm', ext: 'webm' }
+  ];
+  for (const c of candidates) {
+    if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(c.mimeType)) {
+      return c;
+    }
+  }
+  return { mimeType: 'video/webm', ext: 'webm' };
+}
+
+// ブラウザ内 Canvas + Web Audio API による顔出しなし9:16ショート動画合成（複数枚スライドショー＋MP4録画＋Whisper実測同期テロップ）
+async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr, scriptStr, segmentReadings = [], serverSubtitleTimings = null) {
   const width = 720;
   const height = 1280;
   const canvas = document.createElement('canvas');
@@ -900,6 +918,9 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
   }
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume().catch(() => {});
+  }
   const audioArrayBuffer = await loadAudioArrayBuffer(audioSource?.audioDataUrl, audioSource?.audioUrl || audioSource);
   const audioBuf = await audioCtx.decodeAudioData(audioArrayBuffer);
   const durationSec = Math.max(3, audioBuf.duration + 0.5);
@@ -915,9 +936,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     ...dest.stream.getAudioTracks()
   ]);
 
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-    ? 'video/webm;codecs=vp9,opus'
-    : 'video/webm';
+  const { mimeType, ext: videoExt } = pickBestVideoMimeType();
   const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 3500000 });
   const chunks = [];
   recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
@@ -953,31 +972,40 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     return Math.max(4, moraCount + periodCount * 4.0 + commaCount * 1.6 + (isHook ? 2.0 : 0));
   };
 
-  const buildSubtitleTimeline = (hookTextVal, scriptTextVal, segReadings, audioBuffer, totalDurationSec) => {
+  const buildSubtitleTimeline = (hookTextVal, scriptTextVal, segReadings, whisperTimings, audioBuffer, totalDurationSec) => {
     const entries = buildSubtitleEntries(hookTextVal, scriptTextVal);
     if (entries.length === 0) return [];
 
+    // 1. サーバー側 Whisper API による実測タイムスタンプがある場合は最優先で使用
+    if (Array.isArray(whisperTimings) && whisperTimings.length === entries.length) {
+      return entries.map((e, i) => ({
+        text: e.text,
+        isHook: e.isHook,
+        cols: wrapLines(e.text, e.isHook ? 11 : 12).slice(0, 4),
+        start: i === 0 ? 0 : Math.max(0, Number(whisperTimings[i].start) || 0),
+        end: i === entries.length - 1 ? totalDurationSec : Math.max(0.3, Number(whisperTimings[i].end) || totalDurationSec)
+      }));
+    }
+
+    // 2. フォールバック：モーラ数比率＋AudioBuffer実波形の息継ぎ無音スナップ
     const { speechStart, speechEnd, pauses } = analyzeSpeechAndPauses(audioBuffer);
     const activeSpeechDur = Math.max(1, speechEnd - speechStart);
 
     const weights = entries.map((e, i) => calcMoraWeight(segReadings?.[i], e.text, e.isHook));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
 
-    // 1. まずモーラ数比率で理想境界時刻を算出
     const boundaries = [0];
     let accWeight = 0;
     for (let i = 0; i < entries.length - 1; i++) {
       accWeight += weights[i];
       const estimatedTime = speechStart + (accWeight / totalWeight) * activeSpeechDur;
 
-      // 2. 推定時刻の前後 ±1.15秒以内にある最も自然で深い無音区間（息継ぎ）へスナップ
       const prevBound = boundaries[boundaries.length - 1];
       let bestTime = estimatedTime;
       let bestScore = -Infinity;
       for (const p of pauses) {
         const diff = Math.abs(p.time - estimatedTime);
         if (diff <= 1.15 && p.time > prevBound + 0.65 && p.time < speechEnd - 0.5) {
-          // ポーズが長いほど＆推定時刻に近いほど高スコア
           const score = p.duration * 2.4 - diff * 0.8;
           if (score > bestScore) {
             bestScore = score;
@@ -998,7 +1026,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     }));
   };
 
-  const subtitleTimeline = buildSubtitleTimeline(hookStr, scriptStr, segmentReadings, audioBuf, durationSec);
+  const subtitleTimeline = buildSubtitleTimeline(hookStr, scriptStr, segmentReadings, serverSubtitleTimings, audioBuf, durationSec);
   const minchoFontFamily = '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho", "Noto Serif JP", serif';
 
   const drawVerticalTextColumn = (text, x, startY, charStep, fontSize) => {
@@ -1030,13 +1058,23 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
 
   return await new Promise((resolve, reject) => {
     let rafId = null;
-    const startTime = performance.now();
+    let audioStartCtxTime = null;
+    let stopped = false;
+
+    const finishRecording = () => {
+      if (stopped) return;
+      stopped = true;
+      if (recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+    };
 
     recorder.onstop = () => {
       if (rafId) cancelAnimationFrame(rafId);
       audioCtx.close().catch(() => {});
-      const blob = new Blob(chunks, { type: mimeType });
-      resolve(URL.createObjectURL(blob));
+      const blobType = videoExt === 'mp4' ? 'video/mp4' : mimeType;
+      const blob = new Blob(chunks, { type: blobType });
+      resolve({ url: URL.createObjectURL(blob), ext: videoExt, mimeType: blobType });
     };
     recorder.onerror = (err) => {
       if (rafId) cancelAnimationFrame(rafId);
@@ -1058,7 +1096,10 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
     };
 
     const drawFrame = () => {
-      const elapsed = (performance.now() - startTime) / 1000;
+      // 実際の音声再生クロック（audioCtx.currentTime）を唯一の基準にしてテロップのズレを0msに抑える
+      const elapsed = audioStartCtxTime !== null
+        ? Math.max(0, audioCtx.currentTime - audioStartCtxTime)
+        : 0;
       const progress = Math.min(1, elapsed / durationSec);
 
       ctx.clearRect(0, 0, width, height);
@@ -1142,20 +1183,24 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
         ctx.restore();
       }
 
-      if (elapsed < durationSec) {
+      if (!stopped && elapsed < durationSec) {
         rafId = requestAnimationFrame(drawFrame);
+      } else if (!stopped) {
+        finishRecording();
       }
     };
 
+    source.onended = () => {
+      setTimeout(finishRecording, 450);
+    };
+
     recorder.start(250);
-    source.start(0);
+    audioStartCtxTime = audioCtx.currentTime + 0.05;
+    source.start(audioStartCtxTime);
     drawFrame();
 
-    setTimeout(() => {
-      if (recorder.state !== 'inactive') {
-        recorder.stop();
-      }
-    }, Math.ceil(durationSec * 1000));
+    // 安全フォールバックタイマー
+    setTimeout(finishRecording, Math.ceil((durationSec + 1.2) * 1000));
   });
 }
 
@@ -1251,23 +1296,31 @@ async function runFacelessVideoGeneration(spokenTextOverride = null) {
         : '🌲 風景背景・字幕・クローン音声を合成しています（音声尺に合わせて数十秒かかります）...';
     }
 
-    const videoBlobUrl = await renderFacelessShortVideo(
+    const rendered = await renderFacelessShortVideo(
       { audioDataUrl: data.audioDataUrl, audioUrl: data.audioUrl },
       bgImagesList,
       hook,
       script,
-      Array.isArray(data.segmentReadings) ? data.segmentReadings : []
+      Array.isArray(data.segmentReadings) ? data.segmentReadings : [],
+      Array.isArray(data.subtitleTimings) ? data.subtitleTimings : null
     );
 
+    const videoBlobUrl = typeof rendered === 'string' ? rendered : rendered.url;
+    const videoExt = typeof rendered === 'string' ? 'mp4' : (rendered.ext || 'mp4');
+
     window.lastGeneratedAvatarVideoUrl = videoBlobUrl;
-    if (resultTitle) resultTitle.textContent = '✅ 顔出しなしショート動画が完成しました！';
+    if (resultTitle) {
+      const alignLabel = data.timingAlignedBy && data.timingAlignedBy.startsWith('whisper') ? '（音声実測同期済み）' : '';
+      resultTitle.textContent = `✅ 顔出しなしショート動画（${videoExt.toUpperCase()}）が完成しました！${alignLabel}`;
+    }
     if (videoEl) videoEl.src = videoBlobUrl;
     if (downloadLink) {
       downloadLink.href = videoBlobUrl;
-      downloadLink.download = `endo_faceless_short_${Date.now()}.webm`;
+      downloadLink.download = `endo_faceless_short_${Date.now()}.${videoExt}`;
+      downloadLink.textContent = `📥 完成動画（${videoExt.toUpperCase()}）をダウンロード`;
     }
     if (resultDiv) resultDiv.style.display = 'block';
-    if (statusEl) statusEl.textContent = '✅ 制作完了！プレビュー・ダウンロード、または動画接続スタジオへセットできます。';
+    if (statusEl) statusEl.textContent = `✅ 制作完了（${videoExt.toUpperCase()}形式）！プレビュー・ダウンロード、または動画接続スタジオへセットできます。`;
   } catch (err) {
     console.error('顔出しなし動画生成エラー:', err);
     if (statusEl) statusEl.textContent = '❌ エラー: ' + err.message;

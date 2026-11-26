@@ -1,6 +1,7 @@
 const { generateVoiceFromText } = require('./_lib/gemini-tts');
 const { generateVoiceFromCartesia } = require('./_lib/cartesia-tts');
 const { resolveJapaneseReading } = require('./_lib/reading-resolver');
+const { alignSubtitlesWithWhisper } = require('./_lib/whisper-aligner');
 const { getDb } = require('./_lib/firebase-admin');
 const { ok, badRequest, methodNotAllowed, parseBody, json } = require('./_lib/helpers');
 const { z } = require('zod');
@@ -45,12 +46,25 @@ exports.handler = async (event) => {
     // そうでない場合は従来どおり Gemini API で生成する
     let audioUrl;
     let audioDataUrl = null;
+    let audioBuffer = null;
     if (process.env.CARTESIA_API_KEY && process.env.CARTESIA_VOICE_ID) {
       const result = await generateVoiceFromCartesia(spokenText, filename, { returnDetails: true });
       audioUrl = result.audioUrl;
       audioDataUrl = result.audioDataUrl;
+      audioBuffer = result.audioBuffer || null;
     } else {
       audioUrl = await generateVoiceFromText(spokenText, filename, payload.voiceName);
+    }
+
+    // Whisper API で実際の音声波形からテロップの実測タイムスタンプを算出
+    let subtitleTimings = null;
+    let timingAlignedBy = 'fallback';
+    if (audioBuffer && Array.isArray(payload.subtitleSegments) && payload.subtitleSegments.length > 0) {
+      const aligned = await alignSubtitlesWithWhisper(audioBuffer, payload.subtitleSegments, segmentReadings);
+      if (aligned && Array.isArray(aligned.timings) && aligned.timings.length === payload.subtitleSegments.length) {
+        subtitleTimings = aligned.timings;
+        timingAlignedBy = aligned.alignedBy;
+      }
     }
 
     // submissionIdがある場合はFirestoreの該当ドキュメントを更新
@@ -74,6 +88,8 @@ exports.handler = async (event) => {
       audioDataUrl,
       spokenText,
       segmentReadings,
+      subtitleTimings,
+      timingAlignedBy,
       readingResolvedBy: resolvedBy,
       checkedReadings,
       remainingKanjiCount
