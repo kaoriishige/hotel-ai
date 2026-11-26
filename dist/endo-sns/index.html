@@ -240,10 +240,22 @@
             </div>
 
             <div>
-              <label id="mediaFilesLabel" for="mediaFiles" style="font-weight: bold; font-size: 13px;">📸 背景用の風景・自然写真をアップロード (任意・横長写真も自動9:16対応):</label>
-              <input id="mediaFiles" type="file" accept="image/*" />
+              <label id="mediaFilesLabel" for="mediaFiles" style="font-weight: bold; font-size: 13px;">📸 背景用の風景・自然写真をアップロード（2〜3枚推奨・最大5枚・横長も自動9:16対応）:</label>
+              <input id="mediaFiles" type="file" accept="image/*" multiple />
               <div id="mediaFilesHint" style="font-size: 11px; color: #6ee7b7; margin-top: 3px; font-weight: 500;">
-                💡 風景写真を選ぶと、ゆっくりズームするシネマティック背景＋遠藤正俊クローン音声で顔出しなしショート動画を生成します。
+                💡 2〜3枚まとめて選択することも、1枚ずつ追加することもできます。音声の長さに合わせて滑らかにクロスフェード切り替えしながら動画を生成します。
+              </div>
+
+              <!-- 🖼️ 顔出しなし動画用 複数画像リスト（2〜3枚スライドショー管理） -->
+              <div id="facelessImagesContainer" style="display: none; margin-top: 10px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 10px; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap;">
+                  <span id="facelessImagesCount" style="font-size: 12px; font-weight: bold; color: #34d399;">🖼️ 選択中の背景画像: 0枚（最大5枚）</span>
+                  <div style="display: flex; gap: 6px;">
+                    <button type="button" id="addMoreFacelessImagesBtn" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; font-size: 11px; padding: 3px 8px; border-radius: 6px; cursor: pointer;">＋ 画像を追加</button>
+                    <button type="button" id="clearFacelessImagesBtn" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; font-size: 11px; padding: 3px 8px; border-radius: 6px; cursor: pointer;">🗑️ すべてクリア</button>
+                  </div>
+                </div>
+                <div id="facelessImagesList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
               </div>
             </div>
 

@@ -21,8 +21,11 @@ exports.handler = async (event) => {
     // Cartesia の設定が存在する場合は Cartesia API で遠藤正俊クローン音声を生成し、
     // そうでない場合は従来どおり Gemini API で生成する
     let audioUrl;
+    let audioDataUrl = null;
     if (process.env.CARTESIA_API_KEY && process.env.CARTESIA_VOICE_ID) {
-      audioUrl = await generateVoiceFromCartesia(payload.text, filename);
+      const result = await generateVoiceFromCartesia(payload.text, filename, { returnDetails: true });
+      audioUrl = result.audioUrl;
+      audioDataUrl = result.audioDataUrl;
     } else {
       audioUrl = await generateVoiceFromText(payload.text, filename, payload.voiceName);
     }
@@ -42,7 +45,7 @@ exports.handler = async (event) => {
       }
     }
 
-    return ok({ ok: true, audioUrl });
+    return ok({ ok: true, audioUrl, audioDataUrl });
   } catch (error) {
     console.error('Error generating voice:', error);
     if (error.name === 'ZodError') {

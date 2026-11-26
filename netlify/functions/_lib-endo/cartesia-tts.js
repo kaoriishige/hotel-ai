@@ -4,8 +4,9 @@ const { getBucket } = require('./firebase-admin');
  * Cartesia APIを使用してテキストからクローン音声を生成し、Firebase Storageに保存してURLを返します。
  * @param {string} text 読み上げるテキスト
  * @param {string} filename 保存するファイル名 (例: 'voice_123_cartesia.wav')
+ * @param {{ returnDetails?: boolean }} [options]
  */
-async function generateVoiceFromCartesia(text, filename) {
+async function generateVoiceFromCartesia(text, filename, options = {}) {
   const apiKey = process.env.CARTESIA_API_KEY;
   const voiceId = process.env.CARTESIA_VOICE_ID;
   if (!apiKey) {
@@ -64,7 +65,14 @@ async function generateVoiceFromCartesia(text, filename) {
     console.error('Failed to save voice file locally:', err);
   }
 
+  // ブラウザ内合成でのCORSエラー(Failed to fetch)を防ぐため、安全なサイズ内ならData URLも併せて生成
+  const MAX_INLINE_BYTES = 3.5 * 1024 * 1024;
+  const audioDataUrl = audioBuffer.length <= MAX_INLINE_BYTES
+    ? `data:audio/wav;base64,${audioBuffer.toString('base64')}`
+    : null;
+
   // Firebase Storageへ保存（請求設定無効・未設定などで失敗した場合はBase64 Data URLへ自動フォールバック）
+  let audioUrl = null;
   try {
     const bucket = getBucket();
     const file = bucket.file(`voices/${filename}`);
@@ -80,11 +88,16 @@ async function generateVoiceFromCartesia(text, filename) {
       console.warn('makePublic failed, attempting alternative metadata access', err);
     });
 
-    return `https://storage.googleapis.com/${bucket.name}/voices/${filename}`;
+    audioUrl = `https://storage.googleapis.com/${bucket.name}/voices/${filename}`;
   } catch (storageErr) {
     console.warn('[cartesia-tts] Firebase Storage保存失敗のためBase64 Data URLで返却します:', storageErr.message);
-    return `data:audio/wav;base64,${audioBuffer.toString('base64')}`;
+    audioUrl = audioDataUrl || `data:audio/wav;base64,${audioBuffer.toString('base64')}`;
   }
+
+  if (options.returnDetails) {
+    return { audioUrl, audioDataUrl: audioDataUrl || audioUrl };
+  }
+  return audioUrl;
 }
 
 module.exports = { generateVoiceFromCartesia };
