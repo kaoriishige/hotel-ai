@@ -1059,6 +1059,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
   return await new Promise((resolve, reject) => {
     let rafId = null;
     let audioStartCtxTime = null;
+    let perfStartTime = null;
     let stopped = false;
 
     const finishRecording = () => {
@@ -1095,11 +1096,7 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       ctx.restore();
     };
 
-    const drawFrame = () => {
-      // 実際の音声再生クロック（audioCtx.currentTime）を唯一の基準にしてテロップのズレを0msに抑える
-      const elapsed = audioStartCtxTime !== null
-        ? Math.max(0, audioCtx.currentTime - audioStartCtxTime)
-        : 0;
+    const renderAtTime = (elapsed) => {
       const progress = Math.min(1, elapsed / durationSec);
 
       ctx.clearRect(0, 0, width, height);
@@ -1146,14 +1143,20 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       ctx.textBaseline = 'alphabetic';
       ctx.fillText('遠藤正俊｜人生と自然の哲学', width / 2, 92);
 
-      // 全編テロップ（冒頭フック〜台本本文の最後まで音声に合わせて自動切り替え・縦書き明朝体）
-      const activeSub = subtitleTimeline.find(s => elapsed >= s.start && elapsed < s.end)
-        || (subtitleTimeline.length > 0 ? subtitleTimeline[subtitleTimeline.length - 1] : null);
+      // 全編テロップ（冒頭0.0秒から最後まで音声に合わせて自動切り替え・縦書き明朝体）
+      const activeIdx = subtitleTimeline.findIndex(s => elapsed >= s.start && elapsed < s.end);
+      const safeIdx = activeIdx >= 0
+        ? activeIdx
+        : (subtitleTimeline.length > 0 ? (elapsed < subtitleTimeline[0].start ? 0 : subtitleTimeline.length - 1) : -1);
+      const activeSub = safeIdx >= 0 ? subtitleTimeline[safeIdx] : null;
 
       if (activeSub && activeSub.cols.length > 0) {
-        const fadeEdge = 0.18;
-        const fadeIn = Math.min(1, Math.max(0, (elapsed - activeSub.start) / fadeEdge));
-        const fadeOut = Math.min(1, Math.max(0, (activeSub.end - elapsed) / fadeEdge));
+        const fadeEdge = 0.14;
+        // 最初のテロップは0.0秒（サムネイル含む）から即100%表示、最後も消さずに余韻を残す
+        const isFirst = safeIdx === 0;
+        const isLast = safeIdx === subtitleTimeline.length - 1;
+        const fadeIn = isFirst ? 1 : Math.min(1, Math.max(0.15, (elapsed - activeSub.start) / fadeEdge));
+        const fadeOut = isLast ? 1 : Math.min(1, Math.max(0.15, (activeSub.end - elapsed) / fadeEdge));
         const subAlpha = Math.min(fadeIn, fadeOut);
 
         const fontSize = activeSub.isHook ? 42 : 38;
@@ -1182,6 +1185,15 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
         });
         ctx.restore();
       }
+    };
+
+    const drawFrame = () => {
+      const ctxElapsed = audioStartCtxTime !== null ? (audioCtx.currentTime - audioStartCtxTime) : 0;
+      const perfElapsed = perfStartTime !== null ? ((performance.now() - perfStartTime) / 1000) : 0;
+      // AudioContextクロックを優先しつつ、未起動・遅延時はperformance.nowに安全フォールバック
+      const elapsed = Math.max(0, ctxElapsed > 0.01 ? ctxElapsed : perfElapsed);
+
+      renderAtTime(elapsed);
 
       if (!stopped && elapsed < durationSec) {
         rafId = requestAnimationFrame(drawFrame);
@@ -1194,8 +1206,12 @@ async function renderFacelessShortVideo(audioSource, bgImagesBase64List, hookStr
       setTimeout(finishRecording, 450);
     };
 
+    // 録画開始前に0.0秒フレーム（最初のテロップ入り）を描画してキーフレームに焼き込む
+    renderAtTime(0);
+
     recorder.start(250);
-    audioStartCtxTime = audioCtx.currentTime + 0.05;
+    perfStartTime = performance.now();
+    audioStartCtxTime = audioCtx.currentTime + 0.03;
     source.start(audioStartCtxTime);
     drawFrame();
 
